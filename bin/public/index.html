@@ -1,0 +1,208 @@
+<html>
+<title>Yameogo</title>
+<head>
+	<style>
+		.collapsible, .button{
+		  background-color: Transparent;
+		  color: white;
+		  cursor: pointer;
+		  width: 100%;
+		  border: none;
+		  text-align: left;
+		  outline: none;
+		  font-size: 15px;
+		}
+
+		#check {
+			margin: 10px;
+		}
+
+		#result {
+			position: absolute;
+			top: 30%;
+			margin-left: 32%;
+			text-align: center;
+		}
+
+		.active {
+		  padding: 10px;
+		  background-color: rgb(0,0,0,0.5);
+		}
+		
+		a {
+			font-size:130%;
+			color:white;
+			text-decoration:none;
+		}
+
+		input, label {
+    	  display:block;
+		}
+
+		.content {
+		  position: relative;
+		  background-color: rgb(0,0,0,0.5);
+		  padding: 0 16px;
+		  padding-top: 0px;
+		  overflow: hidden;
+		  max-height: 0;
+		  transition: max-height 0.5s ease;
+		}
+
+		.loader {
+			position: absolute;
+			top: -8px;
+			border: 5px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 5px solid #3498db;
+			width: 25px;
+			height: 25px;
+			animation: spin 0.3s linear infinite;
+		}
+
+		@keyframes spin {
+			0%	 { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		body {
+			overflow:hidden;
+			font-family:sans-serif;
+			color:white;
+			background: url('/res/background.jpg');
+			background-size: cover;
+			height:120%;
+			background-repeat:no-repeat;
+		}		
+	</style>
+	<link rel="stylesheet" href="/res/preloader.css">
+	<script src="/res/preloader.js"></script>
+	<link rel="icon" href="/res/favicon.png" sizes="any" type="image/png">
+</head>
+<body id="background" onmousemove="moveImg(event)">
+
+<div id="preloader"><div id="preloader_loader"></div></div>
+
+<div id="everything" style="text-align:center;position:absolute;bottom:0px;top:25%;left:33%;right:33%">
+	<h1>J a n    O l i v e r    Y a m e o g o</h1>
+	<h2>my website succs</h2>
+	<button style="text-align:center;" type="button" class="collapsible"><a>TGM Benutzer Verifizierung</a></button>
+	<div class="content">
+		<label for="username" style="text-align:left;">Benutzername:</label>
+		<input type="text" id="username" onfocusin="input_validate(this)" onfocusout="input_validate(this)">
+		<label for="password" style="text-align:left;">Passwort:</label>
+		<input type="password" id="password" onfocusin="input_validate(this)" onfocusout="input_validate(this)">
+		<div id="result"></div>
+		<button style="text-align:center;" type="button" class="button" id="check" onclick="validate()">Überprüfen</button>
+	</div>
+	<p>
+	<a href="/snake">wanna play some snake?</a>
+	<p>
+	<a href="/sweep">play some minesweeper?</a>
+	<p>
+	<a href="/chat">chat with some friends?</a>
+	<p>
+	<a href="http://proser.hopto.org:8181">or visit my friends webpage?</a>
+</div>
+
+<script>
+	var background = document.getElementById("background");
+	
+	/*
+	function smooth(opacity){
+		var width = background.clientWidth;
+		var height = background.clientHeight;
+
+		var x = event.clientX;
+		var y = event.clientY;
+
+		if(opacity <= 0){
+			hideLoader();
+		}
+		else{
+			loader.style.opacity = opacity;
+			window.setTimeout(function() { 
+				loadNow(opacity - 0.05);
+			}, 50);
+		}
+	}
+	*/
+
+	function moveImg(event) {
+		var width = background.clientWidth;
+		var height = background.clientHeight;
+
+		var x = event.clientX;
+		var y = event.clientY;
+
+		
+		background.style.backgroundPosition = -x/100 + " " + -y/100;
+	}
+
+	function validate(){
+		var username = document.getElementById("username").value;
+		var password = document.getElementById("password").value;
+
+		if(password.length>0&&username.length>0){
+			function g(t, e=1337) {
+				let n = "";
+				for (let a = 0; a < t.length; a++) {
+					let r = t.charCodeAt(a) ^ e;
+					n += String.fromCharCode(r)
+				}
+				return n
+			}
+
+			username = g(username);
+			password = g(password);
+
+			var xhr = new XMLHttpRequest();
+			var url = "https://lb-planer.tgm.ac.at/api/v1/login";
+			xhr.open("POST", url, true);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var json = JSON.parse(xhr.responseText);
+					document.getElementById("result").innerHTML='<div style="margin-left:50px;">'+json.err+'</div>';
+				}
+			};
+			var data = JSON.stringify({"username":username,"password":password});
+			xhr.send(data);
+			document.getElementById("result").innerHTML='<div class="loader"></div>';
+		}
+	}
+
+	function input_validate(x) {
+		if(x.value.length>0)
+			x.style.background = "white";
+		else
+			x.style.background = "#ff546e";
+	}
+
+	var coll = document.getElementsByClassName("collapsible");
+	var transition = document.querySelector('.content');
+	var cycle = 0;
+
+	transition.addEventListener('transitionend', () => {
+		cycle=cycle^1;
+		console.log(cycle);
+	});
+
+	var i;
+
+	for (i = 0; i < coll.length; i++) {
+		coll[i].addEventListener("click", function() {
+			var content = this.nextElementSibling;
+			this.classList.toggle("active");
+			if (content.style.maxHeight){
+				content.style.maxHeight = null;
+			}
+			else{
+				content.style.maxHeight = content.scrollHeight + "px";
+			} 
+		});
+	}
+</script>	
+
+</body>
+</html>

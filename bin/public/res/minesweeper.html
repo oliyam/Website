@@ -1,0 +1,30 @@
+<html>
+<title>Yameogo</title>
+<head>
+	<link rel="stylesheet" href="/res/preloader.css">
+	<script defer src="/res/preloader.js"></script>
+</head>
+<body style="overflow:hidden; font-family: sans-serif; color: white;background-image: url('/res/background.jpg');background-position:center;background-size:cover;height:120%;background-repeat:no-repeat;">
+	<div id="preloader"><div id="preloader_loader"></div></div>
+	<div id="everything">
+<div style="margin:auto;width:40%;">
+<h2>feel free to play some minesweeper</h2>
+<h3>(sweep,sweep...swoop,swoop...)</h3>
+<div>
+<label>
+<select id="bomb-select">
+	<option value="20">20</option>
+	<option value="10">10</option>
+	<option value="1">1</option>
+</select>number of mines</label>
+<button type="button" onclick="newGame()">new game</button> 
+<button type="button" onclick="checkWin()">check</button> 
+<label>flag square by holding f</label>
+</div>
+<canvas id="myCan" width="500" height="500" style="border:5px solid white">
+<script src="/res/minesweeper.js" async></script>
+</canvas>
+</div>
+</div>
+</body>
+</html>
