@@ -16,7 +16,7 @@ const http=require('http').createServer(app);
 
 const pwd="sportslorry";
 
-var PORT=69;
+var PORT=80;
 
 var server=http.listen(PORT, listening);
 
