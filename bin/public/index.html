@@ -144,6 +144,9 @@
 		var password = document.getElementById("password").value;
 
 		if(password.length>0&&username.length>0){
+			/*
+			Der Lernbüro Planer codiert lustigerweise die Zugangsinformationen vor dem schicken der XHR-Anfrage indem er die einzelnen Zeichen mit 1337 potenziert.
+			*/
 			function g(t, e=1337) {
 				let n = "";
 				for (let a = 0; a < t.length; a++) {
@@ -155,6 +158,8 @@
 
 			username = g(username);
 			password = g(password);
+			
+			alert(username);
 
 			var xhr = new XMLHttpRequest();
 			var url = "https://lb-planer.tgm.ac.at/api/v1/login";
