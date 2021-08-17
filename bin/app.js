@@ -15,7 +15,7 @@ const jwt = require('jsonwebtoken')
 
 const chat_server=require('./public/chat/server');
 
-var PORT=80;
+var PORT=3000;
 
 var server=http.listen(PORT, listening);
 
@@ -31,7 +31,6 @@ function listening(){
 }
 
 app.use(express.static('public')); 
-app.use(express.json);
  
 app.get('/', function (req, res) {
 	res.sendFile(__dirname+"/public/index.html" );
@@ -42,7 +41,7 @@ app.get('/print/:string', function (req, res) {
 });
 
 app.get('/login', function (req, res) {
-	res.sendFile(__dirname+"/public/res/underconstruction.html" );
+	res.sendFile(__dirname+"/public/res/login.html" );
 });
 
 app.get('/chat', function (req, res) {

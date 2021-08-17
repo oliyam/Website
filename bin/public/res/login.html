@@ -1,0 +1,56 @@
+<html>
+<title>Yameogo</title>
+<head>
+  <link rel="stylesheet" href="/res/preloader.css">
+	<link rel="icon" href="/res/favicon.png" sizes="any" type="image/png">
+	<link rel="stylesheet" href="/res/login.css">
+  <script defer src="/res/preloader.js"></script>
+</head>
+<body>
+  <div id="preloader"><div id="preloader_loader"></div></div>
+  <div id="everything" style="text-align:center;position:absolute;bottom:0px;top:25%;left:33%;right:33%">
+  <h2>Login</h2>
+  
+  <button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
+  
+    <div id="id01" class="modal">
+      
+      <form class="modal-content animate" action="/" method="post">
+        <div class="imgcontainer">
+          <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+        </div>
+    
+        <div class="container">
+          <label for="username"><b>Username</b></label>
+          <input type="text" placeholder="Enter Username" name="username" required>
+    
+          <label for="password"><b>Password</b></label>
+          <input type="password" placeholder="Enter Password" name="password" required>
+    
+          <label for="email"><b>Email</b></label>
+          <input type="email" placeholder="Enter Email" name="email" required>
+            
+          <button type="submit">Login</button>
+          
+        </div>
+    
+        <div class="container" style="background-color:rgba(0,0,0,0.4)">
+          <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  // Get the modal
+  var modal = document.getElementById('id01');
+  
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+      if (event.target == modal) {
+          modal.style.display = "none";
+      }
+  }
+  </script>
+  
+  </body>
+</html>
