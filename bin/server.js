@@ -8,8 +8,7 @@ console.log("░░░▓▓░░░░░░░▓▓▓▓░░░░▓▓�
 */
 //color log
 
-const express=require('express');
-const bodyParser=require('body-parser');  
+const express=require('express'); 
 const app=require('express')();
 const http=require('http').createServer(app);
 
