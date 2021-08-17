@@ -30,15 +30,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json())
 app.use(express.static('public')); 
 
-app.post('/signup', (req, res, next) => {
-	const db=require("./db");
-	console.log(req.body.username)
-	db.query(`SELECT * From users where username="${req.body.username}";`, (err, result) => {
-		console.log(result)
-		console.log(err)
-	});
-});
- 
 app.get('/', function (req, res) {
 	res.sendFile(__dirname+"/public/index.html" );
 }); 
