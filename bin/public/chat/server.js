@@ -15,6 +15,7 @@ exports.run = (server, log) => {
 	//wird ausgefuehrt wenn sich ein neuer socket zum server vebindet
 	io.on('connection', socket => {	   
 	 
+		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
 			ioactive[socket.id]=false;
 			if(!(users[socket.id]===null||users[socket.id]=="null"||users[socket.id]===undefined)){
