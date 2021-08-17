@@ -17,7 +17,7 @@ const chat_server=require('./public/chat/server');
 
 var PORT=3000;
 
-var server=http.listen(PORT, listening);
+var server=http.listen(PORT, function(){log("listening on port: "+PORT,"cyan");});
 
 const logger = require('node-color-log');
 
@@ -26,11 +26,14 @@ function log(string,color){
 	logger.log(string);
 }
 
-function listening(){	
-	log("listening on port: "+PORT,"cyan");
-}
-
 app.use(express.static('public')); 
+
+app.post('/signup', (req, res, next) => {
+	const db=require("./db");
+	db.query(`SELECT * FROM users WHERE 1`, (err, result) => {
+		console.log(result)
+	});
+});
  
 app.get('/', function (req, res) {
 	res.sendFile(__dirname+"/public/index.html" );
