@@ -15,16 +15,9 @@ const http=require('http').createServer(app);
 
 const chat_server=require('./public/chat/server');
 
-const pwd="sportslorry";
-
 var PORT=80;
 
 var server=http.listen(PORT, listening);
-
-
-/****************************************************************************************************************************************
-Node Color Logger stuff START
-****************************************************************************************************************************************/  
 
 const logger = require('node-color-log');
 
@@ -37,9 +30,6 @@ function listening(){
 	log("listening on port: "+PORT,"cyan");
 }
 
-/****************************************************************************************************************************************
-Node Color Logger stuff END
-****************************************************************************************************************************************/ 
 app.use(express.static('public')); 
  
 app.get('/', function (req, res) {

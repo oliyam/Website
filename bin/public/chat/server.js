@@ -1,5 +1,6 @@
 exports.run = (server, log) => {
 	
+	const pwd="sportslorry";
 	const io=require('socket.io')(server, {pingTimeout: 1000000});
 
 	//Liste mit allen Benutzernamen an den Stellen der socket-ids
