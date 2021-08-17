@@ -11,6 +11,7 @@ console.log("░░░▓▓░░░░░░░▓▓▓▓░░░░▓▓�
 const express=require('express'); 
 const app=require('express')();
 const http=require('http').createServer(app);
+const jwt = require('jsonwebtoken')
 
 const chat_server=require('./public/chat/server');
 
@@ -30,6 +31,7 @@ function listening(){
 }
 
 app.use(express.static('public')); 
+app.use(express.json);
  
 app.get('/', function (req, res) {
 	res.sendFile(__dirname+"/public/index.html" );
@@ -39,12 +41,16 @@ app.get('/print/:string', function (req, res) {
 	log(req.params.string, "yellow");
 });
 
+app.get('/login', function (req, res) {
+	res.sendFile(__dirname+"/public/res/underconstruction.html" );
+});
+
 app.get('/chat', function (req, res) {
 	res.sendFile(__dirname+"/public/res/chat.html" );
 });
  
 app.get('/catan', function (req, res) {
-	res.sendFile(__dirname+"/public/catan/catan.html" );
+	res.sendFile(__dirname+"/public/res/underconstruction.html" );
 });
 
 app.get('/dead', function (req, res) {
