@@ -11,7 +11,7 @@ console.log("░░░▓▓░░░░░░░▓▓▓▓░░░░▓▓�
 const express=require('express'); 
 const app=require('express')();
 const http=require('http').createServer(app);
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 const chat_server=require('./public/chat/server');
 
@@ -26,12 +26,16 @@ function log(string,color){
 	logger.log(string);
 }
 
+app.use(express.urlencoded({extended: true}));
+app.use(express.json())
 app.use(express.static('public')); 
 
 app.post('/signup', (req, res, next) => {
 	const db=require("./db");
-	db.query(`SELECT * FROM users WHERE 1`, (err, result) => {
+	console.log(req.body.username)
+	db.query(`SELECT * From users where username="${req.body.username}";`, (err, result) => {
 		console.log(result)
+		console.log(err)
 	});
 });
  
@@ -43,8 +47,8 @@ app.get('/print/:string', function (req, res) {
 	log(req.params.string, "yellow");
 });
 
-app.get('/login', function (req, res) {
-	res.sendFile(__dirname+"/public/res/login.html" );
+app.get('/signup', function (req, res) {
+	res.sendFile(__dirname+"/public/res/signup.html" );
 });
 
 app.get('/chat', function (req, res) {
