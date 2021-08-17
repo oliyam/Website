@@ -1,4 +1,4 @@
-const socket=io('http://yameogo.ddns.net:64000/');
+const socket=io('localhost:80');
 const msgContainer=document.getElementById("msg-card");
 const msgForm=document.getElementById("send-container");
 const msgInput=document.getElementById("msg-input");
