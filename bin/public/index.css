@@ -1,4 +1,4 @@
-		.collapsible, .button{
+		.button{
 		  background-color: Transparent;
 		  color: white;
 		  cursor: pointer;
@@ -20,11 +20,6 @@
 			text-align: center;
 		}
 
-		.active {
-		  padding: 10px;
-		  background-color: rgb(0,0,0,0.5);
-		}
-		
 		a {
 			font-size:130%;
 			color:white;
@@ -33,16 +28,6 @@
 
 		input, label {
     	  display:block;
-		}
-
-		.content {
-		  position: relative;
-		  background-color: rgb(0,0,0,0.5);
-		  padding: 0 16px;
-		  padding-top: 0px;
-		  overflow: hidden;
-		  max-height: 0;
-		  transition: max-height 0.5s ease;
 		}
 
 		.loader {
