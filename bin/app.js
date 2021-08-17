@@ -43,6 +43,10 @@ app.get('/chat', function (req, res) {
 	res.sendFile(__dirname+"/public/res/chat.html" );
 });
  
+app.get('/catan', function (req, res) {
+	res.sendFile(__dirname+"/public/catan/catan.html" );
+});
+
 app.get('/dead', function (req, res) {
 	res.sendFile(__dirname+"/public/sessiondead.html" );
 });

@@ -1,0 +1,31 @@
+<html>
+<title>Yameogo</title>
+<head>
+<meta charset="UTF-8">
+<script defer src="/socket.io/socket.io.js"></script>
+<script defer src="/chat/client.js"></script>
+<link rel="stylesheet" href="/res/preloader.css">
+<script defer src="/res/preloader.js"></script>
+</head>
+<body style="overflow:hidden;font-family: sans-serif; color: white;background-image: url('/res/background.jpg');background-position:center;background-size:cover;height:120%;background-repeat:no-repeat;">
+	<div id="preloader"><div id="preloader_loader"></div></div>
+	<div id="everything">
+<div style="background-color:rgba(0,0,0,0.8);position:absolute;top:0;left:0;right:0;bottom:90%">
+	<h1 style="padding: 10px 10px 10px 10px;">best chat ever:</h1>
+</div>
+
+<div id="msg-card" style="border-radius:0px 0px 10px 10px;overflow:auto;background-color:rgba(0,0,0,0.6);position:absolute;top:10%;left:0;right:20%;bottom:10%">
+
+</div>
+
+<div id="online" style="overflow:auto;border-radius:0px 0px 10px 10px;background-color:rgba(0,0,0,0.7);position:absolute;top:10%;left:80%;right:0;bottom:10%">
+	<h1 style="padding: 10px 10px;">Online:</h1>
+</div>
+
+<form id="send-container" style="position:absolute;bottom:0;right:0;left:0;top:90%">
+	<input type="text" id="msg-input" style="border-radius:10px;width:80%;height:100%;float:left;">
+	<button type="submit" id="msg-send-button" style="border-radius:10px;height:100%;width:20%">Send</button>
+</form>
+</div>
+</body>
+</html>

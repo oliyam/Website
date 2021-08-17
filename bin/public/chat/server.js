@@ -1,7 +1,7 @@
 exports.run = (server, log) => {
 	
 	const pwd="sportslorry";
-	const io=require('socket.io')(server, {pingTimeout: 1000000});
+	const io=require('socket.io')(server, {pingTimeout: 10000});
 
 	//Liste mit allen Benutzernamen an den Stellen der socket-ids
 	var users={};
@@ -17,24 +17,27 @@ exports.run = (server, log) => {
 	 
 		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
-			ioactive[socket.id]=false;
+			delete ioactive[socket.id];
+			delete requests[socket.id];
+			delete users[socket.id];
 			if(!(users[socket.id]===null||users[socket.id]=="null"||users[socket.id]===undefined)){
 				socket.broadcast.emit('user-disconnect', users[socket.id]);
 			}	
 			ids=ids.filter(function(value,index,arr){return value!=socket.id;});
 			socket.broadcast.emit('get-users', {users: users, ids: ids});
 			log("disconnect: "+socket.id,"red");
-			io.to(socket.id).emit('session-dead', socket.id);
-			socket.disconnect(true);
 		})
 		socket.on('send-chat-msg', msg =>{
+			//log
 			if(msg[1]!==undefined)
-					log(users[socket.id]+": "+msg[0]+"; "+msg[1],"magenta");
+				log(users[socket.id]+": "+msg[0]+"; "+msg[1],"magenta");
 			else
 				log(users[socket.id]+": "+msg[0]+"; <no image>","white");		
+			//if socket is active
 			if(ioactive[socket.id]){
+				//adminmode
 				if(msg[0].substring(0,"admin".length)=="admin"){
-					log("adminmode...","yellow");
+					log("adminmode for "+users[socket.id],"yellow");
 					var cmd=[];
 					var last_index=0;
 					for(var i=0;i<msg[0].length+1;i++)
@@ -57,14 +60,11 @@ exports.run = (server, log) => {
 								break;
 						}
 					}
-					else{
+					else
 						log("denied!","red");
-					}
 				}
-				else{
-					if(ioactive[socket.id])
+				else if(ioactive[socket.id])
 						socket.broadcast.emit('chat-msg', {msg: msg, name: users[socket.id]});
-				}
 			}	
 			else{
 				io.to(socket.id).emit('session-dead', socket.id);
@@ -72,12 +72,18 @@ exports.run = (server, log) => {
 			}
 		})	
 		socket.on('name-request', name => {
+			// Test validity of requested username
+			function isValidName(n){
+				return !(Object.values(users).indexOf(n)>-1||n==""||n===null||n===undefined||n.includes(" ")||n.charAt(n.length-1)==":"||n.length>200||n=="null"||n=="You"||n=="you"||n=="YOU"||n=="Admin"||n=="undefined"||n=="plsnull");
+			}
 			if(requests[socket.id]===undefined)	
 				requests[socket.id]=0;
 			else
 				requests[socket.id]++;
-			if(requests[socket.id]>=10)
-				socket.disconnect();
+			if(requests[socket.id]>=10){
+				io.to(socket.id).emit('session-dead', socket.id);
+				socket.disconnect(true);
+			}
 			if(users[socket.id]===undefined){
 				var valid=isValidName(name);
 				console.log("testing validity...");
@@ -97,22 +103,6 @@ exports.run = (server, log) => {
 				}
 			}
 		})
-		
-		function isValidName(v){
-			var valid=false;
-			if(!(v==""||v===null||v===undefined))
-				for(var i=0;i<v.length;i++)
-					if(v.charAt(i)!=" ")
-							valid=true;
-			if(valid){
-				if(v.charAt(v.length-1)==":"||v.length>200||v=="null"||v=="You"||v=="you"||v=="YOU"||v=="Admin"||v=="undefined"||v=="plsnull")
-					valid=false;
-				for(var m=0;m<ids.length;m++)
-					if(users[ids[m]]==v)
-						valid=false;
-			}
-			return valid;
-		}
 	})
 
 }

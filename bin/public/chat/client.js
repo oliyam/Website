@@ -14,14 +14,10 @@ socket.emit('name-request', name);
 
 // Rückmeldung Namensanfrage
 socket.on('name-valid', valid => {
-	validName=valid;
-	if(!valid){
-		name=prompt("pls name");
-		socket.emit('name-request', name);
-	}
-	else{
+	if(valid)
 		appendJoinMsg("You joined!");
-	}	
+	else
+		socket.emit('name-request', prompt("name already taken or invalid"));
 })
 
 // Weiterleitung zu /dead bei einer toten Sitzung
@@ -90,6 +86,7 @@ msgForm.addEventListener('submit', e => {
 					if(msg[1]!==undefined)
 						appendOwnImg(msg[1]);
 					socket.emit('send-chat-msg',msg);
+					console.log("s")
 				}
 			}
 		});
