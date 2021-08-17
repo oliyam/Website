@@ -9,12 +9,10 @@ var validName=false;
 var users=[];
 var message="What's your name?";
 
-//****************
-//anmeldung anfang
-//****************
-
+// Namensanfrage
 socket.emit('name-request', name);
-	
+
+// Rückmeldung Namensanfrage
 socket.on('name-valid', valid => {
 	validName=valid;
 	if(!valid){
@@ -26,10 +24,7 @@ socket.on('name-valid', valid => {
 	}	
 })
 
-//**************
-//anmeldung ende
-//**************
-
+// Weiterleitung zu /dead bei einer toten Sitzung
 socket.on('session-dead', id => {
 	console.log("Session for Socket: "+id+", is no longer alive");
 	location.href="/dead";
@@ -37,13 +32,8 @@ socket.on('session-dead', id => {
 
 socket.on('chat-msg', data => {
 	appendMsg(data.name+": "+data.msg[0]);
-	if(data.msg[1]!==undefined){
+	if(data.msg[1]!==undefined)
 		appendImg(data.msg[1]);
-		console.log(data.name+": "+data.msg[0]+"; "+data.msg[1]);
-	}
-	else{
-		console.log(data.name+": "+data.msg[0]+"; <no image>");
-	}
 })
 
 socket.on('user-connected', name => {
@@ -56,9 +46,8 @@ socket.on('user-disconnect', user => {
 
 socket.on('get-users',  data => {
 	removeAllUsers();
-	for(var t=0;t<data.ids.length;t++){
+	for(var t=0;t<data.ids.length;t++)
 		appendUser(data.users[data.ids[t]],data.ids[t]);
-	}	
 })
 
 
@@ -68,7 +57,6 @@ async function getReddit(msg, send){
 	string[0]=msg;
 	if(msg.substring(0,3)=="pls"){
 			var response=await fetch('https://www.reddit.com/r/'+subreddit+'.json');
-			console.log("response is ok: "+response.ok);
 			if(response.ok){
 				var json=await response.json();
 				var post=Math.floor(Math.random()*json.data.children.length);
@@ -87,38 +75,30 @@ msgForm.addEventListener('submit', e => {
 	msg[0]=msgInput.value;
 	var valid=false;
 	
-	if(msg[0].substring(0,9)=="pls clear"){
-		while(msgContainer.firstChild){
+	if(msg[0].substring(0,9)=="pls clear")
+		while(msgContainer.firstChild)
 			msgContainer.removeChild(msgContainer.firstChild);
-		}
-	}
-	else {
-		getReddit(msg[0], function(msg){			
-	if(msg[1]!==undefined){
-		console.log("title: "+msg[0]+"; url: "+msg[1]);
-	}
-	else{
-		console.log("title: "+msg[0]+"; <no image>");
-	}
-		
-	if(msg[0]!=null&&msg!=""){	
-		for(var u=0;u<msg[0].length;u++){
-			if(msg[0].charAt(u)!=" "){
-				valid=true;
+	else
+		getReddit(msg[0], function(msg){							
+			if(msg[0]!=null&&msg!=""){	
+				for(var u=0;u<msg[0].length;u++){
+					if(msg[0].charAt(u)!=" ")
+						valid=true;
+				}	
+				if(valid){
+					appendOwnMsg("You: "+msg[0]);
+					if(msg[1]!==undefined)
+						appendOwnImg(msg[1]);
+					socket.emit('send-chat-msg',msg);
+				}
 			}
-		}	
-		if(valid){
-			appendOwnMsg("You: "+msg[0]);
-			if(msg[1]!==undefined)
-				appendOwnImg(msg[1]);
-			socket.emit('send-chat-msg',msg);
-		}
-	}
-	});
-	 }
+		});
 	msgInput.value="";
 })
 
+/****************************************
+ *	Funktionen zur Manipulation der GUI	*
+ ****************************************/
 
 function appendUser(user, id) {
 	const userElement=document.createElement("div");
