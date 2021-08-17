@@ -21,10 +21,7 @@ var background = document.getElementById("background");
 	*/
 
 	function moveImg(event) {
-			var x = event.clientX;
-			var y = event.clientY;
-
-			background.style.backgroundPosition = ((background.clientWidth/2-x)/100-(background.clientWidth/2/100)) + " " + ((background.clientHeight/2-y)/100-(background.clientHeight/2/100));
+			background.style.backgroundPosition = -event.clientX/100 + " " + -event.clientY/100;
 	}
 
 	function validate(){
