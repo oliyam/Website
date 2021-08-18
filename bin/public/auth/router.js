@@ -1,15 +1,13 @@
-require('dotenv').config();
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const uuid = require("uuid")
-const db = require("db");
+const uuid = require("uuid");
 
-const users = require('users');
+const db = require("./db");
+const users = require('./users');
 
-
-router.post('/signup', users.validateRegister, (req, res, next) => {
+router.post('/signup', users.validateRegister, (req, res) => {
     db.query(`SELECT * FROM users WHERE username="${db.escape(req.body.username )}";`, (err, result) => {
         if (result.length) 
             return res.status(409).send({message: 'This username is already in use!'});
@@ -27,7 +25,7 @@ router.post('/signup', users.validateRegister, (req, res, next) => {
     });
 });
 
-router.post('/login', (req, res, next) => {
+router.post('/login', (req, res) => {
 	db.query(`SELECT * FROM users WHERE username="${db.escape(req.body.username)}";`, (err, result) => {
 		if(err)
             return res.status(400).send({message: err});
@@ -38,7 +36,7 @@ router.post('/login', (req, res, next) => {
             if(bErr)
                 return res.status(400).send({message: "Username or Password incorrect!"});
             if(bResult)
-                const token = jwt.sign({
+                var token = jwt.sign({
                     username: result[0].username,
                     userId: result[0].userId
                     }, 

@@ -1,6 +1,6 @@
 exports.run = (server, log) => {
 	
-	const pwd="sportslorry";
+	const pwd=process.env.CHAT_SERVER_PWD;
 	const io=require('socket.io')(server, {pingTimeout: 10000});
 
 	//Liste mit allen Benutzernamen an den Stellen der socket-ids
@@ -12,21 +12,21 @@ exports.run = (server, log) => {
 	//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
 	var requests={};
 
-	//wird ausgefuehrt wenn sich ein neuer socket zum server vebindet
 	io.on('connection', socket => {	   
 	 
 		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
-			delete ioactive[socket.id];
-			delete requests[socket.id];
-			delete users[socket.id];
-			if(!(users[socket.id]===null||users[socket.id]=="null"||users[socket.id]===undefined)){
+			ids=ids.filter((value) => {return value!=socket.id;});
+			if(!(users[socket.id]===null||users[socket.id]===undefined)){
 				socket.broadcast.emit('user-disconnect', users[socket.id]);
-			}	
-			ids=ids.filter(function(value,index,arr){return value!=socket.id;});
-			socket.broadcast.emit('get-users', {users: users, ids: ids});
+				socket.broadcast.emit('get-users', {users: users, ids: ids});
+				delete ioactive[socket.id];
+				delete requests[socket.id];
+				delete users[socket.id];
+			}
 			log("disconnect: "+socket.id,"red");
 		})
+		//wird ausgeführ wenn eine nachricht ankommt
 		socket.on('send-chat-msg', msg =>{
 			//log
 			if(msg[1]!==undefined)
@@ -71,19 +71,20 @@ exports.run = (server, log) => {
 				socket.disconnect(true);
 			}
 		})	
+		//wird ausgeführ wenn ein socket einen namen anfragt
 		socket.on('name-request', name => {
 			// Test validity of requested username
 			function isValidName(n){
 				return !(Object.values(users).indexOf(n)>-1||n==""||n===null||n===undefined||n.includes(" ")||n.charAt(n.length-1)==":"||n.length>200||n=="null"||n=="You"||n=="you"||n=="YOU"||n=="Admin"||n=="undefined"||n=="plsnull");
 			}
 			if(requests[socket.id]===undefined)	
-				requests[socket.id]=0;
-			else
-				requests[socket.id]++;
-			if(requests[socket.id]>=10){
+				requests[socket.id]=1;
+			else if(requests[socket.id]>10){
 				io.to(socket.id).emit('session-dead', socket.id);
 				socket.disconnect(true);
 			}
+			else
+				requests[socket.id]++;
 			if(users[socket.id]===undefined){
 				var valid=isValidName(name);
 				console.log("testing validity...");

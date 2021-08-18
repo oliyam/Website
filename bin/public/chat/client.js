@@ -26,20 +26,24 @@ socket.on('session-dead', id => {
 	location.href="/dead";
 })
 
+//Nachricht empfangen
 socket.on('chat-msg', data => {
 	appendMsg(data.name+": "+data.msg[0]);
 	if(data.msg[1]!==undefined)
 		appendImg(data.msg[1]);
 })
 
+//Benutzer verbunden
 socket.on('user-connected', name => {
 	appendJoinMsg(name+" connected!");
 })
 
+//Benutzer getrennt
 socket.on('user-disconnect', user => {
 	appendLeaveMsg(user+" disconnected!");
 })
 
+//Benutzerliste aktualisieren
 socket.on('get-users',  data => {
 	removeAllUsers();
 	for(var t=0;t<data.ids.length;t++)
@@ -121,7 +125,7 @@ function appendMsg(msg) {
 	const msgElement=document.createElement("div");
 	msgElement.style="word-wrap: break-word;border:1px solid white;width:50%;border-radius: 0px 5px 5px;padding: 10px 10px 10px 10px;";
 	if(msg.includes("@"+name))
-				msgElement.style="background-color:rgba(255,122,0,0.3);word-wrap: break-word;border:1px solid white;width:50%;border-radius: 0px 5px 5px;padding: 10px 10px 10px 10px;";
+		msgElement.style="background-color:rgba(255,122,0,0.3);word-wrap: break-word;border:1px solid white;width:50%;border-radius: 0px 5px 5px;padding: 10px 10px 10px 10px;";
 	msgElement.innerText=msg;
 	msgContainer.append(msgElement);
 	msgContainer.scrollTop=msgContainer.scrollHeight;
