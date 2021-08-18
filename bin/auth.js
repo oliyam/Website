@@ -4,15 +4,27 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const uuid = require("uuid")
-
 const db = require("db");
 
-router.post('/signup', (req, res, next) => {
-	db.query(`SELECT * From users where username="${req.body.username}";`, (err, result) => {
-		if(err)
-            return res.status(400).send({message: err});
-        //if(!result.length)
-	});
+const users = require('users');
+
+
+router.post('/signup', users.validateRegister, (req, res, next) => {
+    db.query(`SELECT * FROM users WHERE username="${db.escape(req.body.username )}";`, (err, result) => {
+        if (result.length) 
+            return res.status(409).send({message: 'This username is already in use!'});
+        else
+            bcrypt.hash(req.body.password, 10, (err, hash) => {
+                if (err) 
+                    return res.status(500).send({message: err});
+                else 
+                    db.query(`INSERT INTO users (id, username, password, email, registered) VALUES ("${uuid.v4()}", "${db.escape(req.body.username)}", "${db.escape(hash)}", "${db.escape(req.body.email)}", now())`,(err, result) => {
+                        if (err)
+                            return res.status(400).send({message: err });
+                        return res.status(201).send({message: "Registered!"});
+                    });
+            });
+    });
 });
 
 router.post('/login', (req, res, next) => {
@@ -24,9 +36,7 @@ router.post('/login', (req, res, next) => {
         
         bcrypt.compare(req.body.password, result[0]['password'], (bErr, bResult) => {
             if(bErr)
-                return res.status(400).send({
-                    message: "Username or Password incorrect!"
-                });
+                return res.status(400).send({message: "Username or Password incorrect!"});
             if(bResult)
                 const token = jwt.sign({
                     username: result[0].username,
@@ -42,9 +52,8 @@ router.post('/login', (req, res, next) => {
                 user: result[0]
             });
         });
-        return res.status(400).send({
-            message: "Username or Password incorrect!"
-        });
+        return res.status(400).send({message: "Username or Password incorrect!"});
     });
 });
  
+module.exports = router;
