@@ -20,11 +20,15 @@ const chat_server=require('./public/chat/server');
 
 //start http server
 var PORT= process.env.PORT || 80;
-var server=http.listen(PORT, function(){log("listening on port: "+PORT,"cyan");});
+var server=http.listen(PORT, function(){
+	log("HTTP server listening on port: ","cyan");
+	log(PORT,"yellow");
+});
 
 //start ngrok
 ngrok.connect({auth: process.env.NGROK_TOKEN,PORT}).then( (url) => {
-	log("Ngrok tunnel established: "+url+" -> http://localhost:"+PORT, "magenta")
+	log("Ngrok tunnel established: ", "magenta")
+	log(url+" -> http://localhost:"+PORT, "yellow")
 });
  
 //start chat server

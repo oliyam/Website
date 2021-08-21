@@ -3,6 +3,8 @@ exports.run = (server, log) => {
 	const pwd=process.env.CHAT_SERVER_PWD;
 	const io=require('socket.io')(server, {pingTimeout: 10000});
 
+	log("Chat server running", "cyan");
+	
 	//Liste mit allen Benutzernamen an den Stellen der socket-ids
 	var users={};
 	//Array mit allen socket-ids

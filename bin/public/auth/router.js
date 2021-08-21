@@ -6,6 +6,7 @@ const uuid = require("uuid");
 
 const db = require("./db");
 const users = require('./users');
+const log = require('../logger/color-logger.js').log;
 
 router.post('/signup', users.validateRegister, (req, res) => {
     db.query(`SELECT * FROM users WHERE username="${db.escape(req.body.username )}";`, (err, result) => {
