@@ -1,4 +1,4 @@
-const socket=io('localhost:3000');
+const socket=io("ff870b322909.ngrok.io");
 const msgContainer=document.getElementById("msg-card");
 const msgForm=document.getElementById("send-container");
 const msgInput=document.getElementById("msg-input");

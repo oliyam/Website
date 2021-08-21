@@ -3,8 +3,10 @@ console.log("NodeJS server is starting...");
 //general dependencies
 const express = require('express'); 
 const app = require('express')();
+const https = require('https');
 const http = require('http').createServer(app);
 const dotenv = require('dotenv').config();
+const ngrok = require('ngrok');
 
 //authentication
 const users = require('./public/auth/users');
@@ -24,6 +26,21 @@ function log(string,color){
 var PORT= process.env.PORT || 80;
 var server=http.listen(PORT, function(){log("listening on port: "+PORT,"cyan");});
 
+//start ngrok
+ngrok.connect({auth: process.env.NGROK_TOKEN,PORT}).then( (url) => {
+	log("Ngrok tunnel established: "+url+" -> http://localhost:"+PORT, "magenta")
+	let user = new Buffer.alloc("oliyam:j3WKKYZnjY5C9yQAFGGyp6RePB87JS9cKjGPpv8xP9shsNtKWYVxPdqWCsygnY5s".length,"oliyam:j3WKKYZnjY5C9yQAFGGyp6RePB87JS9cKjGPpv8xP9shsNtKWYVxPdqWCsygnY5s").toString('base64');
+	log(user, "yellow")
+	https.request({
+		hostname: 'dynupdate.no-ip.com',
+		port: 80,
+		path: '/nic/update?hostname=yameogo.ddns.net&myip='+url,
+		Authorization: user,
+		method: 'GET'}, res => {
+			log(res.statusCode, "green")
+	});
+});
+ 
 //start chat server
 chat_server.run(server, log);
 
