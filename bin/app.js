@@ -8,19 +8,15 @@ const http = require('http').createServer(app);
 const dotenv = require('dotenv').config();
 const ngrok = require('ngrok');
 
+//custom color logger
+const log = require('./public/logger/color-logger.js').log;
+
 //authentication
 const users = require('./public/auth/users');
-const auth = require('./public/auth/router.js');
+const auth = require('./public/auth/router');
 
 //chatserver
 const chat_server=require('./public/chat/server');
-
-//color log
-const logger = require('node-color-log');
-function log(string,color){
-	logger.color(color);
-	logger.log(string);
-}
 
 //start http server
 var PORT= process.env.PORT || 80;
@@ -29,16 +25,6 @@ var server=http.listen(PORT, function(){log("listening on port: "+PORT,"cyan");}
 //start ngrok
 ngrok.connect({auth: process.env.NGROK_TOKEN,PORT}).then( (url) => {
 	log("Ngrok tunnel established: "+url+" -> http://localhost:"+PORT, "magenta")
-	let user = new Buffer.alloc("oliyam:j3WKKYZnjY5C9yQAFGGyp6RePB87JS9cKjGPpv8xP9shsNtKWYVxPdqWCsygnY5s".length,"oliyam:j3WKKYZnjY5C9yQAFGGyp6RePB87JS9cKjGPpv8xP9shsNtKWYVxPdqWCsygnY5s").toString('base64');
-	log(user, "yellow")
-	https.request({
-		hostname: 'dynupdate.no-ip.com',
-		port: 80,
-		path: '/nic/update?hostname=yameogo.ddns.net&myip='+url,
-		Authorization: user,
-		method: 'GET'}, res => {
-			log(res.statusCode, "green")
-	});
 });
  
 //start chat server
