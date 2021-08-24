@@ -30,7 +30,7 @@ ngrok.connect({auth: process.env.NGROK_TOKEN,PORT}).then( (url) => {
 	log("Ngrok tunnel established: ", "magenta")
 	log(url+" -> http://localhost:"+PORT, "yellow")
 });
- 
+
 //start chat server
 chat_server.run(server, log);
 

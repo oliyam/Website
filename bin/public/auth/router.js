@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const uuid = require("uuid");
 
-const db = require("./db");
+const db = require("./db").connect("website-login");
 const users = require('./users');
 const log = require('../logger/color-logger.js').log;
 
