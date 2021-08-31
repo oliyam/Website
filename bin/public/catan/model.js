@@ -52,7 +52,7 @@ class brett {
     }
 
     kreuzungen(weg){
-        return [[(weg[1]>this.brett[0].length/2)+(weg[1]%2?2*weg[0]:+weg[0]),Math.floor(weg[1]/2)],[!(weg[1]>this.brett[0].length/2)+(weg[1]%2?2*weg[0]:+weg[0]),Math.ceil(weg[1]/2)]];
+        return [[(weg[1]>this.brett[0].length)+(weg[1]%2?2*weg[0]:+weg[0]),Math.floor(weg[1]/2)],[!(weg[1]>this.brett[0].length)+(weg[1]%2?2*weg[0]:+weg[0]),Math.ceil(weg[1]/2)]];
     }
 
     wege(kreuzung){
@@ -84,4 +84,4 @@ class spiel {
     spieler; 
 };
 var brett_=new brett;
-log(brett_.kreuzungen([[2],[6]]));
+log(brett_.kreuzungen([[0],[0]]));
