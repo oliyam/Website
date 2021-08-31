@@ -33,26 +33,25 @@ class spieler {
 class brett {
 
     brett=[[],[]];
-    offset=[];
+    size;
 
     constructor(size){       
-        size=size||5;
-        this.land=Array(size);
-        for(var o=0;o<size;o++){
-            var i=size-Math.abs(o%size-Math.floor(size/2));
+        this.size=size||5;
+        this.land=Array(this.size);
+        for(var o=0;o<this.size;o++){
+            var i=this.size-Math.abs(o%this.size-Math.floor(this.size/2));
             this.land.push(Array(i));
             this.brett[0].push(Array(i*2), Array(i+1));
             this.brett[1].push(Array(i*2+1));
-            if(o==Math.floor(size/2)){
+            if(o==Math.floor(this.size/2)){
                 this.brett[0].push(Array(i*2));
                 this.brett[1].push(Array(i*2+1));
             }
-            this.offset.push(+(o>Math.floor(size/2)));
         }
     }
 
     kreuzungen(weg){
-        return [[(weg[1]>this.brett[0].length)+(weg[1]%2?2*weg[0]:+weg[0]),Math.floor(weg[1]/2)],[!(weg[1]>this.brett[0].length)+(weg[1]%2?2*weg[0]:+weg[0]),Math.ceil(weg[1]/2)]];
+        return [[(weg[1]/2>this.size/2&&weg[1]%2)+(weg[1]%2?2*weg[0]:+weg[0]),Math.floor(weg[1]/2)],[!(weg[1]/2>this.size/2&&weg[1]%2)+(weg[1]%2?2*weg[0]:+weg[0]),Math.ceil(weg[1]/2)]];
     }
 
     wege(kreuzung){
@@ -84,4 +83,4 @@ class spiel {
     spieler; 
 };
 var brett_=new brett;
-log(brett_.kreuzungen([[0],[0]]));
+log(brett_.kreuzungen([[3],[8]]));
