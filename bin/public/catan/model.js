@@ -55,7 +55,7 @@ class brett {
     }
 
     wege(kreuzung){
-
+        return[[kreuzung[0]-1,parseInt(kreuzung[1])+1],[kreuzung[0]-1,parseInt(kreuzung[1])+2],[kreuzung[0],parseInt(kreuzung[1])+1]];
     }
 
     bauen(x, y, id, typ){
@@ -83,4 +83,4 @@ class spiel {
     spieler; 
 };
 var brett_=new brett;
-log(brett_.kreuzungen([[3],[8]]));
+log(brett_.wege([[3],[1]]));
