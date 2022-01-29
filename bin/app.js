@@ -26,7 +26,7 @@ var server=http.listen(PORT, function(){
 });
 
 //start ngrok
-ngrok.connect({auth: process.env.NGROK_TOKEN,PORT}).then( (url) => {
+ngrok.connect({authtoken: process.env.NGROK_TOKEN, addr: PORT}).then( (url) => {
 	log("Ngrok tunnel established: ", "magenta")
 	log(url+" -> http://localhost:"+PORT, "yellow")
 });
@@ -41,7 +41,7 @@ app.use(express.static('public'));
 app.get('/', function (req, res) {
 	res.sendFile(__dirname+"/public/index.html" );
 }); 
-
+ 
 app.get('/print/:string', function (req, res) {
 	log(req.params.string, "yellow");
 });
@@ -57,7 +57,7 @@ app.get('/chat', function (req, res) {
 });
  
 app.get('/catan', function (req, res) {
-	res.sendFile(__dirname+"/public/res/underconstruction.html" );
+	res.sendFile(__dirname+"/public/catan/catan.html" );
 });
 
 app.get('/dead', function (req, res) {
