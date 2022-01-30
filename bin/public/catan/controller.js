@@ -4,10 +4,12 @@ const app = new PIXI.Application({
 
 app.view.id = "pixijs";
 
-document.getElementById('map').appendChild(app.view);
-document.getElementById('map').scrollTo({
-    left: (app.screen.width-document.getElementById('map').clientWidth)/2,
-    top: (app.screen.height-document.getElementById('map').clientHeight)/2,
+var map=document.getElementById('map');
+
+map.appendChild(app.view);
+map.scrollTo({
+    left: (app.screen.width-map.clientWidth)/2,
+    top: (app.screen.height-map.clientHeight)/2,
     behaviour: 'smooth'
 });
 
@@ -89,3 +91,22 @@ function getHexCorner(x, y, size, i){
         y: y + size * Math.sin(angle_rad)
     };
 }
+
+let pos = {
+    top: 0,
+    left: 0,
+    x: 0,
+    y: 0
+};
+
+const mouseDownHandler = function(e) {
+
+};
+
+const mouseMoveHandler = function(e) {
+    const dx = e.clientX - pos.x;
+    const dy = e.clientY - pos.y;
+
+    map.scrollTop = pos.top - dy;
+    map.scrollLeft = pos.left - dx;
+};

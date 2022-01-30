@@ -50,14 +50,15 @@
 #map {
     padding-left: 0;
     padding-right: 0;
+    max-height: 600px;
+    max-width: 600px;
     margin: auto;
     left: 33%;
     right: 33%;
     display: block;
     border:5px solid white;
-    overflow: scroll;
-    max-height: 600px;
-    max-width: 600px;
+    cursor: grab;
+    overflow: auto;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
