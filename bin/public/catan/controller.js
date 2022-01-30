@@ -7,11 +7,9 @@ app.view.id = "pixijs";
 var map=document.getElementById('map');
 
 map.appendChild(app.view);
-map.scrollTo({
-    left: (app.screen.width-map.clientWidth)/2,
-    top: (app.screen.height-map.clientHeight)/2,
-    behaviour: 'smooth'
-});
+map.scrollTo((app.screen.width-map.clientWidth)/2, (app.screen.height-map.clientHeight)/2);
+
+scroll_drag(map);
 
 const container = new PIXI.Container();
 container.interactive = true;
@@ -92,21 +90,44 @@ function getHexCorner(x, y, size, i){
     };
 }
 
-let pos = {
-    top: 0,
-    left: 0,
-    x: 0,
-    y: 0
-};
+function scroll_drag(element){
 
-const mouseDownHandler = function(e) {
+    let pos = { top: 0, left: 0, x: 0, y: 0 };
 
-};
+    const mouseDownHandler = function (e) {
+        element.style.cursor = 'grabbing';
+        element.style.userSelect = 'none';
 
-const mouseMoveHandler = function(e) {
-    const dx = e.clientX - pos.x;
-    const dy = e.clientY - pos.y;
+        pos = {
+            left: element.scrollLeft,
+            top: element.scrollTop,
+            // Get the current mouse position
+            x: e.clientX,
+            y: e.clientY,
+        };
 
-    map.scrollTop = pos.top - dy;
-    map.scrollLeft = pos.left - dx;
-};
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+    };
+
+    const mouseMoveHandler = function (e) {
+        // How far the mouse has been moved
+        const dx = e.clientX - pos.x;
+        const dy = e.clientY - pos.y;
+
+        // Scroll the element
+        element.scrollTop = pos.top - dy;
+        element.scrollLeft = pos.left - dx;
+    };
+
+    const mouseUpHandler = function () {
+        element.style.cursor = 'grab';
+        element.style.removeProperty('user-select');
+
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+    };
+
+    // Attach the handler
+    element.addEventListener('mousedown', mouseDownHandler);
+}
