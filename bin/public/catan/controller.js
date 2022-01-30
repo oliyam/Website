@@ -9,6 +9,14 @@ var map=document.getElementById('map');
 map.appendChild(app.view);
 map.scrollTo((app.screen.width-map.clientWidth)/2, (app.screen.height-map.clientHeight)/2);
 
+document.getElementById('reset_map').addEventListener('click', () => {
+    map.scrollTo({
+        left: (app.screen.width-map.clientWidth)/2, 
+        top: (app.screen.height-map.clientHeight)/2,
+        behavior: 'smooth'
+    });
+});
+
 scroll_drag(map);
 
 const container = new PIXI.Container();
@@ -28,6 +36,7 @@ app.ticker.add(() => {
 
     count += 0.01;
 });
+
 
 
 function drawHexMap(graphics, x, y, size){

@@ -47,14 +47,28 @@
     margin:auto;
 }
 
+#controls {
+    position: absolute;
+    top: calc(50% - 275px);
+    left: calc(5%);
+    height: 600px;
+    width: 300px;
+    display: block;
+    border:5px solid white;
+    overflow: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 #map {
-    padding-left: 0;
-    padding-right: 0;
+    position: absolute;
+    top: calc(50% - 275px);
+    left: calc(50% - 300px);
+    height: 600px;
+    width: 600px;
     max-height: 600px;
     max-width: 600px;
     margin: auto;
-    left: 33%;
-    right: 33%;
     display: block;
     border:5px solid white;
     overflow: auto;
