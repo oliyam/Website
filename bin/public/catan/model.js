@@ -31,9 +31,17 @@ class spieler {
 };
 
 class brett {
-    feld; 
+
     kreuzung;
     strasse;
+
+    feld=[
+        {length: 3, offset: 0},
+        {length: 4, offset: 0},
+        {length: 5, offset: 0},
+        {length: 4, offset: 1},
+        {length: 3, offset: 2}
+    ];
 
     landschaften={ 
         "wald": 4,
