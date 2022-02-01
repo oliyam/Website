@@ -4,11 +4,13 @@ const app = new PIXI.Application({
 
 class game{
     karte = [
-        {size: 3, offset: 2},
-        {size: 4, offset: 1},
+        {size: 4, offset: 3},
+        {size: 5, offset: 2},
+        {size: 6, offset: 1},
+        {size: 7, offset: 0},
+        {size: 6, offset: 0},
         {size: 5, offset: 0},
-        {size: 4, offset: 0},
-        {size: 3, offset: 0}
+        {size: 4, offset: 0}
     ];
     kreuzungen = new Map();
     wege = new Map();
@@ -28,13 +30,10 @@ class game{
 
 
         this.wege.set([
-            {q: 2, r: 0},
-            {q: 1, r: 1}
-        ], {id: 0});
-        this.wege.set([
             {q: 2, r: 1},
-            {q: 1, r: 1}
+            {q: 3, r: 1}
         ], {id: 0});
+
     }
 };
 
@@ -93,6 +92,7 @@ function drawGame(container, game){
             g.hitArea = new PIXI.Polygon(getHex(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, true));
             g.interactive = true;
             g.on('pointerover', e => {
+                console.log(g.q+" "+g.r)
                 if(!g.marked)
                 g.tint = 0x666666;
             });
@@ -111,6 +111,7 @@ function drawGame(container, game){
                     g.marked = false;
                     marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
                 }
+                temp_graphics.clear();
                 if(areNeighbours(marked_tiles))
                     switch(marked_tiles.length){
                         case 2:
@@ -136,29 +137,31 @@ function drawGame(container, game){
     });
 
     game.kreuzungen.forEach((value, key) => {
-        drawKreuzung(value, key);
+        //drawKreuzung(value, key);
     });
 }
 
 function drawStrasse(value, key){
-    x=(position[key[0].q][key[0].r].x-position[key[1].q][key[1].r].x);
-    y=(position[key[0].q][key[0].r].y-position[key[1].q][key[1].r].y);
+    x=(position[key[0].q][key[0].r].x-position[key[1].q][key[1].r].x)/10;
+    y=(position[key[0].q][key[0].r].y-position[key[1].q][key[1].r].y)/10;
 
     let graphics = new PIXI.Graphics();
     graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
     graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
     graphics.lineStyle(4, 0xFFFFFF);
     graphics.beginFill(0xFF0000, 1);
-    graphics.drawCircle(-x/4, -y/4, size/15);
-    graphics.drawCircle(x/4, y/4, size/15);
+    graphics.drawCircle(-x, -y, size/16);
+    graphics.drawCircle(x, y, size/16);
     graphics.lineStyle(10, 0xFFFFFF);
-    graphics.moveTo(-x/4, -y/4)
-    graphics.lineTo(x/4, y/4);
+    graphics.moveTo(-x, -y)
+    graphics.lineTo(x, y);
     graphics.lineStyle(4, 0xFF0000);
-    graphics.moveTo(-x/4, -y/4)
-    graphics.lineTo(x/4, y/4);
+    graphics.moveTo(-x, -y)
+    graphics.lineTo(x, y);
     graphics.rotation=Math.PI/180*90;
     container.addChild(graphics);
+
+    return graphics;
 }
 
 function drawKreuzung(value, key){
