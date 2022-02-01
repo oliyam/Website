@@ -16,13 +16,24 @@ class game{
     constructor(){
         this.kreuzungen.set([
             {q: 2, r: 0},
-            {q: 3, r: 0},
             {q: 1, r: 1},
+            {q: 2, r: 1},
         ], {id: 0, stadt: true});
 
+        this.kreuzungen.set([
+            {q: 1, r: 2},
+            {q: 1, r: 1},
+            {q: 2, r: 1},
+        ], {id: 0, stadt: false});
+
+
         this.wege.set([
-            {q: 0, r: 0},
-            {q: 1, r: 0}
+            {q: 2, r: 0},
+            {q: 1, r: 1}
+        ], {id: 0});
+        this.wege.set([
+            {q: 2, r: 1},
+            {q: 1, r: 1}
         ], {id: 0});
     }
 };
@@ -72,19 +83,36 @@ function drawGame(container, game){
         o++;
     });
 
-    game.kreuzungen.forEach((values, keys) => {
+    game.wege.forEach((value, key) => {
+        console.log(key);
+        let graphics = new PIXI.Graphics();
+        graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
+        graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
+        x=(position[key[0].q][key[0].r].x-position[key[1].q][key[1].r].x);
+        y=(position[key[0].q][key[0].r].y-position[key[1].q][key[1].r].y);
+        graphics.lineStyle(10, 0xFFFFFF);
+        graphics.moveTo(-x/4, -y/4)
+        graphics.lineTo(x/4, y/4);
+        graphics.lineStyle(4, 0xFF0000);
+        graphics.moveTo(-x/4, -y/4)
+        graphics.lineTo(x/4, y/4);
+        graphics.rotation=Math.PI/180*90;
+        container.addChild(graphics);
+    });
+
+    game.kreuzungen.forEach((value, key) => {
         var pos={
             x: 0,
             y: 0
         };
-        keys.forEach(key => {
-            pos.x+=position[key.q][key.r].x;
-            pos.y+=position[key.q][key.r].y;
+        key.forEach(e => {
+            pos.x+=position[e.q][e.r].x;
+            pos.y+=position[e.q][e.r].y;
         });
         let graphics = new PIXI.Graphics();
         graphics.lineStyle(4, 0xFFFFFF);
-        graphics.beginFill(0xFF0000, 0.5);
-        graphics.drawRegularPolygon(pos.x/3-hex_x/6, pos.y/3+hex_y/4, size/3, 6, 0);
+        graphics.beginFill(0xFF0000, 1);
+        graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
         graphics.endFill();
         container.addChild(graphics);
     });
@@ -113,44 +141,6 @@ let count = 0;
 app.ticker.add(() => {
     count += 0.01;
 });
-
-function drawHexMap(contaienr, x, y, size){
-
-    var hex_x = getHexSize(size).x, hex_y = getHexSize(size).y;
-
-    //index der längsten reihe
-    var _index = 0, index = 0;
-    karte.forEach(reihe => {
-        if(reihe.size>karte[_index].size)
-            _index=index;
-        index++;
-    });
-
-    x += (app.screen.width-hex_x*karte[_index].size)/2+hex_x*(-(_index)/2-karte[_index].offset);
-    y += (app.screen.height-hex_y*(karte.length*3/4+1/4))/2;
-
-    var o = 0;
-    karte.forEach(reihe => {
-        for(var i=0;i<reihe.size;i++){
-            var hex = {
-                q: q=i+reihe.offset,
-                r: r=o
-            };
-            if(hex_map[hex.q]==undefined)
-                hex_map[hex.q]=[];
-            hex_map[hex.q][hex.r]=new PIXI.Graphics();
-
-            let graphics = hex_map[hex.q][hex.r];
-
-            graphics.lineStyle(4, 0xFFFFFF);
-            graphics.beginFill(0x00FF00, 0.5);
-            graphics.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
-            graphics.endFill();
-            container.addChild(graphics);
-        }
-        o++;
-    });
-}
 
 //pointy TODO: pointy and fat boolean
 function pixelToHex(x, y, size){
