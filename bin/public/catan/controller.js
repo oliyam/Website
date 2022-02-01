@@ -38,12 +38,27 @@ class game{
     }
 };
 
+class graphics extends PIXI.Graphics{
+    marked = false;
+    q;
+    r;
+    constructor(q, r){
+        super();
+        this.q=q;
+        this.r=r;
+    }
+}
+
+var marked_tiles = [];
+var temp_graphics = new PIXI.Graphics();
+var position=[];
+var size=50;
+
+
 function drawGame(container, game){
-    var size=50;
+
     var x=0,y=0;
     var hex_x = getHexSize(size).x, hex_y = getHexSize(size).y;
-
-    var position=[];
 
     //index der längsten reihe
     var _index = 0, index = 0;
@@ -63,8 +78,7 @@ function drawGame(container, game){
                 q: q=i+reihe.offset,
                 r: r=o
             };
-            console.log(q+" "+r)
-
+            
             if(!position[hex.q])
                 position[hex.q]=[];
 
@@ -73,49 +87,98 @@ function drawGame(container, game){
                 y: y+hex_y*(3/4*o+1/2)
             };
 
-            let graphics = new PIXI.Graphics();
-            graphics.lineStyle(4, 0xFFFFFF);
-            graphics.beginFill(0x00FF00, 0.5);
-            graphics.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
-            graphics.endFill();
-            container.addChild(graphics);
+            let g = new graphics(hex.q, hex.r);
+            g.beginFill(0x00FF00, 0.5);
+            g.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
+            g.hitArea = new PIXI.Polygon(getHex(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, true));
+            g.interactive = true;
+            g.on('pointerover', e => {
+                if(!g.marked)
+                g.tint = 0x666666;
+            });
+            g.on('pointerout', e => {
+                if(!g.marked)
+                    g.tint = 0xFFFFFF;
+            });
+            g.on('pointerdown', e => {
+                if(!g.marked&&marked_tiles.length<3){
+                    g.tint = 0x333333;
+                    g.marked = true;
+                    marked_tiles.push({q: g.q,r: g.r});
+                }
+                else{
+                    g.tint = 0x666666;
+                    g.marked = false;
+                    marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
+                }
+                if(areNeighbours(marked_tiles))
+                    switch(marked_tiles.length){
+                        case 2:
+                            temp_graphics = drawStrasse({id: 0}, marked_tiles);
+                            break;
+                        case 3:
+                            temp_graphics = drawKreuzung({id: 0, stadt: true}, marked_tiles);
+                            break;
+                    }
+            });
+            g.endFill();
+            container.addChild(g);
+            let graphics2 = new PIXI.Graphics();
+            graphics2.lineStyle(4, 0xFFFFFF);
+            graphics2.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
+            container.addChild(graphics2);
         }
         o++;
     });
 
     game.wege.forEach((value, key) => {
-        console.log(key);
-        let graphics = new PIXI.Graphics();
-        graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
-        graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
-        x=(position[key[0].q][key[0].r].x-position[key[1].q][key[1].r].x);
-        y=(position[key[0].q][key[0].r].y-position[key[1].q][key[1].r].y);
-        graphics.lineStyle(10, 0xFFFFFF);
-        graphics.moveTo(-x/4, -y/4)
-        graphics.lineTo(x/4, y/4);
-        graphics.lineStyle(4, 0xFF0000);
-        graphics.moveTo(-x/4, -y/4)
-        graphics.lineTo(x/4, y/4);
-        graphics.rotation=Math.PI/180*90;
-        container.addChild(graphics);
+        drawStrasse(value, key);
     });
 
     game.kreuzungen.forEach((value, key) => {
-        var pos={
-            x: 0,
-            y: 0
-        };
-        key.forEach(e => {
-            pos.x+=position[e.q][e.r].x;
-            pos.y+=position[e.q][e.r].y;
-        });
-        let graphics = new PIXI.Graphics();
-        graphics.lineStyle(4, 0xFFFFFF);
-        graphics.beginFill(0xFF0000, 1);
-        graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
-        graphics.endFill();
-        container.addChild(graphics);
+        drawKreuzung(value, key);
     });
+}
+
+function drawStrasse(value, key){
+    x=(position[key[0].q][key[0].r].x-position[key[1].q][key[1].r].x);
+    y=(position[key[0].q][key[0].r].y-position[key[1].q][key[1].r].y);
+
+    let graphics = new PIXI.Graphics();
+    graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
+    graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
+    graphics.lineStyle(4, 0xFFFFFF);
+    graphics.beginFill(0xFF0000, 1);
+    graphics.drawCircle(-x/4, -y/4, size/15);
+    graphics.drawCircle(x/4, y/4, size/15);
+    graphics.lineStyle(10, 0xFFFFFF);
+    graphics.moveTo(-x/4, -y/4)
+    graphics.lineTo(x/4, y/4);
+    graphics.lineStyle(4, 0xFF0000);
+    graphics.moveTo(-x/4, -y/4)
+    graphics.lineTo(x/4, y/4);
+    graphics.rotation=Math.PI/180*90;
+    container.addChild(graphics);
+}
+
+function drawKreuzung(value, key){
+    var pos={
+        x: 0,
+        y: 0
+    };
+    key.forEach(e => {
+        pos.x+=position[e.q][e.r].x;
+        pos.y+=position[e.q][e.r].y;
+    });
+
+    let graphics = new PIXI.Graphics();
+    graphics.lineStyle(4, 0xFFFFFF);
+    graphics.beginFill(0xFF0000, 1);
+    graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
+    graphics.endFill();
+    container.addChild(graphics);
+
+    return graphics;
 }
 
 app.view.id = "pixijs";
@@ -128,14 +191,10 @@ var game_ = new game();
 drawGame(container, game_);
 app.stage.addChild(container);
 
-map.addEventListener('mouseover', (e) => {
-    map.addEventListener('mousemove', (e) => {
-        app.stage.removeChild(container);
-        container = new PIXI.Container();
-        drawGame(container, game_);
-        app.stage.addChild(container);
-    });
-});
+app.stage.removeChild(container);
+container = new PIXI.Container();
+drawGame(container, game_);
+app.stage.addChild(container);
 
 let count = 0;
 app.ticker.add(() => {
@@ -187,6 +246,30 @@ function cubeRound(frac){
 
 function axialRound(frac){
     return cubeToAxial(cubeRound(axialToCube(frac)));
+}
+
+function areNeighbours(tiles){
+    if(tiles.length<2)
+        return -1;
+    let a = true;
+    tiles.forEach(t0 => {
+        tiles.forEach(t1 => {
+            if(!neighbours(t0, t1)&&t1!=t0)
+                a = false;
+        });
+    });
+    return a;
+}
+
+function neighbours(t0, t1){
+    var vectors = [
+        [1, 0], [1, -1], [0, -1], 
+        [-1, 0], [-1, 1], [0, 1]
+    ];
+    for(var i=0;i<vectors.length;i++)
+        if((t0.q+vectors[i][0]==t1.q&&t0.r+vectors[i][1]==t1.r))
+            return true;
+    return false;
 }
 
 function getHexSize(size){
