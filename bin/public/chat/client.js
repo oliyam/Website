@@ -1,4 +1,4 @@
-const socket=io("9e67-84-114-180-14.ngrok.io");
+const socket=io("51bc-77-119-200-254.ngrok.io");
 const msgContainer=document.getElementById("msg-card");
 const msgForm=document.getElementById("send-container");
 const msgInput=document.getElementById("msg-input");
