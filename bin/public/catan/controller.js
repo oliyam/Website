@@ -260,10 +260,7 @@ document.getElementById('loeschen').addEventListener('click', e => {
 document.getElementById('stadt').addEventListener('click', e => {
     document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
     stadt_=!stadt_;
-    if(areNeighbours(marked_tiles)&&isFree(marked_tiles)&&marked_tiles.length==3){
-        temp_graphics.clear();
-        temp_graphics = drawKreuzung({id: spieler_, stadt: stadt_}, marked_tiles);
-    }
+    drawMarkedTiles();
 });
 
 document.getElementById('spieler').addEventListener('click', e => {
