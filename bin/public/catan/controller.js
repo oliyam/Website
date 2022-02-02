@@ -12,6 +12,10 @@ class game{
         {size: 5, offset: 0},
         {size: 4, offset: 0}
     ];
+    blocked = [
+        {q: 3, r: 0}
+    ];
+
     kreuzungen = new Map();
     wege = new Map();
 
@@ -22,7 +26,7 @@ class game{
         this.kreuzungen.set([
             {q: 3, r: 0},
             {q: 2, r: 1},
-            {q: 3, r: 1},
+            {q: 3, r: 1}
         ], {id: 0, stadt: true});
 
         this.wege.set([
@@ -63,8 +67,8 @@ function drawGame(container, game){
         index++;
     });
 
-    x += (600-hex_x*game.karte[_index].size)/2+hex_x*(-(_index)/2-game.karte[_index].offset);
-    y += (600-hex_y*(game.karte.length*3/4+1/4))/2;
+    x += (app.screen.width-hex_x*game.karte[_index].size)/2+hex_x*(-(_index)/2-game.karte[_index].offset);
+    y += (app.screen.height-hex_y*(game.karte.length*3/4+1/4))/2;
 
     var o = 0;
     game.karte.forEach(reihe => {
@@ -107,14 +111,19 @@ function drawGame(container, game){
                     g.marked = false;
                     marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
                 }
+                console.log(isFree(marked_tiles))
+                temp_graphics.clear();
                 if(areNeighbours(marked_tiles))
                     switch(marked_tiles.length){
                         case 2:
-                            temp_graphics = drawStrasse({id: 0}, marked_tiles);
+                            if(isFree(marked_tiles))
+                                temp_graphics = drawStrasse({id: 0}, marked_tiles);
                             break;
                         case 3:
-                            temp_graphics.clear();
-                            temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
+                            if(isFree(marked_tiles)){
+                                temp_graphics.clear();
+                                temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
+                            }
                             break;
                     }
             });
@@ -211,14 +220,22 @@ document.getElementById('bauen').addEventListener('click', e => {
     if(areNeighbours(marked_tiles))
         switch(marked_tiles.length){
             case 2:
-                game_.wege_bauen.set(marked_tiles, {id: 0});
-                marked_tiles = [];
-                redraw();
+                if(isFree(marked_tiles)){
+                    game_.wege_bauen.set(marked_tiles, {id: 0});
+                    redraw();
+                    marked_tiles = [];
+                }
+                else
+                temp_graphics.clear();
                 break;
             case 3:
-                game_.kreuzungen_bauen.set(marked_tiles, {id: 0, stadt: document.getElementById('stadt').checked});
-                marked_tiles = [];
-                redraw();
+                if(isFree(marked_tiles)){
+                    game_.kreuzungen_bauen.set(marked_tiles, {id: 0, stadt: document.getElementById('stadt').checked});
+                    redraw();
+                    marked_tiles = [];
+                }
+                else
+                temp_graphics.clear();
                 break;
         }
 });
@@ -227,17 +244,61 @@ document.getElementById('loeschen').addEventListener('click', e => {
     game_.wege_bauen = new Map();
     game_.kreuzungen_bauen = new Map();
     redraw();
+    marked_tiles = [];
 });
 
 document.getElementById('stadt').addEventListener('click', e => {
-    temp_graphics.clear();
-    temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
+    if(areNeighbours(marked_tiles)&&isFree(marked_tiles)&&marked_tiles.length==3){
+        temp_graphics.clear();
+        temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
+    }
 });
 
 let count = 0;
 app.ticker.add(() => {
     count += 0.01;
 });
+
+function has(array, tile){
+    let a = false;
+    array.forEach(t => {
+        if(isEqual(t, tile))
+            a = true;
+    });
+    return a;
+}
+
+function isFree(tiles){
+    let frei = true;
+    if(tiles.length)
+        switch(tiles.length){
+            case 2:
+                game_.wege.forEach((value, key) => {
+                    if(has(key, tiles[0])&&has(key, tiles[1]))
+                        frei = false;
+                });
+                game_.wege_bauen.forEach((value, key) => {
+                    if(has(key, tiles[0])&&has(key, tiles[1]))
+                        frei = false;
+                });
+                return frei;
+            case 3:
+                game_.kreuzungen.forEach((value, key) => {
+                    if(has(key, tiles[0])&&has(key, tiles[1])&&has(key, tiles[2]))
+                        frei = false;
+                });
+                game_.kreuzungen_bauen.forEach((value, key) => {
+                    if(has(key, tiles[0])&&has(key, tiles[1])&&has(key, tiles[2]))
+                        frei = false;
+                });
+                return frei;
+        }
+    return -1;
+}
+
+function isEqual(hex_0, hex_1){
+    return hex_0.q==hex_1.q&&hex_0.r==hex_1.r;
+}
 
 //pointy TODO: pointy and fat boolean
 function pixelToHex(x, y, size){
