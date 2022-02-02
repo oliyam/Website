@@ -15,19 +15,15 @@ class game{
     kreuzungen = new Map();
     wege = new Map();
 
+    kreuzungen_bauen = new Map();
+    wege_bauen = new Map();
+
     constructor(){
         this.kreuzungen.set([
-            {q: 2, r: 0},
-            {q: 1, r: 1},
+            {q: 3, r: 0},
             {q: 2, r: 1},
+            {q: 3, r: 1},
         ], {id: 0, stadt: true});
-
-        this.kreuzungen.set([
-            {q: 1, r: 2},
-            {q: 1, r: 1},
-            {q: 2, r: 1},
-        ], {id: 0, stadt: false});
-
 
         this.wege.set([
             {q: 2, r: 1},
@@ -92,15 +88,15 @@ function drawGame(container, game){
             g.hitArea = new PIXI.Polygon(getHex(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, true));
             g.interactive = true;
             g.on('pointerover', e => {
-                console.log(g.q+" "+g.r)
                 if(!g.marked)
-                g.tint = 0x666666;
+                    g.tint = 0x666666;
             });
             g.on('pointerout', e => {
                 if(!g.marked)
                     g.tint = 0xFFFFFF;
             });
             g.on('pointerdown', e => {
+                console.log(g.q+" "+g.r)
                 if(!g.marked&&marked_tiles.length<3){
                     g.tint = 0x333333;
                     g.marked = true;
@@ -118,7 +114,7 @@ function drawGame(container, game){
                             temp_graphics = drawStrasse({id: 0}, marked_tiles);
                             break;
                         case 3:
-                            temp_graphics = drawKreuzung({id: 0, stadt: true}, marked_tiles);
+                            temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
                             break;
                     }
             });
@@ -132,12 +128,20 @@ function drawGame(container, game){
         o++;
     });
 
-    game.wege.forEach((value, key) => {
+    game.wege_bauen.forEach((value, key) => {
         drawStrasse(value, key);
     });
 
+    game.wege.forEach((value, key) => {
+        drawStrasse(value, key);
+    });
+    
+    game.kreuzungen_bauen.forEach((value, key) => {
+        drawKreuzung(value, key);
+    });
+
     game.kreuzungen.forEach((value, key) => {
-        //drawKreuzung(value, key);
+        drawKreuzung(value, key);
     });
 }
 
@@ -194,10 +198,35 @@ var game_ = new game();
 drawGame(container, game_);
 app.stage.addChild(container);
 
-app.stage.removeChild(container);
-container = new PIXI.Container();
-drawGame(container, game_);
-app.stage.addChild(container);
+function redraw(){
+    app.stage.removeChild(container);
+    container = new PIXI.Container();
+    drawGame(container, game_);
+    app.stage.addChild(container);
+    marked_tiles = [];
+}
+
+redraw();
+
+document.getElementById('bauen').addEventListener('click', e => {
+    if(areNeighbours(marked_tiles))
+        switch(marked_tiles.length){
+            case 2:
+                game_.wege_bauen.set(marked_tiles, {id: 0});
+                redraw();
+                break;
+            case 3:
+                game_.kreuzungen_bauen.set(marked_tiles, {id: 0, stadt: document.getElementById('stadt').checked});
+                redraw();
+                break;
+        }
+});
+
+document.getElementById('loeschen').addEventListener('click', e => {
+    game_.wege_bauen = new Map();
+    game_.kreuzungen_bauen = new Map();
+    redraw();
+});
 
 let count = 0;
 app.ticker.add(() => {
