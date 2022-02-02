@@ -25,7 +25,7 @@ class game{
     farben = [
         0xFF0000,
         0x0000FF,
-        0xcccccc,
+        0xCCCCCC,
         0xFFA500
     ];
 
@@ -36,6 +36,7 @@ class game{
     wege_bauen = new Map();
 
     constructor(){
+        /*
         this.kreuzungen.set([
             {q: 3, r: 0},
             {q: 2, r: 1},
@@ -46,6 +47,7 @@ class game{
             {q: 2, r: 1},
             {q: 3, r: 1}
         ], {id: 0});
+        */
 
     }
 };
@@ -272,8 +274,8 @@ document.getElementById('spieler').addEventListener('click', e => {
 });
 
 function drawMarkedTiles(){
+    temp_graphics.clear();
     if(areNeighbours(marked_tiles)&&isFree(marked_tiles)){
-        temp_graphics.clear();
         switch(marked_tiles.length){
             case 2:
                 temp_graphics = drawStrasse({id: spieler_}, marked_tiles);
