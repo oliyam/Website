@@ -13,7 +13,13 @@ class game{
         {size: 4, offset: 0}
     ];
     blocked = [
-        {q: 3, r: 0}
+        {q: 3, r: 0},{q: 4, r: 0},{q: 5, r: 0},{q: 6, r: 0},
+        {q: 2, r: 1},{q: 6, r: 1},
+        {q: 1, r: 2},{q: 6, r: 2},
+        {q: 0, r: 3},{q: 6, r: 3},
+        {q: 0, r: 4},{q: 5, r: 4},
+        {q: 0, r: 5},{q: 4, r: 5},
+        {q: 0, r: 6},{q: 1, r: 6},{q: 2, r: 6},{q: 3, r: 6}
     ];
 
     kreuzungen = new Map();
@@ -87,7 +93,10 @@ function drawGame(container, game){
             };
 
             let g = new graphics(hex.q, hex.r);
-            g.beginFill(0x00FF00, 0.5);
+            if(!has(game.blocked, hex))
+                g.beginFill(0x00FF00, 0.5);
+            else
+                g.beginFill(0xFFFFFF, 0.5);
             g.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
             g.hitArea = new PIXI.Polygon(getHex(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, true));
             g.interactive = true;
@@ -111,7 +120,6 @@ function drawGame(container, game){
                     g.marked = false;
                     marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
                 }
-                console.log(isFree(marked_tiles))
                 temp_graphics.clear();
                 if(areNeighbours(marked_tiles))
                     switch(marked_tiles.length){
@@ -120,19 +128,18 @@ function drawGame(container, game){
                                 temp_graphics = drawStrasse({id: 0}, marked_tiles);
                             break;
                         case 3:
-                            if(isFree(marked_tiles)){
-                                temp_graphics.clear();
+                            if(isFree(marked_tiles))
                                 temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
-                            }
                             break;
                     }
             });
             g.endFill();
             container.addChild(g);
-            let graphics2 = new PIXI.Graphics();
-            graphics2.lineStyle(4, 0xFFFFFF);
-            graphics2.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
-            container.addChild(graphics2);
+            let g_ = new PIXI.Graphics();
+            g_.lineStyle(4, 0xFFFFFF);
+            g_.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
+            if(!has(game.blocked, hex))
+                container.addChild(g_);
         }
         o++;
     });
@@ -201,6 +208,9 @@ app.view.id = "pixijs";
 
 var map=document.getElementById('map');
 map.appendChild(app.view);
+map.addEventListener('mouseover', e => {
+    map.style.cursor = 'crosshair';
+});
 
 var container = new PIXI.Container();
 var game_ = new game();
@@ -268,9 +278,18 @@ function has(array, tile){
     return a;
 }
 
+function hasAll(array, tiles){
+    let a = true;
+    tiles.forEach(t => {
+        if(!has(array, t))
+            a = false;
+    });
+    return a;
+}
+
 function isFree(tiles){
     let frei = true;
-    if(tiles.length)
+    if(tiles.length&&!hasAll(game_.blocked, tiles))
         switch(tiles.length){
             case 2:
                 game_.wege.forEach((value, key) => {
@@ -293,7 +312,7 @@ function isFree(tiles){
                 });
                 return frei;
         }
-    return -1;
+    return false;
 }
 
 function isEqual(hex_0, hex_1){
