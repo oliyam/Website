@@ -12,6 +12,7 @@ class game{
         {size: 5, offset: 0},
         {size: 4, offset: 0}
     ];
+
     blocked = [
         {q: 3, r: 0},{q: 4, r: 0},{q: 5, r: 0},{q: 6, r: 0},
         {q: 2, r: 1},{q: 6, r: 1},
@@ -21,6 +22,8 @@ class game{
         {q: 0, r: 5},{q: 4, r: 5},
         {q: 0, r: 6},{q: 1, r: 6},{q: 2, r: 6},{q: 3, r: 6}
     ];
+
+
 
     farben = [
         0xFF0000,
@@ -70,6 +73,43 @@ var temp_graphics = new PIXI.Graphics();
 var position=[];
 var size=50;
 
+app.view.id = "pixijs";
+
+var map=document.getElementById('map');
+map.appendChild(app.view);
+
+var container = new PIXI.Container();
+var game_ = new game();
+
+redraw();
+
+map.addEventListener('mouseover', e => {
+    map.style.cursor = 'crosshair';
+});
+
+document.getElementById('bauen').addEventListener('click', e => {
+    buildMarkedTiles();
+});
+
+document.getElementById('loeschen').addEventListener('click', e => {
+    game_.wege_bauen = new Map();
+    game_.kreuzungen_bauen = new Map();
+    redraw();
+    marked_tiles = [];
+});
+
+document.getElementById('stadt').addEventListener('click', e => {
+    document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
+    stadt_=!stadt_;
+    drawMarkedTiles();
+});
+
+document.getElementById('spieler').addEventListener('click', e => {
+    spieler_++;
+    spieler_=spieler_%4;
+    document.getElementById('spieler').innerText=spieler_;
+    drawMarkedTiles();
+});
 
 function drawGame(container, game){
 
@@ -204,19 +244,6 @@ function drawKreuzung(value, key){
     return graphics;
 }
 
-app.view.id = "pixijs";
-
-var map=document.getElementById('map');
-map.appendChild(app.view);
-map.addEventListener('mouseover', e => {
-    map.style.cursor = 'crosshair';
-});
-
-var container = new PIXI.Container();
-var game_ = new game();
-drawGame(container, game_);
-app.stage.addChild(container);
-
 function redraw(){
     app.stage.removeChild(container);
     container = new PIXI.Container();
@@ -224,51 +251,29 @@ function redraw(){
     app.stage.addChild(container);
 }
 
-redraw();
-
-document.getElementById('bauen').addEventListener('click', e => {
+function buildMarkedTiles(){
     if(areNeighbours(marked_tiles))
-        switch(marked_tiles.length){
-            case 2:
-                if(isFree(marked_tiles)){
-                    game_.wege_bauen.set(marked_tiles, {id: spieler_});
-                    redraw();
-                    marked_tiles = [];
-                }
-                else
-                temp_graphics.clear();
-                break;
-            case 3:
-                if(isFree(marked_tiles)){
-                    game_.kreuzungen_bauen.set(marked_tiles, {id: spieler_, stadt: stadt_});
-                    redraw();
-                    marked_tiles = [];
-                }
-                else
-                temp_graphics.clear();
-                break;
-        }
-});
-
-document.getElementById('loeschen').addEventListener('click', e => {
-    game_.wege_bauen = new Map();
-    game_.kreuzungen_bauen = new Map();
-    redraw();
-    marked_tiles = [];
-});
-
-document.getElementById('stadt').addEventListener('click', e => {
-    document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
-    stadt_=!stadt_;
-    drawMarkedTiles();
-});
-
-document.getElementById('spieler').addEventListener('click', e => {
-    spieler_++;
-    spieler_=spieler_%4;
-    document.getElementById('spieler').innerText=spieler_;
-    drawMarkedTiles();
-});
+    switch(marked_tiles.length){
+        case 2:
+            if(isFree(marked_tiles)){
+                game_.wege_bauen.set(marked_tiles, {id: spieler_});
+                redraw();
+                marked_tiles = [];
+            }
+            else
+            temp_graphics.clear();
+            break;
+        case 3:
+            if(isFree(marked_tiles)){
+                game_.kreuzungen_bauen.set(marked_tiles, {id: spieler_, stadt: stadt_});
+                redraw();
+                marked_tiles = [];
+            }
+            else
+            temp_graphics.clear();
+            break;
+    }
+}
 
 function drawMarkedTiles(){
     temp_graphics.clear();
@@ -323,11 +328,19 @@ function isFree(tiles){
                 return frei;
             case 3:
                 game_.kreuzungen.forEach((value, key) => {
-                    if(has(key, tiles[0])&&has(key, tiles[1])&&has(key, tiles[2]))
+                    if(
+                        (has(key, tiles[0])&&has(key, tiles[1]))||
+                        (has(key, tiles[0])&&has(key, tiles[2]))||
+                        (has(key, tiles[1])&&has(key, tiles[2]))
+                    )
                         frei = false;
                 });
                 game_.kreuzungen_bauen.forEach((value, key) => {
-                    if(has(key, tiles[0])&&has(key, tiles[1])&&has(key, tiles[2]))
+                    if(
+                        (has(key, tiles[0])&&has(key, tiles[1]))||
+                        (has(key, tiles[0])&&has(key, tiles[2]))||
+                        (has(key, tiles[1])&&has(key, tiles[2]))
+                    )
                         frei = false;
                 });
                 return frei;
