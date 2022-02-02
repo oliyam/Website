@@ -1,5 +1,5 @@
 const app = new PIXI.Application({
-    width: 600, height: 600, backgroundAlpha: 0, antialias: true
+    width: 600, height: 600, backgroundColor: 0x000000, backgroundAlpha: 0.5, antialias: true
 });
 
 class game{
@@ -20,6 +20,13 @@ class game{
         {q: 0, r: 4},{q: 5, r: 4},
         {q: 0, r: 5},{q: 4, r: 5},
         {q: 0, r: 6},{q: 1, r: 6},{q: 2, r: 6},{q: 3, r: 6}
+    ];
+
+    farben = [
+        0xFF0000,
+        0x0000FF,
+        0xcccccc,
+        0xFFA500
     ];
 
     kreuzungen = new Map();
@@ -54,6 +61,8 @@ class graphics extends PIXI.Graphics{
     }
 }
 
+var stadt_=false;
+var spieler_=0;
 var marked_tiles = [];
 var temp_graphics = new PIXI.Graphics();
 var position=[];
@@ -120,18 +129,7 @@ function drawGame(container, game){
                     g.marked = false;
                     marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
                 }
-                temp_graphics.clear();
-                if(areNeighbours(marked_tiles))
-                    switch(marked_tiles.length){
-                        case 2:
-                            if(isFree(marked_tiles))
-                                temp_graphics = drawStrasse({id: 0}, marked_tiles);
-                            break;
-                        case 3:
-                            if(isFree(marked_tiles))
-                                temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
-                            break;
-                    }
+                drawMarkedTiles()
             });
             g.endFill();
             container.addChild(g);
@@ -169,13 +167,13 @@ function drawStrasse(value, key){
     graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
     graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
     graphics.lineStyle(4, 0xFFFFFF);
-    graphics.beginFill(0xFF0000, 1);
+    graphics.beginFill(game_.farben[value.id], 1);
     graphics.drawCircle(-x, -y, size/16);
     graphics.drawCircle(x, y, size/16);
     graphics.lineStyle(10, 0xFFFFFF);
     graphics.moveTo(-x, -y)
     graphics.lineTo(x, y);
-    graphics.lineStyle(4, 0xFF0000);
+    graphics.lineStyle(4, game_.farben[value.id]);
     graphics.moveTo(-x, -y)
     graphics.lineTo(x, y);
     graphics.rotation=Math.PI/180*90;
@@ -196,7 +194,7 @@ function drawKreuzung(value, key){
 
     let graphics = new PIXI.Graphics();
     graphics.lineStyle(4, 0xFFFFFF);
-    graphics.beginFill(0xFF0000, 1);
+    graphics.beginFill(game_.farben[value.id], 1);
     graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
     graphics.endFill();
     container.addChild(graphics);
@@ -231,7 +229,7 @@ document.getElementById('bauen').addEventListener('click', e => {
         switch(marked_tiles.length){
             case 2:
                 if(isFree(marked_tiles)){
-                    game_.wege_bauen.set(marked_tiles, {id: 0});
+                    game_.wege_bauen.set(marked_tiles, {id: spieler_});
                     redraw();
                     marked_tiles = [];
                 }
@@ -240,7 +238,7 @@ document.getElementById('bauen').addEventListener('click', e => {
                 break;
             case 3:
                 if(isFree(marked_tiles)){
-                    game_.kreuzungen_bauen.set(marked_tiles, {id: 0, stadt: document.getElementById('stadt').checked});
+                    game_.kreuzungen_bauen.set(marked_tiles, {id: spieler_, stadt: stadt_});
                     redraw();
                     marked_tiles = [];
                 }
@@ -258,11 +256,34 @@ document.getElementById('loeschen').addEventListener('click', e => {
 });
 
 document.getElementById('stadt').addEventListener('click', e => {
+    document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
+    stadt_=!stadt_;
     if(areNeighbours(marked_tiles)&&isFree(marked_tiles)&&marked_tiles.length==3){
         temp_graphics.clear();
-        temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
+        temp_graphics = drawKreuzung({id: spieler_, stadt: stadt_}, marked_tiles);
     }
 });
+
+document.getElementById('spieler').addEventListener('click', e => {
+    spieler_++;
+    spieler_=spieler_%4;
+    document.getElementById('spieler').innerText=spieler_;
+    drawMarkedTiles();
+});
+
+function drawMarkedTiles(){
+    if(areNeighbours(marked_tiles)&&isFree(marked_tiles)){
+        temp_graphics.clear();
+        switch(marked_tiles.length){
+            case 2:
+                temp_graphics = drawStrasse({id: spieler_}, marked_tiles);
+                break;
+            case 3:
+                temp_graphics = drawKreuzung({id: spieler_, stadt: stadt_}, marked_tiles);
+                break;
+        }
+    }
+}
 
 let count = 0;
 app.ticker.add(() => {
