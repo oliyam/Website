@@ -107,13 +107,13 @@ function drawGame(container, game){
                     g.marked = false;
                     marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
                 }
-                temp_graphics.clear();
                 if(areNeighbours(marked_tiles))
                     switch(marked_tiles.length){
                         case 2:
                             temp_graphics = drawStrasse({id: 0}, marked_tiles);
                             break;
                         case 3:
+                            temp_graphics.clear();
                             temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
                             break;
                     }
@@ -203,7 +203,6 @@ function redraw(){
     container = new PIXI.Container();
     drawGame(container, game_);
     app.stage.addChild(container);
-    marked_tiles = [];
 }
 
 redraw();
@@ -213,10 +212,12 @@ document.getElementById('bauen').addEventListener('click', e => {
         switch(marked_tiles.length){
             case 2:
                 game_.wege_bauen.set(marked_tiles, {id: 0});
+                marked_tiles = [];
                 redraw();
                 break;
             case 3:
                 game_.kreuzungen_bauen.set(marked_tiles, {id: 0, stadt: document.getElementById('stadt').checked});
+                marked_tiles = [];
                 redraw();
                 break;
         }
@@ -226,6 +227,11 @@ document.getElementById('loeschen').addEventListener('click', e => {
     game_.wege_bauen = new Map();
     game_.kreuzungen_bauen = new Map();
     redraw();
+});
+
+document.getElementById('stadt').addEventListener('click', e => {
+    temp_graphics.clear();
+    temp_graphics = drawKreuzung({id: 0, stadt: document.getElementById('stadt').checked}, marked_tiles);
 });
 
 let count = 0;
