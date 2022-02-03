@@ -23,8 +23,6 @@ class game{
         {q: 0, r: 6},{q: 1, r: 6},{q: 2, r: 6},{q: 3, r: 6}
     ];
 
-
-
     farben = [
         0xFF0000,
         0x0000FF,
@@ -83,6 +81,11 @@ var game_ = new game();
 
 redraw();
 
+let count = 0;
+app.ticker.add(() => {
+    count += 0.01;
+});
+
 map.addEventListener('mouseover', e => {
     map.style.cursor = 'crosshair';
 });
@@ -110,6 +113,13 @@ document.getElementById('spieler').addEventListener('click', e => {
     document.getElementById('spieler').innerText=spieler_;
     drawMarkedTiles();
 });
+
+function redraw(){
+    app.stage.removeChild(container);
+    container = new PIXI.Container();
+    drawGame(container, game_);
+    app.stage.addChild(container);
+}
 
 function drawGame(container, game){
 
@@ -244,13 +254,6 @@ function drawKreuzung(value, key){
     return graphics;
 }
 
-function redraw(){
-    app.stage.removeChild(container);
-    container = new PIXI.Container();
-    drawGame(container, game_);
-    app.stage.addChild(container);
-}
-
 function buildMarkedTiles(){
     if(areNeighbours(marked_tiles))
     switch(marked_tiles.length){
@@ -289,11 +292,6 @@ function drawMarkedTiles(){
     }
 }
 
-let count = 0;
-app.ticker.add(() => {
-    count += 0.01;
-});
-
 function has(array, tile){
     let a = false;
     array.forEach(t => {
@@ -312,34 +310,80 @@ function hasAll(array, tiles){
     return a;
 }
 
+//DONT USE RETURN IN FOR EACH
+
+function isConnected(tiles){
+    var connected = false;
+    game_.wege.forEach((value, keys) => {
+        if(value.id==spieler_)
+            switch(tiles.length){
+                case 2:
+                    if((areNeighbours([keys[0],tiles[0]])&&areNeighbours([keys[1],tiles[0]]))||(areNeighbours([keys[0],tiles[1]])&&areNeighbours([keys[1],tiles[1]])))
+                        connected = true;
+                    break;
+                case 3:
+                    if(
+                        has(keys, tiles[0])&&has(keys, tiles[1])||
+                        has(keys, tiles[1])&&has(keys, tiles[2])||
+                        has(keys, tiles[2])&&has(keys, tiles[0])
+                    )
+                        connected = true;
+                    break;
+            }
+    });
+    game_.wege_bauen.forEach((value, keys) => {
+        if(value.id==spieler_)
+            switch(tiles.length){
+                case 2:
+                    if((areNeighbours([keys[0],tiles[0]])&&areNeighbours([keys[1],tiles[0]]))||(areNeighbours([keys[0],tiles[1]])&&areNeighbours([keys[1],tiles[1]])))
+                        connected = true;
+                    break;
+                case 3:
+                    if(
+                        has(keys, tiles[0])&&has(keys, tiles[1])||
+                        has(keys, tiles[1])&&has(keys, tiles[2])||
+                        has(keys, tiles[2])&&has(keys, tiles[0])
+                    )
+                        connected = true;
+                    break;
+            }
+    });
+    return connected;
+}
+
 function isFree(tiles){
+    console.log(isConnected(tiles));
     let frei = true;
     if(tiles.length&&!hasAll(game_.blocked, tiles))
         switch(tiles.length){
             case 2:
-                game_.wege.forEach((value, key) => {
-                    if(has(key, tiles[0])&&has(key, tiles[1]))
-                        frei = false;
-                });
-                game_.wege_bauen.forEach((value, key) => {
-                    if(has(key, tiles[0])&&has(key, tiles[1]))
-                        frei = false;
-                });
+                    game_.wege.forEach((value, key) => {
+                        if(has(key, tiles[0])&&has(key, tiles[1]))
+                            frei = false;
+                    });
+                    game_.wege_bauen.forEach((value, key) => {
+                        if(has(key, tiles[0])&&has(key, tiles[1]))
+                            frei = false;
+                    });
                 return frei;
             case 3:
                 game_.kreuzungen.forEach((value, key) => {
                     if(
-                        (has(key, tiles[0])&&has(key, tiles[1]))||
-                        (has(key, tiles[0])&&has(key, tiles[2]))||
-                        (has(key, tiles[1])&&has(key, tiles[2]))
+                        (
+                            (has(key, tiles[0])&&has(key, tiles[1]))||
+                            (has(key, tiles[1])&&has(key, tiles[2]))||
+                            (has(key, tiles[2])&&has(key, tiles[0]))
+                        )
                     )
                         frei = false;
                 });
                 game_.kreuzungen_bauen.forEach((value, key) => {
                     if(
-                        (has(key, tiles[0])&&has(key, tiles[1]))||
-                        (has(key, tiles[0])&&has(key, tiles[2]))||
-                        (has(key, tiles[1])&&has(key, tiles[2]))
+                        (
+                            (has(key, tiles[0])&&has(key, tiles[1]))||
+                            (has(key, tiles[1])&&has(key, tiles[2]))||
+                            (has(key, tiles[2])&&has(key, tiles[0]))
+                        )
                     )
                         frei = false;
                 });
