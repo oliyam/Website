@@ -30,6 +30,26 @@ class game{
         0xFFA500
     ];
 
+    farben_landschaften = {
+        "wald": 0x027800,
+        "huegelland": 0xed5b00,
+        "weideland": 0x00FF00,
+        "ackerland": 0xfff200,
+        "gebirge": 0x666666,
+        "wueste": 0xba8f23
+    };
+
+    landschaften={ 
+        "wald": 4,
+        "huegelland": 3,
+        "weideland": 4,
+        "ackerland": 4,
+        "gebirge": 3,
+        "wueste": 1
+    };
+
+    karte_landschaften = new Array();
+
     kreuzungen = new Map();
     wege = new Map();
 
@@ -37,6 +57,12 @@ class game{
     wege_bauen = new Map();
 
     constructor(){
+        var karte_landschaften=[];
+        for(let key in this.landschaften){
+            for(let i=0;i<this.landschaften[key];i++)
+                karte_landschaften.push(key)
+        }
+        this.karte_landschaften=shuffleArray(karte_landschaften);
         /*
         this.kreuzungen.set([
             {q: 3, r: 0},
@@ -52,6 +78,25 @@ class game{
 
     }
 };
+
+function shuffleArray(array){
+    if(Array.isArray(array)){
+        for(var i=array.length-1;i>0;i--){
+            let j=Math.floor(Math.random()*i+1);
+            swapArray(array,i,j);
+        }
+        return array;
+    }
+}
+
+function swapArray(array,i,j){
+    if(Array.isArray(array)&&i>=0&&j>=0&&i<array.length&&j<array.length){
+        let tmp=array[i];
+        array[i]=array[j];
+        array[j]=tmp;
+        return array;
+    }
+}
 
 class graphics extends PIXI.Graphics{
     marked = false;
@@ -125,6 +170,7 @@ function drawGame(container, game){
 
     var x=0,y=0;
     var hex_x = getHexSize(size).x, hex_y = getHexSize(size).y;
+    var landschaft=0;
 
     //index der längsten reihe
     var _index = 0, index = 0;
@@ -154,8 +200,10 @@ function drawGame(container, game){
             };
 
             let g = new graphics(hex.q, hex.r);
-            if(!has(game.blocked, hex))
-                g.beginFill(0x00FF00, 0.5);
+            if(!has(game.blocked, hex)){
+                g.beginFill(game.farben_landschaften[game.karte_landschaften[landschaft]], 0.6);
+                landschaft++;
+            }
             else
                 g.beginFill(0xFFFFFF, 0.5);
             g.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
