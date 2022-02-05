@@ -23,7 +23,7 @@ class game{
         {q: 0, r: 6},{q: 1, r: 6},{q: 2, r: 6},{q: 3, r: 6}
     ];
 
-    farben = [
+    farben_spieler = [
         0xFF0000,
         0x0000FF,
         0xCCCCCC,
@@ -219,13 +219,13 @@ function drawStrasse(value, key){
     graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
     graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
     graphics.lineStyle(4, 0xFFFFFF);
-    graphics.beginFill(game_.farben[value.id], 1);
+    graphics.beginFill(game_.farben_spieler[value.id], 1);
     graphics.drawCircle(-x, -y, size/16);
     graphics.drawCircle(x, y, size/16);
     graphics.lineStyle(10, 0xFFFFFF);
     graphics.moveTo(-x, -y)
     graphics.lineTo(x, y);
-    graphics.lineStyle(4, game_.farben[value.id]);
+    graphics.lineStyle(4, game_.farben_spieler[value.id]);
     graphics.moveTo(-x, -y)
     graphics.lineTo(x, y);
     graphics.rotation=Math.PI/180*90;
@@ -246,7 +246,7 @@ function drawKreuzung(value, key){
 
     let graphics = new PIXI.Graphics();
     graphics.lineStyle(4, 0xFFFFFF);
-    graphics.beginFill(game_.farben[value.id], 1);
+    graphics.beginFill(game_.farben_spieler[value.id], 1);
     graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
     graphics.endFill();
     container.addChild(graphics);
