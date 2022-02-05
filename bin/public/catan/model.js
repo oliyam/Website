@@ -52,20 +52,19 @@ class brett {
         "wueste": 1
     };
 
+    karte_landschaften;
+
     constructor(size){
         var size=size || 5;
-        var karten_landschaft=[];
+        var karte_landschaften=[];
         for(let key in this.landschaften){
             for(let i=0;i<this.landschaften[key];i++)
-                karten_landschaft.push(key)
+                karte_landschaften.push(key)
         }
-        console.log(karten_landschaft);
-        console.log(shuffleArray(karten_landschaft));
+        karte_landschaften=shuffleArray(karten_landschaften);
     }
 
 };
-
-new brett();
 
 class spiel {
 

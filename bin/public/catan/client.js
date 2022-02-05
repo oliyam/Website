@@ -312,14 +312,14 @@ function hasAll(array, tiles){
 
 //DONT USE RETURN IN FOR EACH
 
-function isConnected(tiles){
-    var connected = false;
+function connected(tiles){
+    var connected = 0;
     game_.wege.forEach((value, keys) => {
         if(value.id==spieler_)
             switch(tiles.length){
                 case 2:
                     if((areNeighbours([keys[0],tiles[0]])&&areNeighbours([keys[1],tiles[0]]))||(areNeighbours([keys[0],tiles[1]])&&areNeighbours([keys[1],tiles[1]])))
-                        connected = true;
+                        connected ++;
                     break;
                 case 3:
                     if(
@@ -327,7 +327,7 @@ function isConnected(tiles){
                         has(keys, tiles[1])&&has(keys, tiles[2])||
                         has(keys, tiles[2])&&has(keys, tiles[0])
                     )
-                        connected = true;
+                        connected ++;
                     break;
             }
     });
@@ -336,7 +336,7 @@ function isConnected(tiles){
             switch(tiles.length){
                 case 2:
                     if((areNeighbours([keys[0],tiles[0]])&&areNeighbours([keys[1],tiles[0]]))||(areNeighbours([keys[0],tiles[1]])&&areNeighbours([keys[1],tiles[1]])))
-                        connected = true;
+                        connected ++;
                     break;
                 case 3:
                     if(
@@ -344,16 +344,51 @@ function isConnected(tiles){
                         has(keys, tiles[1])&&has(keys, tiles[2])||
                         has(keys, tiles[2])&&has(keys, tiles[0])
                     )
-                        connected = true;
+                        connected ++;
                     break;
             }
     });
     return connected;
 }
 
+function spielerKreuzungen(spieler){
+    let anzahl = 0;
+    game_.kreuzungen_bauen.forEach((value, keys) => {
+        anzahl+=value.id==spieler;
+    });
+    return anzahl;
+}
+
+function spielerStrassen(spieler){
+    let anzahl = 0;
+    game_.wege_bauen.forEach((value, keys) => {
+        anzahl+=value.id==spieler;
+    });
+    return anzahl;
+}
+
 function isFree(tiles){
-    console.log(isConnected(tiles));
     let frei = true;
+    if(spielerStrassen(spieler_)<2){
+        if(tiles.length==3)
+            frei = false;
+        else if(tiles.length==2){
+
+        }
+    }
+    else if(spielerStrassen(spieler_)==2){
+        if(tiles.length==3){
+            if(connected(tiles)!=1){
+                frei = false;
+            }
+        }
+        else{
+            frei = false;
+        }
+    }
+    if(spielerStrassen(spieler_)>=2&&spielerKreuzungen(spieler_)>=2)
+        frei = true;
+
     if(tiles.length&&!hasAll(game_.blocked, tiles))
         switch(tiles.length){
             case 2:
