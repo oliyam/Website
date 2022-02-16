@@ -494,6 +494,15 @@ function spielerStrassen(spieler){
     return anzahl;
 }
 
+function areAllBlocked(tiles){
+    var blocked=true;
+    tiles.forEach(tile => {
+        if(!game_.felder[tile.q+"/"+tile.r].blocked)
+            blocked = false;
+    });
+    return blocked;
+}
+
 function isFree(tiles){
     let frei = true;
     if(spielerStrassen(spieler_)<2){
@@ -516,7 +525,7 @@ function isFree(tiles){
     if(spielerStrassen(spieler_)>=2&&spielerKreuzungen(spieler_)>=2)
         frei = true;
 
-    if(tiles.length&&!hasAll(game_.blocked, tiles))
+    if(tiles.length&&!areAllBlocked(tiles))
         switch(tiles.length){
             case 2:
                     game_.wege.forEach((value, key) => {
