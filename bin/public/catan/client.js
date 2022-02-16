@@ -14,14 +14,14 @@ class game{
     ];
 
     blocked = [
-        {q: 3, r: 0},{q: 4, r: 0},{q: 5, r: 0},{q: 6, r: 0},
-        {q: 2, r: 1},{q: 6, r: 1},
-        {q: 1, r: 2},{q: 6, r: 2},
-        {q: 0, r: 3},{q: 6, r: 3},
-        {q: 0, r: 4},{q: 5, r: 4},
-        {q: 0, r: 5},{q: 4, r: 5},
-        {q: 0, r: 6},{q: 1, r: 6},{q: 2, r: 6},{q: 3, r: 6}
-    ];
+                    true, true, true, true,
+                true, false, false, false, true,
+            true, false, false, false, false, true,
+        true, false, false, false, false, false, true,
+            true, false, false, false, false, true,
+                true, false, false, false, true,
+                    true, true, true, true
+    ]; 
 
     farben_spieler = [
         0xFF0000,
@@ -39,7 +39,7 @@ class game{
         "wueste": 0xba8f23
     };
 
-    landschaften={ 
+    landschaften = { 
         "wald": 4,
         "huegelland": 3,
         "weideland": 4,
@@ -48,7 +48,9 @@ class game{
         "wueste": 1
     };
 
-    karte_landschaften = new Array();
+    zahlen = [5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11];
+
+    felder = [];
 
     kreuzungen = new Map();
     wege = new Map();
@@ -57,12 +59,36 @@ class game{
     wege_bauen = new Map();
 
     constructor(){
-        var karte_landschaften=[];
-        for(let key in this.landschaften){
+
+        var index=0;
+        for(let row=0;row<this.karte.length;row++)
+            for(var tile=0;tile<this.karte[row].size;tile++){
+                    this.felder.push({
+                        q: tile+this.karte[row].offset,
+                        r: row,
+                        blocked: this.blocked[index],
+                        landschaft: null,
+                        zahl: null,
+                        raeuber: null
+                    });
+                    index++;
+            }   
+
+        var landschaftsfelder=[];
+        for(let key in this.landschaften)
             for(let i=0;i<this.landschaften[key];i++)
-                karte_landschaften.push(key)
-        }
-        this.karte_landschaften=shuffleArray(karte_landschaften);
+                landschaftsfelder.push(key)
+        landschaftsfelder=shuffleArray(landschaftsfelder);
+
+        index=0;
+        this.felder.forEach(data => {
+            if(!data.blocked){
+                data.landschaft=landschaftsfelder[index]
+                data.raeuber=landschaftsfelder[index]=="wueste";
+                index++;
+            }
+        });
+
         /*
         this.kreuzungen.set([
             {q: 3, r: 0},
@@ -79,25 +105,6 @@ class game{
     }
 };
 
-function shuffleArray(array){
-    if(Array.isArray(array)){
-        for(var i=array.length-1;i>0;i--){
-            let j=Math.floor(Math.random()*i+1);
-            swapArray(array,i,j);
-        }
-        return array;
-    }
-}
-
-function swapArray(array,i,j){
-    if(Array.isArray(array)&&i>=0&&j>=0&&i<array.length&&j<array.length){
-        let tmp=array[i];
-        array[i]=array[j];
-        array[j]=tmp;
-        return array;
-    }
-}
-
 class graphics extends PIXI.Graphics{
     marked = false;
     q;
@@ -109,105 +116,101 @@ class graphics extends PIXI.Graphics{
     }
 }
 
-var stadt_=false;
-var spieler_=0;
-var marked_tiles = [];
-var temp_graphics = new PIXI.Graphics();
-var position=[];
-var size=50;
+class view extends PIXI.Container{
 
-app.view.id = "pixijs";
+    game;
+    positions = new Map();;
+    x;
+    y;
+    temp_graphics = new PIXI.Graphics();
 
-var map=document.getElementById('map');
-map.appendChild(app.view);
+    constructor(game){
+        super();
+        this.game=game;
+    }    
 
-var container = new PIXI.Container();
-var game_ = new game();
+    drawGame(){
+        var hex_x = getHexSize(size).x, hex_y = getHexSize(size).y;
 
-redraw();
+        //index der längsten reihe
+        var _index = 0, index = 0;
+        this.game.karte.forEach(reihe => {
+            if(reihe.size>this.game.karte[_index].size)
+                _index=index;
+            index++;
+        });
 
-let count = 0;
-app.ticker.add(() => {
-    count += 0.01;
-});
+        this.x = ((app.screen.width-hex_x*this.game.karte[_index].size)+hex_x*(-(_index)-2*this.game.karte[_index].offset)+hex_x)/2;
+        this.y = ((app.screen.height-hex_y*(this.game.karte.length*3/4+1/4))+hex_y)/2;
 
-map.addEventListener('mouseover', e => {
-    map.style.cursor = 'crosshair';
-});
+        this.drawTiles();
 
-document.getElementById('bauen').addEventListener('click', e => {
-    buildMarkedTiles();
-});
+        this.game.wege_bauen.forEach((value, key) => {
+            this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
+        });
 
-document.getElementById('loeschen').addEventListener('click', e => {
-    game_.wege_bauen = new Map();
-    game_.kreuzungen_bauen = new Map();
-    redraw();
-    marked_tiles = [];
-});
+        this.game.wege.forEach((value, key) => {
+            this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
+        });
+        
+        this.game.kreuzungen_bauen.forEach((value, key) => {
+            this.drawKreuzung(value, key);
+        });
 
-document.getElementById('stadt').addEventListener('click', e => {
-    document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
-    stadt_=!stadt_;
-    drawMarkedTiles();
-});
+        this.game.kreuzungen.forEach((value, key) => {
+            this.drawKreuzung(value, key);
+        });
+        
+    }
 
-document.getElementById('spieler').addEventListener('click', e => {
-    spieler_++;
-    spieler_=spieler_%4;
-    document.getElementById('spieler').innerText=spieler_;
-    drawMarkedTiles();
-});
-
-function redraw(){
-    app.stage.removeChild(container);
-    container = new PIXI.Container();
-    drawGame(container, game_);
-    app.stage.addChild(container);
-}
-
-function drawGame(container, game){
-
-    var x=0,y=0;
-    var hex_x = getHexSize(size).x, hex_y = getHexSize(size).y;
-    var landschaft=0;
-
-    //index der längsten reihe
-    var _index = 0, index = 0;
-    game.karte.forEach(reihe => {
-        if(reihe.size>game.karte[_index].size)
-            _index=index;
-        index++;
-    });
-
-    x += (app.screen.width-hex_x*game.karte[_index].size)/2+hex_x*(-(_index)/2-game.karte[_index].offset);
-    y += (app.screen.height-hex_y*(game.karte.length*3/4+1/4))/2;
-
-    var o = 0;
-    game.karte.forEach(reihe => {
-        for(var i=0;i<reihe.size;i++){
+    drawTiles(){
+        this.game.felder.forEach(data => {
             var hex = {
-                q: q=i+reihe.offset,
-                r: r=o
+                q: data.q,
+                r: data.r
             };
-            
-            if(!position[hex.q])
-                position[hex.q]=[];
 
-            position[hex.q][hex.r]={
-                x: x+hex_x*(i+1/2*o+reihe.offset+1/2),
-                y: y+hex_y*(3/4*o+1/2)
-            };
+            var x=this.x+hexToPixel(hex).x;
+            var y=this.y+hexToPixel(hex).y;
+
+            this.positions[hex.q+"/"+hex.r]={x: x, y: y};
 
             let g = new graphics(hex.q, hex.r);
-            if(!has(game.blocked, hex)){
-                g.beginFill(game.farben_landschaften[game.karte_landschaften[landschaft]], 0.6);
-                landschaft++;
+            if(!data.blocked){
+                g.beginFill(this.game.farben_landschaften[data.landschaft], 0.6);
+                g.drawRegularPolygon(x, y, size, 6, 0);
+                if(data.raeuber){
+                    g.beginFill(0x000000, 1);  
+                    g.drawCircle(x, y, size/4)
+                }
+                else if(data.landschaft!="wueste"){
+                    g.beginFill(0xF2AC44, 1);
+                    g.drawCircle(x, y, size/4)
+                    let text = new PIXI.Container;
+                    text.addChild(new PIXI.Text('6', {
+                        fontFamily: 'Comic Sans MS',
+                        fontSize: size/3,
+                        fontWeight: 'bold',
+                        fill: 'white',
+                    }));
+                    text.x=x-size/4/2;
+                    text.y=y-size/4; 
+                    g.addChild(text);
+                }
+                g.endFill();
+                super.addChild(g);
+                let g_outline = new PIXI.Graphics();
+                g_outline.lineStyle(4, 0xFFFFFF);
+                g_outline.drawRegularPolygon(x, y, size, 6, 0);
+                super.addChild(g_outline);
             }
-            else
+            else{
                 g.beginFill(0xFFFFFF, 0.5);
-            g.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
-            g.hitArea = new PIXI.Polygon(getHex(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, true));
+                g.drawRegularPolygon(x, y, size, 6, 0);
+                g.endFill();
+                super.addChild(g);
+            }
+            g.hitArea = new PIXI.Polygon(getHex(x, y, size, true));
             g.interactive = true;
             g.on('pointerover', e => {
                 if(!g.marked)
@@ -229,78 +232,145 @@ function drawGame(container, game){
                     g.marked = false;
                     marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
                 }
-                drawMarkedTiles()
+                this.drawMarkedTiles()
             });
-            g.endFill();
-            container.addChild(g);
-            let g_ = new PIXI.Graphics();
-            g_.lineStyle(4, 0xFFFFFF);
-            g_.drawRegularPolygon(x+hex_x*(i+1/2*o+reihe.offset+1/2), y+hex_y*(3/4*o+1/2), size, 6, 0);
-            if(!has(game.blocked, hex))
-                container.addChild(g_);
+        });
+    }
+
+    drawStrasse(value, key){
+        var x=(this.positions[key[0].q+"/"+key[0].r].x-this.positions[key[1].q+"/"+key[1].r].x)/10;
+        var y=(this.positions[key[0].q+"/"+key[0].r].y-this.positions[key[1].q+"/"+key[1].r].y)/10;
+
+        let graphics = new PIXI.Graphics();
+        graphics.position.x=(this.positions[key[0].q+"/"+key[0].r].x+this.positions[key[1].q+"/"+key[1].r].x)/2;
+        graphics.position.y=(this.positions[key[0].q+"/"+key[0].r].y+this.positions[key[1].q+"/"+key[1].r].y)/2;
+        graphics.lineStyle(4, 0xFFFFFF);
+        graphics.beginFill(this.game.farben_spieler[value.id], 1);
+        graphics.drawCircle(-x, -y, size/16);
+        graphics.drawCircle(x, y, size/16);
+        graphics.lineStyle(10, 0xFFFFFF);
+        graphics.moveTo(-x, -y)
+        graphics.lineTo(x, y);
+        graphics.lineStyle(4, this.game.farben_spieler[value.id]);
+        graphics.moveTo(-x, -y)
+        graphics.lineTo(x, y);
+        graphics.rotation=Math.PI/180*90;
+        super.addChild(graphics);
+
+        return graphics;
+    }
+
+    drawKreuzung(value, key){
+        var pos={
+            x: 0,
+            y: 0
+        };
+        key.forEach(e => {
+            pos.x+=this.positions[e.q+"/"+e.r].x;
+            pos.y+=this.positions[e.q+"/"+e.r].y;
+        });
+
+        console.log(pos.x)
+        let graphics = new PIXI.Graphics();
+        graphics.lineStyle(4, 0xFFFFFF);
+        graphics.beginFill(this.game.farben_spieler[value.id], 1);
+        graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
+        graphics.endFill();
+        super.addChild(graphics);
+
+        return graphics;
+    }
+
+    drawMarkedTiles(){
+        this.temp_graphics.clear();
+        if(areNeighbours(marked_tiles)&&isFree(marked_tiles)){
+            switch(marked_tiles.length){
+                case 2:
+                    this.temp_graphics = this.drawStrasse({id: spieler_}, marked_tiles);
+                    break;
+                case 3:
+                    console.log("sex")
+                    this.temp_graphics = this.drawKreuzung({id: spieler_, stadt: stadt_}, marked_tiles);
+                    break;
+            }
         }
-        o++;
-    });
+    }
 
-    game.wege_bauen.forEach((value, key) => {
-        drawStrasse(value, key);
-    });
-
-    game.wege.forEach((value, key) => {
-        drawStrasse(value, key);
-    });
-    
-    game.kreuzungen_bauen.forEach((value, key) => {
-        drawKreuzung(value, key);
-    });
-
-    game.kreuzungen.forEach((value, key) => {
-        drawKreuzung(value, key);
-    });
 }
 
-function drawStrasse(value, key){
-    x=(position[key[0].q][key[0].r].x-position[key[1].q][key[1].r].x)/10;
-    y=(position[key[0].q][key[0].r].y-position[key[1].q][key[1].r].y)/10;
-
-    let graphics = new PIXI.Graphics();
-    graphics.position.x=(position[key[0].q][key[0].r].x+position[key[1].q][key[1].r].x)/2;
-    graphics.position.y=(position[key[0].q][key[0].r].y+position[key[1].q][key[1].r].y)/2;
-    graphics.lineStyle(4, 0xFFFFFF);
-    graphics.beginFill(game_.farben_spieler[value.id], 1);
-    graphics.drawCircle(-x, -y, size/16);
-    graphics.drawCircle(x, y, size/16);
-    graphics.lineStyle(10, 0xFFFFFF);
-    graphics.moveTo(-x, -y)
-    graphics.lineTo(x, y);
-    graphics.lineStyle(4, game_.farben_spieler[value.id]);
-    graphics.moveTo(-x, -y)
-    graphics.lineTo(x, y);
-    graphics.rotation=Math.PI/180*90;
-    container.addChild(graphics);
-
-    return graphics;
+function shuffleArray(array){
+    if(Array.isArray(array)){
+        for(var i=array.length-1;i>0;i--){
+            let j=Math.floor(Math.random()*i+1);
+            swapArray(array,i,j);
+        }
+        return array;
+    }
 }
 
-function drawKreuzung(value, key){
-    var pos={
-        x: 0,
-        y: 0
-    };
-    key.forEach(e => {
-        pos.x+=position[e.q][e.r].x;
-        pos.y+=position[e.q][e.r].y;
-    });
-
-    let graphics = new PIXI.Graphics();
-    graphics.lineStyle(4, 0xFFFFFF);
-    graphics.beginFill(game_.farben_spieler[value.id], 1);
-    graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
-    graphics.endFill();
-    container.addChild(graphics);
-
-    return graphics;
+function swapArray(array,i,j){
+    if(Array.isArray(array)&&i>=0&&j>=0&&i<array.length&&j<array.length){
+        let tmp=array[i];
+        array[i]=array[j];
+        array[j]=tmp;
+        return array;
+    }
 }
+
+var stadt_=false;
+var spieler_=0;
+var marked_tiles = [];
+var position=[];
+var size=50;
+
+app.view.id = "pixijs";
+
+var map=document.getElementById('map');
+map.appendChild(app.view);
+
+var game_ = new game();
+var view_ = new view(game_);
+
+function redraw(){
+    app.stage.removeChild(view_);
+    view_ = new view(game_);
+    view_.drawGame();
+    app.stage.addChild(view_);
+}
+
+redraw();
+
+let count = 0;
+app.ticker.add(() => {
+    count += 0.01;
+});
+
+map.addEventListener('mouseover', e => {
+    map.style.cursor = 'crosshair';
+});
+
+document.getElementById('bauen').addEventListener('click', e => {
+    buildMarkedTiles();
+});
+
+document.getElementById('loeschen').addEventListener('click', e => {
+    game_.wege_bauen = new Map();
+    game_.kreuzungen_bauen = new Map();
+    marked_tiles = [];
+});
+
+document.getElementById('stadt').addEventListener('click', e => {
+    document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
+    stadt_=!stadt_;
+    redraw();
+});
+
+document.getElementById('spieler').addEventListener('click', e => {
+    spieler_++;
+    spieler_=spieler_%4;
+    document.getElementById('spieler').innerText=spieler_;
+    redraw()
+});
 
 function buildMarkedTiles(){
     if(areNeighbours(marked_tiles))
@@ -323,20 +393,6 @@ function buildMarkedTiles(){
             else
             temp_graphics.clear();
             break;
-    }
-}
-
-function drawMarkedTiles(){
-    temp_graphics.clear();
-    if(areNeighbours(marked_tiles)&&isFree(marked_tiles)){
-        switch(marked_tiles.length){
-            case 2:
-                temp_graphics = drawStrasse({id: spieler_}, marked_tiles);
-                break;
-            case 3:
-                temp_graphics = drawKreuzung({id: spieler_, stadt: stadt_}, marked_tiles);
-                break;
-        }
     }
 }
 
@@ -479,7 +535,6 @@ function isEqual(hex_0, hex_1){
     return hex_0.q==hex_1.q&&hex_0.r==hex_1.r;
 }
 
-//pointy TODO: pointy and fat boolean
 function pixelToHex(x, y, size){
     var q = (Math.sqrt(3)/3*x-1/3*y)/size;
     var r = (2/3*y)/size;
@@ -487,6 +542,13 @@ function pixelToHex(x, y, size){
         q: q,
         r: r
     });
+}
+
+function hexToPixel(hex){
+    return {
+        x: size * (Math.sqrt(3) * hex.q  +  Math.sqrt(3)/2 * hex.r),
+        y: size * (                                   3./2 * hex.r)
+    };
 }
 
 function axialToCube(axial){
