@@ -50,6 +50,7 @@ export class game{
     wege_bauen = new Map();
 
     constructor(){
+        //mitte des spielfeldes
         if(this.karte.length%2)
             this.karte.forEach(row => {
                 if(row.size%2)
@@ -58,7 +59,7 @@ export class game{
                         r: Math.floor(this.karte.length/2)
                     };
                 });
-
+        //spielfeld erstellen
         var index=0;
         for(let row=0;row<this.karte.length;row++)
             for(var tile=0;tile<this.karte[row].size;tile++){
@@ -72,17 +73,21 @@ export class game{
                     };
                     index++;
             }   
-
+        //ring blockierter felder erstellen
         hex.ring({q: 6,r: 0}, 3).forEach(blocked_tile => {
             this.felder[blocked_tile.q+"/"+blocked_tile.r].blocked=true;
         });
 
+        //landschaftskarten stapel erstellen
         var landschaftsfelder=[];
         for(let key in this.landschaften)
             for(let i=0;i<this.landschaften[key];i++)
                 landschaftsfelder.push(key)
-        landschaftsfelder=array.shuffleArray(landschaftsfelder);
 
+        //landschaftskarten stapel mischen
+        landschaftsfelder=array.shuffleArray(landschaftsfelder);
+        
+        //landschaftskarten verteilen räuber auf wüste plazieren
         index=0;
         for(let key in this.felder){
             if (this.felder.hasOwnProperty(key)){
@@ -93,7 +98,7 @@ export class game{
                 }
             }
         }
-
+        //zahlenchips verteilen
         index=0;
         hex.spiral({q: 5,r: 1}, 2).forEach(feld => {
             this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++];
