@@ -13,7 +13,7 @@ class graphics extends PIXI.Graphics{
     }
 }
 
-export class view extends PIXI.Container{
+export class _view extends PIXI.Container{
 
     width;
     height;

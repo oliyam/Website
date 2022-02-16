@@ -1,7 +1,7 @@
 import * as array from "/catan/array_tools.js";
 import * as hex from "/catan/hex.js";
 
-export class game{
+export class _game{
     karte = [
         {size: 4, offset: 3},
         {size: 5, offset: 2},
