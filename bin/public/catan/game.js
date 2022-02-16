@@ -50,7 +50,7 @@ export class game{
     wege_bauen = new Map();
 
     constructor(){
-        //mitte des spielfeldes
+        //mitte des spielfeldes ermitteln
         if(this.karte.length%2)
             this.karte.forEach(row => {
                 if(row.size%2)
@@ -77,16 +77,13 @@ export class game{
         hex.ring({q: 6,r: 0}, 3).forEach(blocked_tile => {
             this.felder[blocked_tile.q+"/"+blocked_tile.r].blocked=true;
         });
-
         //landschaftskarten stapel erstellen
         var landschaftsfelder=[];
         for(let key in this.landschaften)
             for(let i=0;i<this.landschaften[key];i++)
                 landschaftsfelder.push(key)
-
         //landschaftskarten stapel mischen
         landschaftsfelder=array.shuffleArray(landschaftsfelder);
-        
         //landschaftskarten verteilen räuber auf wüste plazieren
         index=0;
         for(let key in this.felder){
@@ -105,19 +102,5 @@ export class game{
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
-
-        /*
-        this.kreuzungen.set([
-            {q: 3, r: 0},
-            {q: 2, r: 1},
-            {q: 3, r: 1}
-        ], {id: 0, stadt: true});
-
-        this.wege.set([
-            {q: 2, r: 1},
-            {q: 3, r: 1}
-        ], {id: 0});
-        */
-
     }
 };

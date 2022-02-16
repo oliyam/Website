@@ -1,4 +1,4 @@
-var vectors = [
+export var vectors = [
     [-1, 0], [-1, 1], [0, 1], 
     [1, 0], [1, -1], [0, -1]
 ];
