@@ -186,7 +186,7 @@ class view extends PIXI.Container{
 
     drawMarkedTiles(){
         this.temp_graphics.clear();
-        if(areNeighbours(marked_tiles)&&isFree(marked_tiles)){
+        if(_hex.areNeighbours(marked_tiles)&&isFree(marked_tiles)){
             switch(marked_tiles.length){
                 case 2:
                     this.temp_graphics = this.drawStrasse({id: spieler_}, marked_tiles);
@@ -259,7 +259,7 @@ document.getElementById('spieler').addEventListener('click', e => {
 });
 
 function buildMarkedTiles(){
-    if(areNeighbours(marked_tiles))
+    if(_hex.areNeighbours(marked_tiles))
     switch(marked_tiles.length){
         case 2:
             if(isFree(marked_tiles)){

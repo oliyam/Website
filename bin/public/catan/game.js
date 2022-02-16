@@ -14,16 +14,6 @@ export class game{
 
     center = null;
 
-    blocked = [
-                    true, true, true, true,
-                true, false, false, false, true,
-            true, false, false, false, false, true,
-        true, false, false, false, false, false, true,
-            true, false, false, false, false, true,
-                true, false, false, false, true,
-                    true, true, true, true
-    ]; 
-
     farben_spieler = [
         0xFF0000,
         0x0000FF,
@@ -75,13 +65,17 @@ export class game{
                     this.felder[tile+this.karte[row].offset+"/"+row]={
                         q: tile+this.karte[row].offset,
                         r: row,
-                        blocked: this.blocked[index],
+                        blocked: false,
                         landschaft: null,
                         zahl: null,
                         raeuber: null
                     };
                     index++;
             }   
+
+        hex.ring({q: 6,r: 0}, 3).forEach(blocked_tile => {
+            this.felder[blocked_tile.q+"/"+blocked_tile.r].blocked=true;
+        });
 
         var landschaftsfelder=[];
         for(let key in this.landschaften)
