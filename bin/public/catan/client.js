@@ -13,6 +13,8 @@ class game{
         {size: 4, offset: 0}
     ];
 
+    center = null;
+
     blocked = [
                     true, true, true, true,
                 true, false, false, false, true,
@@ -59,6 +61,14 @@ class game{
     wege_bauen = new Map();
 
     constructor(){
+        if(this.karte.length%2)
+            this.karte.forEach(row => {
+                if(row.size%2)
+                    this.center={
+                        q: Math.ceil(row.size/2), 
+                        r: Math.floor(this.karte.length/2)
+                    };
+                });
 
         var index=0;
         for(let row=0;row<this.karte.length;row++)
@@ -97,8 +107,6 @@ class game{
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
-
-        console.log(spiral({r: 5,q: 1}, 2))
 
         /*
         this.kreuzungen.set([
@@ -200,15 +208,15 @@ class view extends PIXI.Container{
                         g.beginFill(0xF2AC44, 1);
                         g.drawCircle(x, y, size/4)
                         let text = new PIXI.Container;
-                        console.log(data.zahl)
-                        text.addChild(new PIXI.Text(data.zahl, {
-                            fontFamily: 'Comic Sans MS',
+                        text.addChild(new PIXI.Text(data.zahl+(data.zahl==6||data.zahl==9?'.':''), {
+                            align: "center",
+                            fontFamily: 'Times New Roman',
                             fontSize: size/3,
                             fontWeight: 'bold',
                             fill: data.zahl==6||data.zahl==8?'red':'black',
                         }));
-                        text.x=x-size/4/2;
-                        text.y=y-size/4; 
+                        text.x=x-text.width/2;
+                        text.y=y-size/3/2; 
                         g.addChild(text);
                     }
                     g.endFill();
