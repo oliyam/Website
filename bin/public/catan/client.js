@@ -26,7 +26,7 @@ class game{
     farben_spieler = [
         0xFF0000,
         0x0000FF,
-        0xCCCCCC,
+        0xFFFFFF,
         0xFFA500
     ];
 
@@ -63,14 +63,14 @@ class game{
         var index=0;
         for(let row=0;row<this.karte.length;row++)
             for(var tile=0;tile<this.karte[row].size;tile++){
-                    this.felder.push({
+                    this.felder[tile+this.karte[row].offset+"/"+row]={
                         q: tile+this.karte[row].offset,
                         r: row,
                         blocked: this.blocked[index],
                         landschaft: null,
                         zahl: null,
                         raeuber: null
-                    });
+                    };
                     index++;
             }   
 
@@ -81,13 +81,24 @@ class game{
         landschaftsfelder=shuffleArray(landschaftsfelder);
 
         index=0;
-        this.felder.forEach(data => {
-            if(!data.blocked){
-                data.landschaft=landschaftsfelder[index]
-                data.raeuber=landschaftsfelder[index]=="wueste";
-                index++;
+        for(let key in this.felder){
+            if (this.felder.hasOwnProperty(key)){
+                var data=this.felder[key];
+                if(!data.blocked){
+                    data.landschaft=landschaftsfelder[index]
+                    data.raeuber=landschaftsfelder[index++]=="wueste";
+                }
             }
+        }
+
+        index=0;
+        spiral({q: 5,r: 1}, 2).forEach(feld => {
+            this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++];
+            if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
+                index--;
         });
+
+        console.log(spiral({r: 5,q: 1}, 2))
 
         /*
         this.kreuzungen.set([
@@ -164,77 +175,81 @@ class view extends PIXI.Container{
     }
 
     drawTiles(){
-        this.game.felder.forEach(data => {
-            var hex = {
-                q: data.q,
-                r: data.r
-            };
+        for(let key in this.game.felder){
+            if (this.game.felder.hasOwnProperty(key)){
+                var data=this.game.felder[key];
+                var hex = {
+                    q: data.q,
+                    r: data.r
+                };
 
-            var x=this.x+hexToPixel(hex).x;
-            var y=this.y+hexToPixel(hex).y;
+                var x=this.x+hexToPixel(hex).x;
+                var y=this.y+hexToPixel(hex).y;
 
-            this.positions[hex.q+"/"+hex.r]={x: x, y: y};
+                this.positions[hex.q+"/"+hex.r]={x: x, y: y};
 
-            let g = new graphics(hex.q, hex.r);
-            if(!data.blocked){
-                g.beginFill(this.game.farben_landschaften[data.landschaft], 0.6);
-                g.drawRegularPolygon(x, y, size, 6, 0);
-                if(data.raeuber){
-                    g.beginFill(0x000000, 1);  
-                    g.drawCircle(x, y, size/4)
-                }
-                else if(data.landschaft!="wueste"){
-                    g.beginFill(0xF2AC44, 1);
-                    g.drawCircle(x, y, size/4)
-                    let text = new PIXI.Container;
-                    text.addChild(new PIXI.Text('6', {
-                        fontFamily: 'Comic Sans MS',
-                        fontSize: size/3,
-                        fontWeight: 'bold',
-                        fill: 'white',
-                    }));
-                    text.x=x-size/4/2;
-                    text.y=y-size/4; 
-                    g.addChild(text);
-                }
-                g.endFill();
-                super.addChild(g);
-                let g_outline = new PIXI.Graphics();
-                g_outline.lineStyle(4, 0xF2AC44);
-                g_outline.drawRegularPolygon(x, y, size, 6, 0);
-                super.addChild(g_outline);
-            }
-            else{
-                g.beginFill(0x2693FF, 0.5);
-                g.drawRegularPolygon(x, y, size, 6, 0);
-                g.endFill();
-                super.addChild(g);
-            }
-            g.hitArea = new PIXI.Polygon(getHex(x, y, size, true));
-            g.interactive = true;
-            g.on('pointerover', e => {
-                if(!g.marked)
-                    g.tint = 0x666666;
-            });
-            g.on('pointerout', e => {
-                if(!g.marked)
-                    g.tint = 0xFFFFFF;
-            });
-            g.on('pointerdown', e => {
-                console.log(g.q+" "+g.r)
-                if(!g.marked&&marked_tiles.length<3){
-                    g.tint = 0x333333;
-                    g.marked = true;
-                    marked_tiles.push({q: g.q,r: g.r});
+                let g = new graphics(hex.q, hex.r);
+                if(!data.blocked){
+                    g.beginFill(this.game.farben_landschaften[data.landschaft], 0.6);
+                    g.drawRegularPolygon(x, y, size, 6, 0);
+                    if(data.raeuber){
+                        g.beginFill(0x000000, 1);  
+                        g.drawCircle(x, y, size/4)
+                    }
+                    else if(data.landschaft!="wueste"){
+                        g.beginFill(0xF2AC44, 1);
+                        g.drawCircle(x, y, size/4)
+                        let text = new PIXI.Container;
+                        console.log(data.zahl)
+                        text.addChild(new PIXI.Text(data.zahl, {
+                            fontFamily: 'Comic Sans MS',
+                            fontSize: size/3,
+                            fontWeight: 'bold',
+                            fill: data.zahl==6||data.zahl==8?'red':'black',
+                        }));
+                        text.x=x-size/4/2;
+                        text.y=y-size/4; 
+                        g.addChild(text);
+                    }
+                    g.endFill();
+                    super.addChild(g);
+                    let g_outline = new PIXI.Graphics();
+                    g_outline.lineStyle(4, 0xF2AC44);
+                    g_outline.drawRegularPolygon(x, y, size, 6, 0);
+                    super.addChild(g_outline);
                 }
                 else{
-                    g.tint = 0x666666;
-                    g.marked = false;
-                    marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
+                    g.beginFill(0x2693FF, 0.5);
+                    g.drawRegularPolygon(x, y, size, 6, 0);
+                    g.endFill();
+                    super.addChild(g);
                 }
-                this.drawMarkedTiles()
-            });
-        });
+                g.hitArea = new PIXI.Polygon(getHex(x, y, size, true));
+                g.interactive = true;
+                g.on('pointerover', e => {
+                    if(!g.marked)
+                        g.tint = 0x666666;
+                });
+                g.on('pointerout', e => {
+                    if(!g.marked)
+                        g.tint = 0xFFFFFF;
+                });
+                g.on('pointerdown', e => {
+                    console.log(g.q+" "+g.r)
+                    if(!g.marked&&marked_tiles.length<3){
+                        g.tint = 0x333333;
+                        g.marked = true;
+                        marked_tiles.push({q: g.q,r: g.r});
+                    }
+                    else{
+                        g.tint = 0x666666;
+                        g.marked = false;
+                        marked_tiles = marked_tiles.filter(tile => !(tile.q==g.q&&tile.r==g.r));
+                    }
+                    this.drawMarkedTiles()
+                });
+            }
+        }
     }
 
     drawStrasse(value, key){
@@ -269,8 +284,6 @@ class view extends PIXI.Container{
             pos.x+=this.positions[e.q+"/"+e.r].x;
             pos.y+=this.positions[e.q+"/"+e.r].y;
         });
-
-        console.log(pos.x)
         let graphics = new PIXI.Graphics();
         graphics.lineStyle(4, 0xF2AC44);
         graphics.beginFill(this.game.farben_spieler[value.id], 1);
@@ -289,7 +302,6 @@ class view extends PIXI.Container{
                     this.temp_graphics = this.drawStrasse({id: spieler_}, marked_tiles);
                     break;
                 case 3:
-                    console.log("sex")
                     this.temp_graphics = this.drawKreuzung({id: spieler_, stadt: stadt_}, marked_tiles);
                     break;
             }
@@ -368,6 +380,7 @@ document.getElementById('stadt').addEventListener('click', e => {
 });
 
 document.getElementById('spieler').addEventListener('click', e => {
+    marked_tiles = [];
     spieler_++;
     spieler_=spieler_%4;
     document.getElementById('spieler').innerText=spieler_;
@@ -603,15 +616,47 @@ function areNeighbours(tiles){
     return a;
 }
 
+function neighbour(hex, i){
+    var vectors = [
+        [-1, 0], [-1, 1], [0, 1], 
+        [1, 0], [1, -1], [0, -1]
+    ];
+    return {q: hex.q+vectors[i][0], r: hex.r+vectors[i][1]};
+}
+
 function neighbours(t0, t1){
     var vectors = [
-        [1, 0], [1, -1], [0, -1], 
-        [-1, 0], [-1, 1], [0, 1]
+        [-1, 0], [-1, 1], [0, 1], 
+        [1, 0], [1, -1], [0, -1]
     ];
     for(var i=0;i<vectors.length;i++)
         if((t0.q+vectors[i][0]==t1.q&&t0.r+vectors[i][1]==t1.r))
             return true;
     return false;
+}
+
+function ring(start, radius){
+    var results = [];
+    for(let i=0;i<6;i++)
+        for(let o=0;o<radius-(i==5);o++){
+            results.push(start);
+            start=neighbour(start, i);
+        }
+        results.push(start)
+    return results;
+}
+
+function spiral(start, radius){
+    var results = [];
+
+    for(let i=radius;i>0;i--){
+        results=results.concat(ring({q: start.q,r: start.r}, i));
+        start.q-=1;
+        start.r+=1;
+    }
+    results=results.concat({q: start.q,r: start.r});
+    return results;
+
 }
 
 function getHexSize(size){
