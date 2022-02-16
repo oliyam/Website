@@ -200,12 +200,12 @@ class view extends PIXI.Container{
                 g.endFill();
                 super.addChild(g);
                 let g_outline = new PIXI.Graphics();
-                g_outline.lineStyle(4, 0xFFFFFF);
+                g_outline.lineStyle(4, 0xF2AC44);
                 g_outline.drawRegularPolygon(x, y, size, 6, 0);
                 super.addChild(g_outline);
             }
             else{
-                g.beginFill(0xFFFFFF, 0.5);
+                g.beginFill(0x2693FF, 0.5);
                 g.drawRegularPolygon(x, y, size, 6, 0);
                 g.endFill();
                 super.addChild(g);
@@ -244,11 +244,11 @@ class view extends PIXI.Container{
         let graphics = new PIXI.Graphics();
         graphics.position.x=(this.positions[key[0].q+"/"+key[0].r].x+this.positions[key[1].q+"/"+key[1].r].x)/2;
         graphics.position.y=(this.positions[key[0].q+"/"+key[0].r].y+this.positions[key[1].q+"/"+key[1].r].y)/2;
-        graphics.lineStyle(4, 0xFFFFFF);
+        graphics.lineStyle(4, 0xF2AC44);
         graphics.beginFill(this.game.farben_spieler[value.id], 1);
         graphics.drawCircle(-x, -y, size/16);
         graphics.drawCircle(x, y, size/16);
-        graphics.lineStyle(10, 0xFFFFFF);
+        graphics.lineStyle(10, 0xF2AC44);
         graphics.moveTo(-x, -y)
         graphics.lineTo(x, y);
         graphics.lineStyle(4, this.game.farben_spieler[value.id]);
@@ -272,7 +272,7 @@ class view extends PIXI.Container{
 
         console.log(pos.x)
         let graphics = new PIXI.Graphics();
-        graphics.lineStyle(4, 0xFFFFFF);
+        graphics.lineStyle(4, 0xF2AC44);
         graphics.beginFill(this.game.farben_spieler[value.id], 1);
         graphics.drawRegularPolygon(pos.x/3, pos.y/3, size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
         graphics.endFill();
@@ -351,6 +351,7 @@ map.addEventListener('mouseover', e => {
 
 document.getElementById('bauen').addEventListener('click', e => {
     buildMarkedTiles();
+    marked_tiles = [];
 });
 
 document.getElementById('loeschen').addEventListener('click', e => {
@@ -361,6 +362,7 @@ document.getElementById('loeschen').addEventListener('click', e => {
 
 document.getElementById('stadt').addEventListener('click', e => {
     document.getElementById('stadt').innerText=stadt_?'Siedlung':'Stadt';
+    marked_tiles = [];
     stadt_=!stadt_;
     redraw();
 });
