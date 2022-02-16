@@ -1,128 +1,10 @@
+import {game} from "/catan/game.js";
+import * as _hex from "/catan/hex.js";
+
 const app = new PIXI.Application({
     width: 600, height: 600, backgroundColor: 0x000000, backgroundAlpha: 0.5, antialias: true
 });
 
-class game{
-    karte = [
-        {size: 4, offset: 3},
-        {size: 5, offset: 2},
-        {size: 6, offset: 1},
-        {size: 7, offset: 0},
-        {size: 6, offset: 0},
-        {size: 5, offset: 0},
-        {size: 4, offset: 0}
-    ];
-
-    center = null;
-
-    blocked = [
-                    true, true, true, true,
-                true, false, false, false, true,
-            true, false, false, false, false, true,
-        true, false, false, false, false, false, true,
-            true, false, false, false, false, true,
-                true, false, false, false, true,
-                    true, true, true, true
-    ]; 
-
-    farben_spieler = [
-        0xFF0000,
-        0x0000FF,
-        0xFFFFFF,
-        0xFFA500
-    ];
-
-    farben_landschaften = {
-        "wald": 0x027800,
-        "huegelland": 0xed5b00,
-        "weideland": 0x00FF00,
-        "ackerland": 0xfff200,
-        "gebirge": 0x666666,
-        "wueste": 0xba8f23
-    };
-
-    landschaften = { 
-        "wald": 4,
-        "huegelland": 3,
-        "weideland": 4,
-        "ackerland": 4,
-        "gebirge": 3,
-        "wueste": 1
-    };
-
-    zahlen = [5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11];
-
-    felder = [];
-
-    kreuzungen = new Map();
-    wege = new Map();
-
-    kreuzungen_bauen = new Map();
-    wege_bauen = new Map();
-
-    constructor(){
-        if(this.karte.length%2)
-            this.karte.forEach(row => {
-                if(row.size%2)
-                    this.center={
-                        q: Math.ceil(row.size/2), 
-                        r: Math.floor(this.karte.length/2)
-                    };
-                });
-
-        var index=0;
-        for(let row=0;row<this.karte.length;row++)
-            for(var tile=0;tile<this.karte[row].size;tile++){
-                    this.felder[tile+this.karte[row].offset+"/"+row]={
-                        q: tile+this.karte[row].offset,
-                        r: row,
-                        blocked: this.blocked[index],
-                        landschaft: null,
-                        zahl: null,
-                        raeuber: null
-                    };
-                    index++;
-            }   
-
-        var landschaftsfelder=[];
-        for(let key in this.landschaften)
-            for(let i=0;i<this.landschaften[key];i++)
-                landschaftsfelder.push(key)
-        landschaftsfelder=shuffleArray(landschaftsfelder);
-
-        index=0;
-        for(let key in this.felder){
-            if (this.felder.hasOwnProperty(key)){
-                var data=this.felder[key];
-                if(!data.blocked){
-                    data.landschaft=landschaftsfelder[index]
-                    data.raeuber=landschaftsfelder[index++]=="wueste";
-                }
-            }
-        }
-
-        index=0;
-        spiral({q: 5,r: 1}, 2).forEach(feld => {
-            this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++];
-            if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
-                index--;
-        });
-
-        /*
-        this.kreuzungen.set([
-            {q: 3, r: 0},
-            {q: 2, r: 1},
-            {q: 3, r: 1}
-        ], {id: 0, stadt: true});
-
-        this.wege.set([
-            {q: 2, r: 1},
-            {q: 3, r: 1}
-        ], {id: 0});
-        */
-
-    }
-};
 
 class graphics extends PIXI.Graphics{
     marked = false;
@@ -149,7 +31,7 @@ class view extends PIXI.Container{
     }    
 
     drawGame(){
-        var hex_x = getHexSize(size).x, hex_y = getHexSize(size).y;
+        var hex_x = _hex.getHexSize(size).x, hex_y = _hex.getHexSize(size).y;
 
         //index der längsten reihe
         var _index = 0, index = 0;
@@ -191,8 +73,8 @@ class view extends PIXI.Container{
                     r: data.r
                 };
 
-                var x=this.x+hexToPixel(hex).x;
-                var y=this.y+hexToPixel(hex).y;
+                var x=this.x+_hex.hexToPixel(hex, size).x;
+                var y=this.y+_hex.hexToPixel(hex, size).y;
 
                 this.positions[hex.q+"/"+hex.r]={x: x, y: y};
 
@@ -232,7 +114,7 @@ class view extends PIXI.Container{
                     g.endFill();
                     super.addChild(g);
                 }
-                g.hitArea = new PIXI.Polygon(getHex(x, y, size, true));
+                g.hitArea = new PIXI.Polygon(_hex.getHex(x, y, size, true));
                 g.interactive = true;
                 g.on('pointerover', e => {
                     if(!g.marked)
@@ -316,25 +198,6 @@ class view extends PIXI.Container{
         }
     }
 
-}
-
-function shuffleArray(array){
-    if(Array.isArray(array)){
-        for(var i=array.length-1;i>0;i--){
-            let j=Math.floor(Math.random()*i+1);
-            swapArray(array,i,j);
-        }
-        return array;
-    }
-}
-
-function swapArray(array,i,j){
-    if(Array.isArray(array)&&i>=0&&j>=0&&i<array.length&&j<array.length){
-        let tmp=array[i];
-        array[i]=array[j];
-        array[j]=tmp;
-        return array;
-    }
 }
 
 var stadt_=false;
@@ -428,15 +291,6 @@ function has(array, tile){
     return a;
 }
 
-function hasAll(array, tiles){
-    let a = true;
-    tiles.forEach(t => {
-        if(!has(array, t))
-            a = false;
-    });
-    return a;
-}
-
 //DONT USE RETURN IN FOR EACH
 
 function connected(tiles){
@@ -445,7 +299,7 @@ function connected(tiles){
         if(value.id==spieler_)
             switch(tiles.length){
                 case 2:
-                    if((areNeighbours([keys[0],tiles[0]])&&areNeighbours([keys[1],tiles[0]]))||(areNeighbours([keys[0],tiles[1]])&&areNeighbours([keys[1],tiles[1]])))
+                    if((_hex.areNeighbours([keys[0],tiles[0]])&&_hex.areNeighbours([keys[1],tiles[0]]))||(_hex.areNeighbours([keys[0],tiles[1]])&&_hex.areNeighbours([keys[1],tiles[1]])))
                         connected ++;
                     break;
                 case 3:
@@ -462,7 +316,7 @@ function connected(tiles){
         if(value.id==spieler_)
             switch(tiles.length){
                 case 2:
-                    if((areNeighbours([keys[0],tiles[0]])&&areNeighbours([keys[1],tiles[0]]))||(areNeighbours([keys[0],tiles[1]])&&areNeighbours([keys[1],tiles[1]])))
+                    if((_hex.areNeighbours([keys[0],tiles[0]])&&_hex.areNeighbours([keys[1],tiles[0]]))||(_hex.areNeighbours([keys[0],tiles[1]])&&_hex.areNeighbours([keys[1],tiles[1]])))
                         connected ++;
                     break;
                 case 3:
@@ -561,143 +415,4 @@ function isFree(tiles){
                 return frei;
         }
     return false;
-}
-
-function isEqual(hex_0, hex_1){
-    return hex_0.q==hex_1.q&&hex_0.r==hex_1.r;
-}
-
-function pixelToHex(x, y, size){
-    var q = (Math.sqrt(3)/3*x-1/3*y)/size;
-    var r = (2/3*y)/size;
-    return axialRound({
-        q: q,
-        r: r
-    });
-}
-
-function hexToPixel(hex){
-    return {
-        x: size * (Math.sqrt(3) * hex.q  +  Math.sqrt(3)/2 * hex.r),
-        y: size * (                                   3./2 * hex.r)
-    };
-}
-
-function axialToCube(axial){
-    return {
-        q: axial.q,
-        r: axial.r,
-        s: -axial.q-axial.r
-    };
-}
-
-function cubeToAxial(cube){
-    return {
-        q: cube.q,
-        r: cube.r
-    };
-}
-
-function cubeRound(frac){
-    var q = Math.round(frac.q), r = Math.round(frac.r), s = Math.round(frac.s);
-    var dq = Math.abs(q - frac.q), dr = Math.abs(r - frac.r), ds = Math.abs(s - frac.s);
-
-    if(dq>dr&&dq>ds)
-        q=-r-s;
-    else if(dr>ds)
-        r=-q-s;
-    else    
-        s=-q-r;
-
-    return {
-        q: q,
-        r: r,
-        s: s
-    };
-}
-
-function axialRound(frac){
-    return cubeToAxial(cubeRound(axialToCube(frac)));
-}
-
-function areNeighbours(tiles){
-    if(tiles.length<2)
-        return -1;
-    let a = true;
-    tiles.forEach(t0 => {
-        tiles.forEach(t1 => {
-            if(!neighbours(t0, t1)&&t1!=t0)
-                a = false;
-        });
-    });
-    return a;
-}
-
-function neighbour(hex, i){
-    var vectors = [
-        [-1, 0], [-1, 1], [0, 1], 
-        [1, 0], [1, -1], [0, -1]
-    ];
-    return {q: hex.q+vectors[i][0], r: hex.r+vectors[i][1]};
-}
-
-function neighbours(t0, t1){
-    var vectors = [
-        [-1, 0], [-1, 1], [0, 1], 
-        [1, 0], [1, -1], [0, -1]
-    ];
-    for(var i=0;i<vectors.length;i++)
-        if((t0.q+vectors[i][0]==t1.q&&t0.r+vectors[i][1]==t1.r))
-            return true;
-    return false;
-}
-
-function ring(start, radius){
-    var results = [];
-    for(let i=0;i<6;i++)
-        for(let o=0;o<radius-(i==5);o++){
-            results.push(start);
-            start=neighbour(start, i);
-        }
-        results.push(start)
-    return results;
-}
-
-function spiral(start, radius){
-    var results = [];
-
-    for(let i=radius;i>0;i--){
-        results=results.concat(ring({q: start.q,r: start.r}, i));
-        start.q-=1;
-        start.r+=1;
-    }
-    results=results.concat({q: start.q,r: start.r});
-    return results;
-
-}
-
-function getHexSize(size){
-    return {
-        x: Math.sqrt(3) * size,
-        y: 2 * size
-    };
-}
-
-function getHex(x, y, size, pointy){
-    var array=[];
-    for(var i=0;i<6;i++){
-        let c=getHexCorner(x, y, size, i, pointy)
-        array.push(c.x);
-        array.push(c.y)
-    }
-    return array;
-}
-
-function getHexCorner(x, y, size, i, pointy){
-    var angle_deg = 60 * i - (pointy?30:0);
-    var angle_rad = Math.PI / 180 * angle_deg;
-    return {
-        x: x + size * Math.cos(angle_rad),
-        y: y + size * Math.sin(angle_rad)
-    };
 }
