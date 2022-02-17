@@ -127,7 +127,7 @@ export class _game{
         //zahlenchips verteilen
         index=0;
         hex.spiral({q: 5,r: 1}, 2).forEach(feld => {
-            this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++];
+            this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++%this.zahlen.length];
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
