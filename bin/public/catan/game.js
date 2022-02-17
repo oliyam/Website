@@ -1,6 +1,35 @@
 import * as array from "/catan/array_tools.js";
 import * as hex from "/catan/hex.js";
 
+class spieler {
+
+    id;
+
+    bauen={
+        strasse,
+        siedlung,
+        stadt
+    };
+
+    ressourcen={
+        holz,
+        lehm,
+        erz,
+        getreide,
+        wolle
+    };
+
+    entwicklung={
+        ritter,
+        siegespunkt,
+        fortschritt
+    };
+
+    constructor(){
+        this.bauen=[60,20,16];
+    }
+};
+
 export class _game{
     karte = [
         {size: 4, offset: 3},
@@ -102,5 +131,140 @@ export class _game{
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
+    }
+
+    has(array, tile){
+        let a = false;
+        array.forEach(t => {
+            if(hex.isEqual(t, tile))
+                a = true;
+        });
+        return a;
+    }
+
+    //DONT USE RETURN IN FOR EACH
+
+    connected(tiles){
+        var connected = 0;
+        this.game.wege.forEach((value, keys) => {
+            if(value.id==spieler_)
+                switch(tiles.length){
+                    case 2:
+                        if((hex.areNeighbours([keys[0],tiles[0]])&&hex.areNeighbours([keys[1],tiles[0]]))||(hex.areNeighbours([keys[0],tiles[1]])&&hex.areNeighbours([keys[1],tiles[1]])))
+                            connected ++;
+                        break;
+                    case 3:
+                        if(
+                            this.has(keys, tiles[0])&&this.has(keys, tiles[1])||
+                            this.has(keys, tiles[1])&&this.has(keys, tiles[2])||
+                            this.has(keys, tiles[2])&&this.has(keys, tiles[0])
+                        )
+                            connected ++;
+                        break;
+                }
+        });
+        this.wege_bauen.forEach((value, keys) => {
+            if(value.id==spieler_)
+                switch(tiles.length){
+                    case 2:
+                        if((_hex.areNeighbours([keys[0],tiles[0]])&&hex.areNeighbours([keys[1],tiles[0]]))||(hex.areNeighbours([keys[0],tiles[1]])&&hex.areNeighbours([keys[1],tiles[1]])))
+                            connected ++;
+                        break;
+                    case 3:
+                        if(
+                            this.has(keys, tiles[0])&&this.has(keys, tiles[1])||
+                            this.has(keys, tiles[1])&&this.has(keys, tiles[2])||
+                            this.has(keys, tiles[2])&&this.has(keys, tiles[0])
+                        )
+                            connected ++;
+                        break;
+                }
+        });
+        return connected;
+    }
+
+    spielerKreuzungen(spieler){
+        let anzahl = 0;
+        this.kreuzungen_bauen.forEach((value, keys) => {
+            anzahl+=value.id==spieler;
+        });
+        return anzahl;
+    }
+
+    spielerStrassen(spieler){
+        let anzahl = 0;
+        this.wege_bauen.forEach((value, keys) => {
+            anzahl+=value.id==spieler;
+        });
+        return anzahl;
+    }
+
+    areAllBlocked(tiles){
+        var blocked=true;
+        tiles.forEach(tile => {
+            if(!this.felder[tile.q+"/"+tile.r].blocked)
+                blocked = false;
+        });
+        return blocked;
+    }
+
+    isFree(tiles, spieler){
+        let frei = true;
+        if(this.spielerStrassen(spieler)<2){
+            if(tiles.length==3)
+                frei = false;
+            else if(tiles.length==2){
+
+            }
+        }
+        else if(this.spielerStrassen(spieler)==2){
+            if(tiles.length==3){
+                if(connected(tiles)!=1){
+                    frei = false;
+                }
+            }
+            else{
+                frei = false;
+            }
+        }
+        if(this.spielerStrassen(spieler)>=2&&this.spielerKreuzungen(spieler)>=2)
+            frei = true;
+
+        if(tiles.length&&!this.areAllBlocked(tiles))
+            switch(tiles.length){
+                case 2:
+                    this.wege.forEach((value, key) => {
+                            if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
+                                frei = false;
+                        });
+                        this.wege_bauen.forEach((value, key) => {
+                            if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
+                                frei = false;
+                        });
+                    return frei;
+                case 3:
+                    this.kreuzungen.forEach((value, key) => {
+                        if(
+                            (
+                                (this.has(key, tiles[0])&&this.has(key, tiles[1]))||
+                                (this.has(key, tiles[1])&&this.has(key, tiles[2]))||
+                                (this.has(key, tiles[2])&&this.has(key, tiles[0]))
+                            )
+                        )
+                            frei = false;
+                    });
+                    this.kreuzungen_bauen.forEach((value, key) => {
+                        if(
+                            (
+                                (this.has(key, tiles[0])&&this.has(key, tiles[1]))||
+                                (this.has(key, tiles[1])&&this.has(key, tiles[2]))||
+                                (this.has(key, tiles[2])&&this.has(key, tiles[0]))
+                            )
+                        )
+                            frei = false;
+                    });
+                    return frei;
+            }
+        return false;
     }
 };

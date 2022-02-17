@@ -23,7 +23,7 @@ export class _view extends PIXI.Container{
     positions = new Map();;
     
     temp = {
-        temp_graphics: new PIXI.Graphics(),
+        graphics: new PIXI.Graphics(),
         stadt: false,
         spieler: 0,
         marked_tiles: []
@@ -191,153 +191,16 @@ export class _view extends PIXI.Container{
     }
 
     drawMarkedTiles(){
-        this.temp_graphics.clear();
-        if(_hex.areNeighbours(this.temp.marked_tiles)&&isFree(this.temp.marked_tiles)){
+        this.temp.graphics.clear();
+        if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.isFree(this.temp.marked_tiles)){
             switch(this.temp.marked_tiles.length){
                 case 2:
-                    this.temp_graphics = this.drawStrasse({id: spieler_}, this.temp.marked_tiles);
+                    this.temp.graphics = this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles);
                     break;
                 case 3:
-                    this.temp_graphics = this.drawKreuzung({id: spieler_, stadt: stadt_}, this.temp.marked_tiles);
+                    this.temp.graphics = this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles);
                     break;
             }
         }
     }
-
-}
-
-
-function has(array, tile){
-    let a = false;
-    array.forEach(t => {
-        if(isEqual(t, tile))
-            a = true;
-    });
-    return a;
-}
-
-//DONT USE RETURN IN FOR EACH
-
-function connected(tiles){
-    var connected = 0;
-    game_.wege.forEach((value, keys) => {
-        if(value.id==spieler_)
-            switch(tiles.length){
-                case 2:
-                    if((_hex.areNeighbours([keys[0],tiles[0]])&&_hex.areNeighbours([keys[1],tiles[0]]))||(_hex.areNeighbours([keys[0],tiles[1]])&&_hex.areNeighbours([keys[1],tiles[1]])))
-                        connected ++;
-                    break;
-                case 3:
-                    if(
-                        has(keys, tiles[0])&&has(keys, tiles[1])||
-                        has(keys, tiles[1])&&has(keys, tiles[2])||
-                        has(keys, tiles[2])&&has(keys, tiles[0])
-                    )
-                        connected ++;
-                    break;
-            }
-    });
-    game_.wege_bauen.forEach((value, keys) => {
-        if(value.id==spieler_)
-            switch(tiles.length){
-                case 2:
-                    if((_hex.areNeighbours([keys[0],tiles[0]])&&_hex.areNeighbours([keys[1],tiles[0]]))||(_hex.areNeighbours([keys[0],tiles[1]])&&_hex.areNeighbours([keys[1],tiles[1]])))
-                        connected ++;
-                    break;
-                case 3:
-                    if(
-                        has(keys, tiles[0])&&has(keys, tiles[1])||
-                        has(keys, tiles[1])&&has(keys, tiles[2])||
-                        has(keys, tiles[2])&&has(keys, tiles[0])
-                    )
-                        connected ++;
-                    break;
-            }
-    });
-    return connected;
-}
-
-function spielerKreuzungen(spieler){
-    let anzahl = 0;
-    game_.kreuzungen_bauen.forEach((value, keys) => {
-        anzahl+=value.id==spieler;
-    });
-    return anzahl;
-}
-
-function spielerStrassen(spieler){
-    let anzahl = 0;
-    game_.wege_bauen.forEach((value, keys) => {
-        anzahl+=value.id==spieler;
-    });
-    return anzahl;
-}
-
-function areAllBlocked(tiles){
-    var blocked=true;
-    tiles.forEach(tile => {
-        if(!game_.felder[tile.q+"/"+tile.r].blocked)
-            blocked = false;
-    });
-    return blocked;
-}
-
-function isFree(tiles){
-    let frei = true;
-    if(spielerStrassen(spieler_)<2){
-        if(tiles.length==3)
-            frei = false;
-        else if(tiles.length==2){
-
-        }
-    }
-    else if(spielerStrassen(spieler_)==2){
-        if(tiles.length==3){
-            if(connected(tiles)!=1){
-                frei = false;
-            }
-        }
-        else{
-            frei = false;
-        }
-    }
-    if(spielerStrassen(spieler_)>=2&&spielerKreuzungen(spieler_)>=2)
-        frei = true;
-
-    if(tiles.length&&!areAllBlocked(tiles))
-        switch(tiles.length){
-            case 2:
-                    game_.wege.forEach((value, key) => {
-                        if(has(key, tiles[0])&&has(key, tiles[1]))
-                            frei = false;
-                    });
-                    game_.wege_bauen.forEach((value, key) => {
-                        if(has(key, tiles[0])&&has(key, tiles[1]))
-                            frei = false;
-                    });
-                return frei;
-            case 3:
-                game_.kreuzungen.forEach((value, key) => {
-                    if(
-                        (
-                            (has(key, tiles[0])&&has(key, tiles[1]))||
-                            (has(key, tiles[1])&&has(key, tiles[2]))||
-                            (has(key, tiles[2])&&has(key, tiles[0]))
-                        )
-                    )
-                        frei = false;
-                });
-                game_.kreuzungen_bauen.forEach((value, key) => {
-                    if(
-                        (
-                            (has(key, tiles[0])&&has(key, tiles[1]))||
-                            (has(key, tiles[1])&&has(key, tiles[2]))||
-                            (has(key, tiles[2])&&has(key, tiles[0]))
-                        )
-                    )
-                        frei = false;
-                });
-                return frei;
-        }
-    return false;
 }
