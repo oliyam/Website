@@ -143,7 +143,6 @@ export class _game{
     }
 
     //DONT USE RETURN IN FOR EACH
-
     connected(tiles){
         var connected = 0;
         this.game.wege.forEach((value, keys) => {
