@@ -20,18 +20,19 @@ export class _view extends PIXI.Container{
     y;
     
     game;
-    positions = new Map();;
+    positions = new Map();
     
     temp = {
         graphics: new PIXI.Graphics(),
         stadt: false,
         spieler: 0,
         marked_tiles: []
-    }
+    };
 
-    constructor(game, width, height){
+    constructor(game, temp, width, height){
         super();
         this.game=game;
+        this.temp=temp;
         this.width=width;
         this.height=height;
     }    
@@ -88,7 +89,7 @@ export class _view extends PIXI.Container{
                 if(!data.blocked){
                     g.beginFill(this.game.farben_landschaften[data.landschaft], 0.6);
                     g.drawRegularPolygon(x, y, this.size, 6, 0);
-                    if(data.raeuber){
+                    if(_hex.isEqual(this.game.raeuber, hex)){
                         g.beginFill(0x000000, 1);  
                         g.drawCircle(x, y, this.size/4)
                     }

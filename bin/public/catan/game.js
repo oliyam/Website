@@ -72,6 +72,8 @@ export class _game{
 
     felder = [];
 
+    raeuber;
+
     kreuzungen = new Map();
     wege = new Map();
 
@@ -97,8 +99,7 @@ export class _game{
                         r: row,
                         blocked: false,
                         landschaft: null,
-                        zahl: null,
-                        raeuber: null
+                        zahl: null
                     };
                     index++;
             }   
@@ -119,8 +120,9 @@ export class _game{
             if (this.felder.hasOwnProperty(key)){
                 var data=this.felder[key];
                 if(!data.blocked){
-                    data.landschaft=landschaftsfelder[index]
-                    data.raeuber=landschaftsfelder[index++]=="wueste";
+                    if(landschaftsfelder[index]=="wueste")
+                        this.raeuber={q: data.q, r: data.r};
+                    data.landschaft=landschaftsfelder[index++];
                 }
             }
         }
@@ -208,6 +210,7 @@ export class _game{
     }
 
     isFree(tiles, spieler){
+        return true;
         let frei = true;
         if(this.spielerStrassen(spieler)<2){
             if(tiles.length==3)
@@ -233,13 +236,13 @@ export class _game{
             switch(tiles.length){
                 case 2:
                     this.wege.forEach((value, key) => {
-                            if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
-                                frei = false;
-                        });
-                        this.wege_bauen.forEach((value, key) => {
-                            if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
-                                frei = false;
-                        });
+                        if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
+                            frei = false;
+                    });
+                    this.wege_bauen.forEach((value, key) => {
+                        if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
+                            frei = false;
+                    });
                     return frei;
                 case 3:
                     this.kreuzungen.forEach((value, key) => {
