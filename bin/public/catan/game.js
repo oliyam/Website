@@ -47,7 +47,7 @@ export class _game{
         0xFF0000,
         0x0000FF,
         0xFFFFFF,
-        0xFFA500
+        0xFF8C00
     ];
 
     farben_landschaften = {
@@ -76,9 +76,6 @@ export class _game{
 
     kreuzungen = new Map();
     wege = new Map();
-
-    kreuzungen_bauen = new Map();
-    wege_bauen = new Map();
 
     constructor(){
         //mitte des spielfeldes ermitteln
@@ -186,7 +183,7 @@ export class _game{
 
     spielerKreuzungen(spieler){
         let anzahl = 0;
-        this.kreuzungen_bauen.forEach((value, keys) => {
+        this.kreuzungen.forEach((value, keys) => {
             anzahl+=value.id==spieler;
         });
         return anzahl;
@@ -194,7 +191,7 @@ export class _game{
 
     spielerStrassen(spieler){
         let anzahl = 0;
-        this.wege_bauen.forEach((value, keys) => {
+        this.wege.forEach((value, keys) => {
             anzahl+=value.id==spieler;
         });
         return anzahl;
@@ -209,7 +206,7 @@ export class _game{
         return blocked;
     }
 
-    isFree(tiles, spieler){
+    isFree(temp){
         return true;
         let frei = true;
         if(this.spielerStrassen(spieler)<2){
@@ -239,7 +236,7 @@ export class _game{
                         if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
                             frei = false;
                     });
-                    this.wege_bauen.forEach((value, key) => {
+                    temp.wege.forEach((value, key) => {
                         if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
                             frei = false;
                     });
@@ -255,7 +252,7 @@ export class _game{
                         )
                             frei = false;
                     });
-                    this.kreuzungen_bauen.forEach((value, key) => {
+                    temp.kreuzungen.forEach((value, key) => {
                         if(
                             (
                                 (this.has(key, tiles[0])&&this.has(key, tiles[1]))||

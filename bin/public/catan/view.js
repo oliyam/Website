@@ -26,16 +26,23 @@ export class _view extends PIXI.Container{
         graphics: new PIXI.Graphics(),
         stadt: false,
         spieler: 0,
-        marked_tiles: []
+        marked_tiles: [],
+        kreuzungen: new Map(),
+        wege: new Map()
     };
 
     constructor(game, temp, width, height){
         super();
         this.game=game;
         this.temp=temp;
+        console.log(temp);
         this.width=width;
         this.height=height;
     }    
+
+    getTemp(){
+        return this.temp;
+    }
 
     drawGame(){
         var hex_x = _hex.getHexSize(this.size).x, hex_y = _hex.getHexSize(this.size).y;
@@ -53,7 +60,7 @@ export class _view extends PIXI.Container{
 
         this.drawTiles();
 
-        this.game.wege_bauen.forEach((value, key) => {
+        this.temp.wege.forEach((value, key) => {
             this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
         });
 
@@ -61,13 +68,15 @@ export class _view extends PIXI.Container{
             this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
         });
         
-        this.game.kreuzungen_bauen.forEach((value, key) => {
+        this.temp.kreuzungen.forEach((value, key) => {
             this.drawKreuzung(value, key);
         });
 
         this.game.kreuzungen.forEach((value, key) => {
             this.drawKreuzung(value, key);
         });
+
+        this.drawMarkedTiles();
         
     }
 

@@ -6,7 +6,9 @@ var temp = {
     graphics: new PIXI.Graphics(),
     stadt: false,
     spieler: 0,
-    marked_tiles: []
+    marked_tiles: [],
+    kreuzungen: new Map(),
+    wege: new Map()
 }
 
 const app = new PIXI.Application({
@@ -43,9 +45,15 @@ document.getElementById('bauen').addEventListener('click', e => {
 });
 
 document.getElementById('loeschen').addEventListener('click', e => {
-    game.wege_bauen = new Map();
-    game.kreuzungen_bauen = new Map();
-    temp.marked_tiles = [];
+    temp = {
+        graphics: new PIXI.Graphics(),
+        stadt: false,
+        spieler: 0,
+        marked_tiles: [],
+        kreuzungen: new Map(),
+        wege: new Map()
+    }
+    redraw();
 });
 
 document.getElementById('stadt').addEventListener('click', e => {
@@ -56,7 +64,6 @@ document.getElementById('stadt').addEventListener('click', e => {
 });
 
 document.getElementById('spieler').addEventListener('click', e => {
-    temp.marked_tiles = [];
     temp.spieler=(temp.spieler+1)%4;
     document.getElementById('spieler').innerText=temp.spieler;
     redraw()
@@ -66,15 +73,15 @@ function buildMarkedTiles(){
     if(_hex.areNeighbours(temp.marked_tiles))
     switch(temp.marked_tiles.length){
         case 2:
-            if(game.isFree(temp.marked_tiles)){
-                game.wege_bauen.set(view.temp.marked_tiles, {id: temp.spieler});
+            if(game.isFree(temp)){
+                temp.wege.set(temp.marked_tiles, {id: temp.spieler});
                 temp.marked_tiles = [];
                 redraw();
             }
             break;
         case 3:
-            if(game.isFree(temp.marked_tiles)){
-                game.kreuzungen_bauen.set(temp.marked_tiles, {id: temp.spieler, stadt: temp.stadt});
+            if(game.isFree(temp)){
+                temp.kreuzungen.set(temp.marked_tiles, {id: temp.spieler, stadt: temp.stadt});
                 temp.marked_tiles = [];
                 redraw();
             }
