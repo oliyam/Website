@@ -60,6 +60,12 @@ export class _view extends PIXI.Container{
 
         this.drawTiles();
 
+        this.game.haefen.forEach(hafen => {
+            this.drawHafen(hafen);
+        });
+
+        this.drawOutlines();
+
         this.temp.wege.forEach((value, key) => {
             this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
         });
@@ -74,10 +80,6 @@ export class _view extends PIXI.Container{
 
         this.game.kreuzungen.forEach((value, key) => {
             this.drawKreuzung(value, key);
-        });
-
-        this.game.haefen.forEach(hafen => {
-            this.drawHafen(hafen);
         });
 
         this.drawMarkedTiles();
@@ -123,10 +125,6 @@ export class _view extends PIXI.Container{
                     }
                     g.endFill();
                     super.addChild(g);
-                    let g_outline = new PIXI.Graphics();
-                    g_outline.lineStyle(4, 0xF2AC44);
-                    g_outline.drawRegularPolygon(x, y, this.size, 6, 0);
-                    super.addChild(g_outline);
                 }
                 else{
                     g.beginFill(0x2693FF, 0.5);
@@ -162,6 +160,27 @@ export class _view extends PIXI.Container{
         }
     }
 
+    drawOutlines(){
+        for(let key in this.game.felder)
+            if (this.game.felder.hasOwnProperty(key)){
+                var data=this.game.felder[key];
+                var hex = {
+                    q: data.q,
+                    r: data.r
+                };
+
+                var x=this.x+_hex.hexToPixel(hex, this.size).x;
+                var y=this.y+_hex.hexToPixel(hex, this.size).y;
+
+                if(!data.blocked){
+                    let g = new PIXI.Graphics();
+                    g.lineStyle(4, 0xF2AC44);
+                    g.drawRegularPolygon(x, y, this.size, 6, 0);
+                    super.addChild(g);
+                }
+            }
+    }
+
     drawStrasse(value, key){
         var x=(this.positions[key[0].q+"/"+key[0].r].x-this.positions[key[1].q+"/"+key[1].r].x)/10;
         var y=(this.positions[key[0].q+"/"+key[0].r].y-this.positions[key[1].q+"/"+key[1].r].y)/10;
@@ -186,17 +205,26 @@ export class _view extends PIXI.Container{
     }
 
     drawHafen(hafen){
-        var x=this.positions[hafen.position[0].q+"/"+hafen.position[0].r].x;
-        var y=this.positions[hafen.position[0].q+"/"+hafen.position[0].r].y;
+        var x0=this.positions[hafen.position[0].q+"/"+hafen.position[0].r].x;
+        var y0=this.positions[hafen.position[0].q+"/"+hafen.position[0].r].y;
+        var x1=this.positions[hafen.position[1].q+"/"+hafen.position[1].r].x;
+        var y1=this.positions[hafen.position[1].q+"/"+hafen.position[1].r].y;
+        var b=Math.sqrt((y0-(y0+y1)/2)**2+(x0-(x0+x1)/2)**2);
 
         let graphics = new PIXI.Graphics();
+        graphics.lineStyle(4, 0x47240a); 
+        graphics.moveTo(x0, y0);
+        graphics.lineTo((x0+x1)/2-(y0-(y0+y1)/2)/b*this.size/2, (y0+y1)/2+(x0-(x0+x1)/2)/b*this.size/2);
+        graphics.moveTo(x0, y0);
+        graphics.lineTo((x0+x1)/2+(y0-(y0+y1)/2)/b*this.size/2, (y0+y1)/2-(x0-(x0+x1)/2)/b*this.size/2);
+        graphics.lineStyle(0); 
         graphics.beginFill(0xF2AC44, 1);
-        graphics.drawCircle(x, y, this.size/3)
+        graphics.drawCircle(x0, y0, this.size/3)
         if(hafen.ressource)
             graphics.beginFill(this.game.farben_landschaften[this.game.ressourcen[hafen.ressource]], 1);
         else
             graphics.beginFill(0x2693FF, 1);
-        graphics.drawCircle(x, y, this.size/4)
+        graphics.drawCircle(x0, y0, this.size/4)
         let text = new PIXI.Container;
         text.addChild(new PIXI.Text(hafen.verhaeltnis[0]+":"+hafen.verhaeltnis[1], {
             align: "center",
@@ -205,8 +233,8 @@ export class _view extends PIXI.Container{
             fontWeight: 'bold',
             fill: 'black',
         }));
-        text.x=x-text.width/2;
-        text.y=y-this.size/3/2; 
+        text.x=x0-text.width/2;
+        text.y=y0-this.size/3/2;
         graphics.addChild(text);
         super.addChild(graphics);
     }
