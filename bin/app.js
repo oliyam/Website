@@ -18,6 +18,9 @@ const auth = require('./public/auth/router');
 //chatserver
 const chat_server=require('./public/chat/server');
 
+//catanserver
+const catan_server=require('./public/catan/server');
+
 //start http server
 var PORT= process.env.PORT || 80;
 var server=http.listen(PORT, function(){
@@ -33,6 +36,7 @@ ngrok.connect({authtoken: process.env.NGROK_TOKEN, addr: PORT}).then( (url) => {
 
 //start chat server
 chat_server.run(server, log);
+catan_server.run(server, log);
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())

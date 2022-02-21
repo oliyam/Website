@@ -76,6 +76,10 @@ export class _view extends PIXI.Container{
             this.drawKreuzung(value, key);
         });
 
+        this.game.haefen.forEach(hafen => {
+            this.drawHafen(hafen);
+        });
+
         this.drawMarkedTiles();
         
     }
@@ -96,7 +100,7 @@ export class _view extends PIXI.Container{
 
                 let g = new graphics(hex.q, hex.r);
                 if(!data.blocked){
-                    g.beginFill(this.game.farben_landschaften[data.landschaft], 0.6);
+                    g.beginFill(this.game.farben_landschaften[data.landschaft], 1);
                     g.drawRegularPolygon(x, y, this.size, 6, 0);
                     if(_hex.isEqual(this.game.raeuber, hex)){
                         g.beginFill(0x000000, 1);  
@@ -181,6 +185,32 @@ export class _view extends PIXI.Container{
         return graphics;
     }
 
+    drawHafen(hafen){
+        var x=this.positions[hafen.position[0].q+"/"+hafen.position[0].r].x;
+        var y=this.positions[hafen.position[0].q+"/"+hafen.position[0].r].y;
+
+        let graphics = new PIXI.Graphics();
+        graphics.beginFill(0xF2AC44, 1);
+        graphics.drawCircle(x, y, this.size/3)
+        if(hafen.ressource)
+            graphics.beginFill(this.game.farben_landschaften[this.game.ressourcen[hafen.ressource]], 1);
+        else
+            graphics.beginFill(0x2693FF, 1);
+        graphics.drawCircle(x, y, this.size/4)
+        let text = new PIXI.Container;
+        text.addChild(new PIXI.Text(hafen.verhaeltnis[0]+":"+hafen.verhaeltnis[1], {
+            align: "center",
+            fontFamily: 'Times New Roman',
+            fontSize: this.size/4,
+            fontWeight: 'bold',
+            fill: 'black',
+        }));
+        text.x=x-text.width/2;
+        text.y=y-this.size/3/2; 
+        graphics.addChild(text);
+        super.addChild(graphics);
+    }
+
     drawKreuzung(value, key){
         var pos={
             x: 0,
@@ -202,7 +232,7 @@ export class _view extends PIXI.Container{
 
     drawMarkedTiles(){
         this.temp.graphics.clear();
-        if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.isFree(this.temp.marked_tiles)){
+        if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.isFree(this.temp)){
             switch(this.temp.marked_tiles.length){
                 case 2:
                     this.temp.graphics = this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles);

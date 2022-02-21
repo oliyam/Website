@@ -2,6 +2,30 @@ import {_game} from "/catan/game.js";
 import {_view} from "/catan/view.js";
 import * as _hex from "/catan/hex.js";
 
+const socket=io("51e3-178-115-41-230.ngrok.io");
+
+var name=prompt("pls name");
+var validName=false;
+var users=[];
+var message="What's your name?";
+
+// Namensanfrage
+socket.emit('catan-name-request', name);
+
+// Rückmeldung Namensanfrage
+socket.on('catan-name-valid', valid => {
+	if(valid)
+		console.log("You joined!");
+	else
+		socket.emit('catan-name-request', prompt("name already taken or invalid"));
+})
+
+// Weiterleitung zu /dead bei einer toten Sitzung
+socket.on('catan-session-dead', id => {
+	console.log("Session for Socket: "+id+", is no longer alive");
+	location.href="/dead";
+})
+
 var temp = {
     graphics: new PIXI.Graphics(),
     stadt: false,
@@ -40,6 +64,10 @@ map.addEventListener('mouseover', e => {
     map.style.cursor = 'crosshair';
 });
 
+document.getElementById('zug_beenden').addEventListener('click', e => {
+    buildMarkedTiles();
+});
+
 document.getElementById('bauen').addEventListener('click', e => {
     buildMarkedTiles();
 });
@@ -57,34 +85,30 @@ document.getElementById('loeschen').addEventListener('click', e => {
 });
 
 document.getElementById('stadt').addEventListener('click', e => {
-    document.getElementById('stadt').innerText=stadt?'Siedlung':'Stadt';
+    document.getElementById('stadt').innerText=temp.stadt?'Siedlung':'Stadt';
     temp.marked_tiles = [];
     temp.stadt=!temp.stadt;
     redraw();
 });
 
 document.getElementById('spieler').addEventListener('click', e => {
+    temp.marked_tiles = [];
     temp.spieler=(temp.spieler+1)%4;
     document.getElementById('spieler').innerText=temp.spieler;
     redraw()
 });
 
 function buildMarkedTiles(){
-    if(_hex.areNeighbours(temp.marked_tiles))
-    switch(temp.marked_tiles.length){
-        case 2:
-            if(game.isFree(temp)){
+    if(_hex.areNeighbours(temp.marked_tiles)&&game.isFree(temp)){
+        switch(temp.marked_tiles.length){
+            case 2:
                 temp.wege.set(temp.marked_tiles, {id: temp.spieler});
-                temp.marked_tiles = [];
-                redraw();
-            }
-            break;
-        case 3:
-            if(game.isFree(temp)){
+                break;
+            case 3:
                 temp.kreuzungen.set(temp.marked_tiles, {id: temp.spieler, stadt: temp.stadt});
-                temp.marked_tiles = [];
-                redraw();
-            }
-            break;
+                break;
+        }
+        temp.marked_tiles = [];
+        redraw();
     }
 }

@@ -50,11 +50,19 @@ export class _game{
         0xFF8C00
     ];
 
+    ressourcen = {
+        "holz": "wald",
+        "lehm": "huegelland",
+        "wolle": "weideland",
+        "getreide": "ackerland",
+        "erz": "gebirge"
+    };
+
     farben_landschaften = {
         "wald": 0x027800,
-        "huegelland": 0xed5b00,
-        "weideland": 0x00FF00,
-        "ackerland": 0xfff200,
+        "huegelland": 0x9c5819,
+        "weideland": 0x10c21e,
+        "ackerland": 0xfad92f,
         "gebirge": 0x666666,
         "wueste": 0xba8f23
     };
@@ -68,11 +76,67 @@ export class _game{
         "wueste": 1
     };
 
-    zahlen = [5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11];
-
     felder = [];
 
+    entwicklungen = {
+        "ritter": 14,
+        "fortschritt": 6,
+        "siegpunkt": 5
+    }
+
+    entwicklungsstapel = [];
+
+    zahlen = [5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11];
+
     raeuber;
+
+    haefen = [
+        {
+            position: [{q: 5, r: 0}, {q: 4, r: 1}],
+            verhaeltnis: [2, 1],
+            ressource: "wolle"  
+        },
+        {
+            position: [{q: 3, r: 0}, {q: 3, r: 1}],
+            verhaeltnis: [3, 1],
+            ressource: null  
+        },
+        {
+            position: [{q: 1, r: 2}, {q: 2, r: 2}],
+            verhaeltnis: [2, 1],
+            ressource: "erz"  
+        },
+        {
+            position: [{q: 0, r: 4}, {q: 1, r: 4}],
+            verhaeltnis: [2, 1],
+            ressource: "getreide"  
+        },
+        {
+            position: [{q: 0, r: 6}, {q: 1, r: 5}],
+            verhaeltnis: [3, 1],
+            ressource: null  
+        },
+        {
+            position: [{q: 2, r: 6}, {q: 2, r: 5}],
+            verhaeltnis: [2, 1],
+            ressource: "holz"  
+        },
+        {
+            position: [{q: 4, r: 5}, {q: 4, r: 4}],
+            verhaeltnis: [2, 1],
+            ressource: "lehm"  
+        },
+        {
+            position: [{q: 6, r: 3}, {q: 5, r: 3}],
+            verhaeltnis: [3, 1],
+            ressource: null  
+        },
+        {
+            position: [{q: 6, r: 1}, {q: 5, r: 2}],
+            verhaeltnis: [3, 1],
+            ressource: null  
+        }
+    ];
 
     kreuzungen = new Map();
     wege = new Map();
@@ -108,7 +172,7 @@ export class _game{
         var landschaftsfelder=[];
         for(let key in this.landschaften)
             for(let i=0;i<this.landschaften[key];i++)
-                landschaftsfelder.push(key)
+                landschaftsfelder.push(key);
         //landschaftskarten stapel mischen
         landschaftsfelder=array.shuffleArray(landschaftsfelder);
         //landschaftskarten verteilen räuber auf wüste plazieren
@@ -130,6 +194,10 @@ export class _game{
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
+        //entwicklungskarten stapel erstellen
+        for(let key in this.entwicklungen)
+            for(let i=0;i<this.entwicklungen[key];i++)
+                this.entwicklungsstapel.push(key);
     }
 
     has(array, tile){
@@ -207,37 +275,20 @@ export class _game{
     }
 
     isFree(temp){
-        return true;
         let frei = true;
-        if(this.spielerStrassen(spieler)<2){
-            if(tiles.length==3)
-                frei = false;
-            else if(tiles.length==2){
 
-            }
-        }
-        else if(this.spielerStrassen(spieler)==2){
-            if(tiles.length==3){
-                if(connected(tiles)!=1){
-                    frei = false;
-                }
-            }
-            else{
-                frei = false;
-            }
-        }
-        if(this.spielerStrassen(spieler)>=2&&this.spielerKreuzungen(spieler)>=2)
+        if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
             frei = true;
 
-        if(tiles.length&&!this.areAllBlocked(tiles))
-            switch(tiles.length){
+        if(temp.marked_tiles.length&&!this.areAllBlocked(temp.marked_tiles))
+            switch(temp.marked_tiles.length){
                 case 2:
                     this.wege.forEach((value, key) => {
-                        if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
+                        if(this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))
                             frei = false;
                     });
                     temp.wege.forEach((value, key) => {
-                        if(this.has(key, tiles[0])&&this.has(key, tiles[1]))
+                        if(this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))
                             frei = false;
                     });
                     return frei;
@@ -245,9 +296,9 @@ export class _game{
                     this.kreuzungen.forEach((value, key) => {
                         if(
                             (
-                                (this.has(key, tiles[0])&&this.has(key, tiles[1]))||
-                                (this.has(key, tiles[1])&&this.has(key, tiles[2]))||
-                                (this.has(key, tiles[2])&&this.has(key, tiles[0]))
+                                (this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))||
+                                (this.has(key, temp.marked_tiles[1])&&this.has(key, temp.marked_tiles[2]))||
+                                (this.has(key, temp.marked_tiles[2])&&this.has(key, temp.marked_tiles[0]))
                             )
                         )
                             frei = false;
@@ -255,9 +306,9 @@ export class _game{
                     temp.kreuzungen.forEach((value, key) => {
                         if(
                             (
-                                (this.has(key, tiles[0])&&this.has(key, tiles[1]))||
-                                (this.has(key, tiles[1])&&this.has(key, tiles[2]))||
-                                (this.has(key, tiles[2])&&this.has(key, tiles[0]))
+                                (this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))||
+                                (this.has(key, temp.marked_tiles[1])&&this.has(key, temp.marked_tiles[2]))||
+                                (this.has(key, temp.marked_tiles[2])&&this.has(key, temp.marked_tiles[0]))
                             )
                         )
                             frei = false;
