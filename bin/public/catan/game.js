@@ -189,11 +189,14 @@ export class _game{
         }
         //zahlenchips verteilen
         index=0;
+        var eckfeld=Math.floor(Math.random()*6);
         hex.spiral({q: 5,r: 1}, 2).forEach(feld => {
+            feld=hex.rotate(feld, this.center, eckfeld);
             this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++%this.zahlen.length];
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
+
         //entwicklungskarten stapel erstellen
         for(let key in this.entwicklungen)
             for(let i=0;i<this.entwicklungen[key];i++)

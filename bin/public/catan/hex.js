@@ -84,6 +84,24 @@ export function neighbours(t0, t1){
     return false;
 }
 
+export function rotate(hex, center, i){
+    if(typeof i=="undefined"){
+        var hex=axialToCube(hex);
+        center=axialToCube(center);
+        hex.q=hex.q-center.q;
+        hex.s=hex.s-center.s;
+        hex.r=hex.r-center.r;
+        return cubeToAxial({
+            q: -hex.s+center.q,
+            r: -hex.q+center.r,
+            s: -hex.r+center.s
+        });
+    }
+    for(var o=0;o<i;o++)
+        hex=rotate(hex, center);
+    return hex;
+}
+
 export function ring(start, radius){
     var results = [];
     for(let i=0;i<6;i++)
