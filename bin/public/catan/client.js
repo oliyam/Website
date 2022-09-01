@@ -2,7 +2,7 @@ import {_game} from "/catan/game.js";
 import {_view} from "/catan/view.js";
 import * as _hex from "/catan/hex.js";
 
-const socket=io("51e3-178-115-41-230.ngrok.io");
+/*const socket=io("51e3-178-115-41-230.ngrok.io");
 
 var name=prompt("pls name");
 var validName=false;
@@ -25,7 +25,7 @@ socket.on('catan-session-dead', id => {
 	console.log("Session for Socket: "+id+", is no longer alive");
 	location.href="/dead";
 })
-
+*/
 var temp = {
     graphics: new PIXI.Graphics(),
     stadt: false,
@@ -40,17 +40,17 @@ const app = new PIXI.Application({
 });
 app.view.id = "pixijs";
 
+var size=50;
+
 var game = new _game();
-var view = new _view(game, temp, app.screen.width, app.screen.height);
+var view = new _view(game, temp, app.screen.width, app.screen.height, size);
 
 var map=document.getElementById('map');
 map.appendChild(app.view);
+app.stage.addChild(view);
 
 function redraw(){
-    app.stage.removeChild(view);
-    view = new _view(game, temp, app.screen.width, app.screen.height);
-    view.drawGame();
-    app.stage.addChild(view);
+    view.drawGame(game, temp, app.screen.width, app.screen.height, size);
 }
 
 redraw();
@@ -58,6 +58,13 @@ redraw();
 let count = 0;
 app.ticker.add(() => {
     count += 0.01;
+});
+
+map.addEventListener('wheel', e => {
+    e.preventDefault();
+    size += e.deltaY * -0.1;
+    size = Math.min(Math.max(50, size), 100);
+    redraw();
 });
 
 map.addEventListener('mouseover', e => {
@@ -95,7 +102,7 @@ document.getElementById('spieler').addEventListener('click', e => {
     temp.marked_tiles = [];
     temp.spieler=(temp.spieler+1)%4;
     document.getElementById('spieler').innerText=temp.spieler;
-    redraw()
+    redraw();
 });
 
 function buildMarkedTiles(){

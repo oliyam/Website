@@ -31,20 +31,31 @@ export class _view extends PIXI.Container{
         wege: new Map()
     };
 
-    constructor(game, temp, width, height){
+    objects = [];
+
+    constructor(game, temp, width, height, size){
         super();
         this.game=game;
         this.temp=temp;
-        console.log(temp);
         this.width=width;
         this.height=height;
+        this.drawGame(game, temp, width, height, size);
     }    
 
     getTemp(){
         return this.temp;
     }
 
-    drawGame(){
+    drawGame(game, temp, width, height, size){
+        this.game=game;
+
+        this.objects.forEach(o => {
+            console.log(o)
+            this.removeChild(o);
+            o.destroy();
+        });
+
+        this.size=size;
         var hex_x = _hex.getHexSize(this.size).x, hex_y = _hex.getHexSize(this.size).y;
 
         //index der längsten reihe
@@ -101,6 +112,7 @@ export class _view extends PIXI.Container{
                 this.positions[hex.q+"/"+hex.r]={x: x, y: y};
 
                 let g = new graphics(hex.q, hex.r);
+                //this.objects.push(g);
                 if(!data.blocked){
                     g.beginFill(this.game.farben_landschaften[data.landschaft], 1);
                     g.drawRegularPolygon(x, y, this.size, 6, 0);
@@ -111,7 +123,8 @@ export class _view extends PIXI.Container{
                     else if(data.landschaft!="wueste"){
                         g.beginFill(0xF2AC44, 1);
                         g.drawCircle(x, y, this.size/4)
-                        let text = new PIXI.Container;
+                        let text = new PIXI.Container();
+                        //this.objects.push(text);
                         text.addChild(new PIXI.Text(data.zahl+(data.zahl==6||data.zahl==9?'.':''), {
                             align: "center",
                             fontFamily: 'Times New Roman',
@@ -124,13 +137,13 @@ export class _view extends PIXI.Container{
                         g.addChild(text);
                     }
                     g.endFill();
-                    super.addChild(g);
+                    this.addChild(g);
                 }
                 else{
                     g.beginFill(0x2693FF, 0.5);
                     g.drawRegularPolygon(x, y, this.size, 6, 0);
                     g.endFill();
-                    super.addChild(g);
+                    this.addChild(g);
                 }
                 g.hitArea = new PIXI.Polygon(_hex.getHex(x, y, this.size, true));
                 g.interactive = true;
@@ -174,9 +187,10 @@ export class _view extends PIXI.Container{
 
                 if(!data.blocked){
                     let g = new PIXI.Graphics();
-                    g.lineStyle(4, 0xF2AC44);
+                    this.objects.push(g);
+                    g.lineStyle(this.size/10, 0xF2AC44);
                     g.drawRegularPolygon(x, y, this.size, 6, 0);
-                    super.addChild(g);
+                    this.addChild(g);
                 }
             }
     }
@@ -186,20 +200,21 @@ export class _view extends PIXI.Container{
         var y=(this.positions[key[0].q+"/"+key[0].r].y-this.positions[key[1].q+"/"+key[1].r].y)/10;
 
         let graphics = new PIXI.Graphics();
+        this.objects.push(graphics);
         graphics.position.x=(this.positions[key[0].q+"/"+key[0].r].x+this.positions[key[1].q+"/"+key[1].r].x)/2;
         graphics.position.y=(this.positions[key[0].q+"/"+key[0].r].y+this.positions[key[1].q+"/"+key[1].r].y)/2;
-        graphics.lineStyle(4, 0xF2AC44);
+        graphics.lineStyle(this.size/12, 0xF2AC44);
         graphics.beginFill(this.game.farben_spieler[value.id], 1);
         graphics.drawCircle(-x, -y, this.size/16);
         graphics.drawCircle(x, y, this.size/16);
-        graphics.lineStyle(10, 0xF2AC44);
+        graphics.lineStyle(this.size/5, 0xF2AC44);
         graphics.moveTo(-x, -y)
         graphics.lineTo(x, y);
-        graphics.lineStyle(4, this.game.farben_spieler[value.id]);
+        graphics.lineStyle(this.size/12, this.game.farben_spieler[value.id]);
         graphics.moveTo(-x, -y)
         graphics.lineTo(x, y);
         graphics.rotation=Math.PI/180*90;
-        super.addChild(graphics);
+        this.addChild(graphics);
 
         return graphics;
     }
@@ -212,7 +227,8 @@ export class _view extends PIXI.Container{
         var b=Math.sqrt((y0-(y0+y1)/2)**2+(x0-(x0+x1)/2)**2);
 
         let graphics = new PIXI.Graphics();
-        graphics.lineStyle(4, 0x47240a); 
+        this.objects.push(graphics);
+        graphics.lineStyle(this.size/10, 0x47240a); 
         graphics.moveTo(x0, y0);
         graphics.lineTo((x0+x1)/2-(y0-(y0+y1)/2)/b*this.size/2, (y0+y1)/2+(x0-(x0+x1)/2)/b*this.size/2);
         graphics.moveTo(x0, y0);
@@ -225,7 +241,8 @@ export class _view extends PIXI.Container{
         else
             graphics.beginFill(0x2693FF, 1);
         graphics.drawCircle(x0, y0, this.size/4)
-        let text = new PIXI.Container;
+        let text = new PIXI.Container();
+        //this.objects.push(text);
         text.addChild(new PIXI.Text(hafen.verhaeltnis[0]+":"+hafen.verhaeltnis[1], {
             align: "center",
             fontFamily: 'Times New Roman',
@@ -236,7 +253,7 @@ export class _view extends PIXI.Container{
         text.x=x0-text.width/2;
         text.y=y0-this.size/3/2;
         graphics.addChild(text);
-        super.addChild(graphics);
+        this.addChild(graphics);
     }
 
     drawKreuzung(value, key){
@@ -249,11 +266,12 @@ export class _view extends PIXI.Container{
             pos.y+=this.positions[e.q+"/"+e.r].y;
         });
         let graphics = new PIXI.Graphics();
-        graphics.lineStyle(4, 0xF2AC44);
+        this.objects.push(graphics);
+        graphics.lineStyle(this.size/10, 0xF2AC44);
         graphics.beginFill(this.game.farben_spieler[value.id], 1);
         graphics.drawRegularPolygon(pos.x/3, pos.y/3, this.size*(value.stadt?1/5:1/6), 6, value.stadt*Math.PI/180*30);
         graphics.endFill();
-        super.addChild(graphics);
+        this.addChild(graphics);
 
         return graphics;
     }
