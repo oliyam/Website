@@ -86,9 +86,10 @@ msgForm.addEventListener('submit', e => {
 						valid=true;
 				}	
 				if(valid){
-					appendOwnMsg("You: "+msg[0]);
 					if(msg[1]!==undefined)
-						appendOwnImg(msg[1]);
+						appendOwnImg("You: "+msg[0], msg[1]);
+					else
+						appendOwnMsg("You: "+msg[0]);
 					socket.emit('send-chat-msg',msg);
 				}
 			}
@@ -155,13 +156,22 @@ function appendImg(msg) {
 	msgContainer.scrollTop=msgContainer.scrollHeight;
 }
 
-function appendOwnImg(msg) {
-	const msgElement=document.createElement("img");
-	msgElement.setAttribute("src", msg);
-	msgElement.setAttribute("onerror","this.style.display='none'");
-	msgElement.setAttribute("style","width:10%;right:0");
-	msgElement.style="word-wrap: break-word;background-color:rgba(255,255,255,0.3);text-align:right;border:1px solid white;width:30%;border-radius: 5px 0px 5px 5px;";
+function appendOwnImg(msg, img) {
+	const image=document.createElement("img");
+	image.setAttribute("src", img);
+	image.setAttribute("onerror","this.style.display='none'");
+	image.setAttribute("style","width:10%;right:0");
+	image.style="word-wrap: break-word;background-color:rgba(255,255,255,0.3);text-align:right;border:1px solid white;width:30%;border-radius: 5px 0px 5px 5px;";
+
+	const msgElement=document.createElement("div");
+	msgElement.style="word-wrap: break-word;border:1px solid white;width:50%;border-radius: 0px 5px 5px;padding: 10px 10px 10px 10px;";
+	if(msg.includes("@"+name))
+		msgElement.style="background-color:rgba(255,122,0,0.3);word-wrap: break-word;border:1px solid white;width:50%;border-radius: 0px 5px 5px;padding: 10px 10px 10px 10px;";
+	msgElement.innerText=msg;
+
+	msgElement.append(image);
 	msgContainer.append(msgElement);
+
 	msgContainer.scrollTop=msgContainer.scrollHeight;
 }
 
