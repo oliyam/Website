@@ -1,4 +1,4 @@
-const socket=io("51e3-178-115-41-230.ngrok.io");
+const socket=io();
 const msgContainer=document.getElementById("msg-card");
 const msgForm=document.getElementById("send-container");
 const msgInput=document.getElementById("msg-input");
@@ -9,7 +9,7 @@ var validName=false;
 var users=[];
 var message="What's your name?";
 
-// Namensanfrage
+//Namensanfrage
 socket.emit('name-request', name);
 
 // Rückmeldung Namensanfrage
@@ -90,7 +90,6 @@ msgForm.addEventListener('submit', e => {
 					if(msg[1]!==undefined)
 						appendOwnImg(msg[1]);
 					socket.emit('send-chat-msg',msg);
-					console.log("s")
 				}
 			}
 		});

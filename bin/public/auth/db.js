@@ -23,6 +23,7 @@ exports.connect = (database) =>{
       
         log("MySQL database connection established: ", "cyan");
         log(USER+"@"+HOST+":"+PORT, "yellow");
-        return connection;
     });
+
+    return connection;
 }

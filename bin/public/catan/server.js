@@ -1,6 +1,4 @@
-exports.run = (server, log) => {
-	
-	const io=require('socket.io')(server, {pingTimeout: 10000});
+exports.run = (io, log) => {
 
 	log("Catan server running", "cyan");
 	

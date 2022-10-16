@@ -2,9 +2,9 @@ console.log("NodeJS server is starting...");
 
 //general dependencies
 const express = require('express'); 
-const app = require('express')();
-const https = require('https');
+const app = express();
 const http = require('http').createServer(app);
+const io=require('socket.io')(http, {pingTimeout: 10000})
 const dotenv = require('dotenv').config();
 const ngrok = require('ngrok');
 
@@ -21,22 +21,24 @@ const chat_server=require('./public/chat/server');
 //catanserver
 const catan_server=require('./public/catan/server');
 
+//start chat server
+chat_server.run(io, log);
+catan_server.run(io, log);
+
 //start http server
 var PORT= process.env.PORT || 80;
-var server=http.listen(PORT, function(){
+http.listen(PORT, function(){
 	log("HTTP server listening on port: ","cyan");
 	log(PORT,"yellow");
 });
 
+/*
 //start ngrok
 ngrok.connect({authtoken: process.env.NGROK_TOKEN, addr: PORT}).then( (url) => {
 	log("Ngrok tunnel established: ", "magenta")
 	log(url+" -> http://localhost:"+PORT, "yellow")
 });
-
-//start chat server
-chat_server.run(server, log);
-catan_server.run(server, log);
+*/
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())

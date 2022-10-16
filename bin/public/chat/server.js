@@ -1,7 +1,10 @@
-exports.run = (server, log) => {
+exports.run = (io, log) => {
 	
 	const pwd=process.env.CHAT_SERVER_PWD;
-	const io=require('socket.io')(server, {pingTimeout: 10000});
+	
+	io.engine.on("connection_error", err => {
+		log("Socket.io connection error", "red")
+	})
 
 	log("Chat server running", "cyan");
 	
@@ -14,8 +17,7 @@ exports.run = (server, log) => {
 	//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
 	var requests={};
 
-	io.on('connection', socket => {	   
-	 
+	io.on('connection', socket => {
 		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
 			ids=ids.filter((value) => {return value!=socket.id;});
@@ -107,5 +109,4 @@ exports.run = (server, log) => {
 			}
 		})
 	})
-
 }
