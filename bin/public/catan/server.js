@@ -1,5 +1,9 @@
 exports.run = (io, log) => {
 
+	io.engine.on("connection_error", err => {
+		log("Socket.io connection error", "red")
+	})
+
 	log("Catan server running", "cyan");
 	
 	//Liste mit allen Benutzernamen an den Stellen der socket-ids
@@ -11,10 +15,10 @@ exports.run = (io, log) => {
 	//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
 	var requests={};
 
-	io.on('catan-connection', socket => {	   
+	io.on('connection', socket => {	   
 	 
 		//wird ausgeführt wenn sich ein socket vom server trennt
-		socket.on('catan-disconnect', () => {
+		socket.on('disconnect', () => {
 			ids=ids.filter((value) => {return value!=socket.id;});
 			if(!(users[socket.id]===null||users[socket.id]===undefined)){
 				socket.broadcast.emit('user-disconnect', users[socket.id]);
@@ -70,7 +74,7 @@ exports.run = (io, log) => {
 				socket.disconnect(true);
 			}
 		})	
-		//wird ausgeführ wenn ein socket einen namen anfragt
+		//wird ausgeführt wenn ein socket einen namen anfragt
 		socket.on('catan-name-request', name => {
 			// Test validity of requested username
 			function isValidName(n){

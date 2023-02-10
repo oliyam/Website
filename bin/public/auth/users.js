@@ -13,19 +13,20 @@ module.exports = {
         next();
     },
 
-    isLoggedIn: (req, res, next) => {
-        try {
-          const token = req.headers.authorization.split(' ')[1];
-          const decoded = jwt.verify(
-            token,
-            process.env.SECRETKEY
-          );
-          req.userData = decoded;
-          next();
-        } catch (err) {
-          return res.status(401).send({
-            message: 'Your session is not valid!'
-          });
-        }
+    isLoggedIn: (req, res) => {
+          const token = req.headers.cookie.split(';').filter(option => option.startsWith("token="))[0].substring(6);
+          console.log(token)
+          if(token){
+            try{
+              var payload = jwt.verify(token,process.env.SECRETKEY)
+            }
+            catch (err){
+               console.log(err)
+            }
+          }
+          if(payload)
+              return payload.username;
+          else
+              return false;
       }
 };

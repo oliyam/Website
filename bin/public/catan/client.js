@@ -2,7 +2,7 @@ import {_game} from "/catan/game.js";
 import {_view} from "/catan/view.js";
 import * as _hex from "/catan/hex.js";
 
-/*const socket=io("51e3-178-115-41-230.ngrok.io");
+const socket=io();
 
 var name=prompt("pls name");
 var validName=false;
@@ -25,9 +25,8 @@ socket.on('catan-session-dead', id => {
 	console.log("Session for Socket: "+id+", is no longer alive");
 	location.href="/dead";
 })
-*/
+
 var temp = {
-    graphics: new PIXI.Graphics(),
     stadt: false,
     spieler: 0,
     marked_tiles: [],
@@ -35,30 +34,40 @@ var temp = {
     wege: new Map()
 }
 
-const app = new PIXI.Application({
-    width: 600, height: 600, backgroundColor: 0x000000, backgroundAlpha: 0.5, antialias: true
-});
-app.view.id = "pixijs";
 
 var size=50;
 
 var game = new _game();
-var view = new _view(game, temp, app.screen.width, app.screen.height, size);
+var view = new _view(game, temp, 600, 600, size);
+
+view.addEventListener("mousemove", (e) => {
+    view.mouse_x=e.clientX-view.getBoundingClientRect().left;
+    view.mouse_y=e.clientY-view.getBoundingClientRect().top;
+    redraw();
+ });
+
+ view.addEventListener("mousedown", (e) => {
+    view.click=1;
+    redraw();
+ });
+
+ view.addEventListener("mouseup", (e) => {
+    view.click=0;
+    redraw();    console.log(temp.marked_tiles)
+ });
 
 var map=document.getElementById('map');
-map.appendChild(app.view);
-app.stage.addChild(view);
+map.appendChild(view);
 
 function redraw(){
-    view.drawGame(game, temp, app.screen.width, app.screen.height, size);
+    view.drawGame(game, temp, 600, 600, size);
+
 }
 
 redraw();
 
 let count = 0;
-app.ticker.add(() => {
-    count += 0.01;
-});
+
 
 map.addEventListener('wheel', e => {
     e.preventDefault();
@@ -88,18 +97,18 @@ document.getElementById('loeschen').addEventListener('click', e => {
         kreuzungen: new Map(),
         wege: new Map()
     }
+    temp.marked_tiles = [];
+    view.temp.marked_tiles = [];
     redraw();
 });
 
 document.getElementById('stadt').addEventListener('click', e => {
     document.getElementById('stadt').innerText=temp.stadt?'Siedlung':'Stadt';
-    temp.marked_tiles = [];
     temp.stadt=!temp.stadt;
     redraw();
 });
 
 document.getElementById('spieler').addEventListener('click', e => {
-    temp.marked_tiles = [];
     temp.spieler=(temp.spieler+1)%4;
     document.getElementById('spieler').innerText=temp.spieler;
     redraw();
@@ -116,6 +125,7 @@ function buildMarkedTiles(){
                 break;
         }
         temp.marked_tiles = [];
+        view.temp.marked_tiles = [];
         redraw();
     }
 }

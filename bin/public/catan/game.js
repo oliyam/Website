@@ -44,10 +44,10 @@ export class _game{
     center = null;
 
     farben_spieler = [
-        0xFF0000,
-        0x0000FF,
-        0xFFFFFF,
-        0xFF8C00
+        "FF0000",
+        "0000FF",
+        "FFFFFF",
+        "FF8C00"
     ];
 
     ressourcen = {
@@ -59,12 +59,12 @@ export class _game{
     };
 
     farben_landschaften = {
-        "wald": 0x027800,
-        "huegelland": 0x9c5819,
-        "weideland": 0x10c21e,
-        "ackerland": 0xfad92f,
-        "gebirge": 0x666666,
-        "wueste": 0xba8f23
+        "wald": "027800",
+        "huegelland": "9c5819",
+        "weideland": "10c21e",
+        "ackerland": "fad92f",
+        "gebirge": "666666",
+        "wueste": "ba8f23"
     };
 
     landschaften = { 

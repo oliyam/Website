@@ -75,7 +75,7 @@ exports.run = (io, log) => {
 				socket.disconnect(true);
 			}
 		})	
-		//wird ausgeführ wenn ein socket einen namen anfragt
+		//wird ausgeführt wenn ein socket einen namen anfragt
 		socket.on('name-request', name => {
 			// Test validity of requested username
 			function isValidName(n){
