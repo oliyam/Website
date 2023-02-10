@@ -60,6 +60,19 @@
     scrollbar-width: none;  /* Firefox */
 }
 
+#chat {
+    position: absolute;
+    top: calc(50% - 275px);
+    right: calc(0%);
+    height: 600px;
+    width: 400px;
+    display: block;
+    border:5px solid white;
+    overflow: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 #map {
     position: absolute;
     top: calc(50% - 275px);

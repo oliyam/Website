@@ -2,29 +2,8 @@ import {_game} from "/catan/game.js";
 import {_view} from "/catan/view.js";
 import * as _hex from "/catan/hex.js";
 
-const socket=io();
+import * as chat from "/chat/client.js";
 
-var name=prompt("pls name");
-var validName=false;
-var users=[];
-var message="What's your name?";
-
-// Namensanfrage
-socket.emit('catan-name-request', name);
-
-// Rückmeldung Namensanfrage
-socket.on('catan-name-valid', valid => {
-	if(valid)
-		console.log("You joined!");
-	else
-		socket.emit('catan-name-request', prompt("name already taken or invalid"));
-})
-
-// Weiterleitung zu /dead bei einer toten Sitzung
-socket.on('catan-session-dead', id => {
-	console.log("Session for Socket: "+id+", is no longer alive");
-	location.href="/dead";
-})
 
 var temp = {
     stadt: false,
