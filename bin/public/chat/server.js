@@ -1,14 +1,13 @@
-//Liste mit allen Benutzernamen an den Stellen der socket-ids
-var users={};
-//Array mit allen socket-ids
-var ids=[];
-//Boolean Liste fur alle Aktiven Sockets
-var ioactive={};
-//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
-var requests={};
-
 exports.run = (io, channel, logger) => {
-	
+	//Liste mit allen Benutzernamen an den Stellen der socket-ids
+	var users={};
+	//Array mit allen socket-ids
+	var ids=[];
+	//Boolean Liste fur alle Aktiven Sockets
+	var ioactive={};
+	//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
+	var requests={};
+
 	const pwd=process.env.CHAT_SERVER_PWD;
 	const channel_name=channel+'>';
 
@@ -114,4 +113,6 @@ exports.run = (io, channel, logger) => {
 			}
 		})
 	})
+
+	return {users, ids, ioactive, requests};
 }

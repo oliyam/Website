@@ -67,10 +67,24 @@
     height: 600px;
     width: 400px;
     display: block;
-    border:5px solid white;
+    border: 5px solid white;
     overflow: auto;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+}
+
+#fps-box {    
+    border-bottom-right-radius: 5px;
+    padding: 0px 5px 5px 0px;
+    font-family: monospace;
+    font-size: 10px;
+    text-align: left;
+    color: black;
+    position: absolute;
+    max-height: 10px;
+    background-color: white;
+    z-index: 489;
+    margin: 0 0;
 }
 
 #map {

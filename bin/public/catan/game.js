@@ -57,6 +57,8 @@ export class spielfeld{
 
     felder = [];
 
+    blocked = [69];
+
     zahlen = [5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11];
 
     raeuber;
@@ -112,9 +114,9 @@ export class spielfeld{
     kreuzungen = new Map();
     wege = new Map();
 
-    constructor(){
+    constructor(size){
 
-        var size=7;
+        size=size*2+1;
 
         this.karte = [{size: size, offset: 0}];
 
@@ -123,17 +125,12 @@ export class spielfeld{
             this.karte.push({size: i, offset: 0});
         }
 
-        console.log(this.karte)
-
         //mitte des spielfeldes ermitteln
-        if(this.karte.length%2)
-            this.karte.forEach(row => {
-                if(row.size%2)
-                    this.center={
-                        q: Math.ceil(row.size/2), 
-                        r: Math.floor(this.karte.length/2)
-                    };
-                });
+        this.center={
+            q: Math.floor(this.karte.length/2), 
+            r: Math.floor(this.karte.length/2)
+        };
+
         //spielfeld erstellen
         var index=0;
         for(let row=0;row<this.karte.length;row++)
@@ -147,6 +144,15 @@ export class spielfeld{
                     };
                     index++;
             }   
+        //manuell blockierte felder als solche markieren
+        var a=0, b=0;
+        for(let key in this.felder){
+            if(this.blocked[b]==a){
+                this.felder[key].blocked=true;
+                b++;
+            }
+            a++;
+        }
         //ring blockierter felder erstellen
         hex.ring({q: this.karte.length-1,r: 0}, this.karte[0].offset).forEach(blocked_tile => {
             this.felder[blocked_tile.q+"/"+blocked_tile.r].blocked=true;
@@ -164,20 +170,22 @@ export class spielfeld{
             if (this.felder.hasOwnProperty(key)){
                 var data=this.felder[key];
                 if(!data.blocked){
-                    if(landschaftsfelder[index]=="wueste")
+                    if(landschaftsfelder[index%landschaftsfelder.length]=="wueste")
                         this.raeuber={q: data.q, r: data.r};
-                    data.landschaft=landschaftsfelder[index++];
+                    data.landschaft=landschaftsfelder[index++%landschaftsfelder.length];
                 }
             }
         }
         //zahlenchips verteilen
         index=0;
         var eckfeld=Math.floor(Math.random()*6);
-        hex.spiral({q: 5,r: 1}, 2).forEach(feld => {
+        hex.spiral({q: size-2,r: 1}, (size-3)/2).forEach(feld => {
             feld=hex.rotate(feld, this.center, eckfeld);
-            this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++%this.zahlen.length];
-            if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
-                index--;
+            if(!this.felder[feld.q+"/"+feld.r].blocked){
+                this.felder[feld.q+"/"+feld.r].zahl=this.zahlen[index++%this.zahlen.length];
+                if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
+                    index--;
+            }
         });
     }
 
@@ -303,7 +311,7 @@ export class spiel{
 
     spieler = [];
 
-    spielfeld = new spielfeld();
+    spielfeld;
 
     entwicklungen = {
         "fortschritte": {
@@ -328,7 +336,9 @@ export class spiel{
     laengste_handelsstrasse;
     groesste_rittermacht;
 
-    constructor(){
+    constructor(size){
+
+        this.spielfeld = new spielfeld(size||3);
 
         for(var i=0;i<4;i++)
             this.spieler.push(new spieler(i));

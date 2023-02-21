@@ -1,15 +1,16 @@
 <html>
+	
 <title>Yameogo</title>
 <head>
+	<link rel="stylesheet" href="/preloader/preloader.css">
+	<script src="/preloader/preloader.js"></script>
+	<div id="preloader"><div id="preloader_loader"></div></div>
 	<script src="https://pixijs.download/release/pixi.js"></script>
 	<script src="https://pixijs.download/release/packages/graphics-extras.js"></script>
 	<script defer src="/socket.io/socket.io.js"></script>
 	<script defer type="module" src="/catan/client.js"></script>
 	<link rel="icon" href="/res/favicon.png" sizes="any" type="image/png">
 	<link rel="stylesheet" href="/catan/catan.css">
-	<link rel="stylesheet" href="/preloader/preloader.css">
-	<script src="/preloader/preloader.js"></script>
-	<div id="preloader"><div id="preloader_loader"></div></div>
 	<script src="/index.js"></script>
 </head>
 <body id="background">
@@ -122,7 +123,11 @@
 			<button id='loeschen'>Zug zurücksetzen</button>
 			<button id='zug_beenden'>Zug beenden</button>
 		</div>
-		<div id=map style="background-image:url('/res/Japanese_Wave_Pattern.svg'); background-size:50%"></div>
+
+		<div id=map style="background-image:url('/res/Japanese_Wave_Pattern.svg');background-repeat:repeat;background-size:50%">
+			<div id="fps-box"></div>
+		</div>
+
 		<div id=chat>
 			<div style="background-color:rgba(0,0,0,0.8);position:absolute;top:0;left:0;right:0;bottom:90%">
 				<h2 style="">best chat ever:</h1>

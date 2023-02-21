@@ -24,7 +24,9 @@ var temp = {
 
 var size=50;
 
-var game = new spiel();
+var spielfeld_size;
+
+var game = new spiel(spielfeld_size);
 var spielfeld = game.spielfeld;
 var view = new _view(spielfeld, temp, 600, 600, size);
 
@@ -55,6 +57,10 @@ var map=document.getElementById('map');
 map.appendChild(view);
 
 function redraw(){
+    render = true;
+
+    start = performance.now();
+
     var ressourcen=game.spieler[temp.spieler].ressourcen;
     var cost=calculateCost();
     var ertrag=dRessourcen();
@@ -97,17 +103,29 @@ function redraw(){
 
     view.drawGame(spielfeld, temp, 600, 600, size);
 
+    end = performance.now();
 }
 
+var fps_ticks=0,render=false, start=0, end=0, interval=500, mul=1;
+
+window.setInterval(function(){
+    if(render){
+        document.getElementById('fps-box').innerText="FPS: "+(1000/(end - start));
+        end = performance.now();
+    }
+    else{
+        document.getElementById('fps-box').innerText="FPS: <"+1000/(interval*mul)+" - No Updates, render stopped!";
+    }
+    if(fps_ticks++%mul==0)
+        render = false;
+}, interval);
+
 redraw();
-
-let count = 0;
-
 
 map.addEventListener('wheel', e => {
     e.preventDefault();
     size += e.deltaY * -0.1;
-    size = Math.min(Math.max(30, size), 100);
+    size = Math.min(Math.max(100/(spielfeld_size||3), size), 100);
     redraw();
 });
 
@@ -125,7 +143,13 @@ document.getElementById('bauen').addEventListener('click', e => {
 
 document.getElementById('loeschen').addEventListener('click', e => {
     temp = {
-        graphics: new PIXI.Graphics(),
+        last_ressourcen: {
+            holz: 0,
+            wolle: 0,
+            lehm: 0,
+            getreide: 0,
+            erz: 0
+        },
         stadt: false,
         spieler: temp.spieler,
         marked_tiles: [],

@@ -27,7 +27,7 @@ export function axialToCube(axial){
     return {
         q: axial.q,
         r: axial.r,
-        s: -axial.q-axial.r
+        s: (-axial.q-axial.r)
     };
 }
 
@@ -85,20 +85,21 @@ export function neighbours(t0, t1){
 }
 
 export function rotate(hex, center, i){
-    if(typeof i=="undefined"){
-        var hex=axialToCube(hex);
+    if(i===undefined){
+        hex=axialToCube(hex);
         center=axialToCube(center);
         hex.q=hex.q-center.q;
         hex.s=hex.s-center.s;
         hex.r=hex.r-center.r;
         return cubeToAxial({
-            q: -hex.s+center.q,
-            r: -hex.q+center.r,
-            s: -hex.r+center.s
+            q: (-hex.s+center.q),
+            r: (-hex.q+center.r),
+            s: (-hex.r+center.s)
         });
     }
     for(var o=0;o<i;o++)
         hex=rotate(hex, center);
+
     return hex;
 }
 

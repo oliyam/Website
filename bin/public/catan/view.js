@@ -70,6 +70,7 @@ export class _view extends HTMLCanvasElement{
     }
 
     drawGame(game, temp, width, height, size){
+
         this.game=game;
         this.temp=temp;
     
@@ -144,11 +145,6 @@ export class _view extends HTMLCanvasElement{
         
                         if(!data.blocked){
                             g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
-                            var imag = new Image();
-                            imag.src = this.bilder_landschaften[data.landschaft];
-                            this.append(imag);
-                            var pattern = g.createPattern(imag, 'repeat');
-                            g.fillStyle = pattern;
 
                             g.lineWidth = this.size/5;
                             g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
@@ -185,7 +181,7 @@ export class _view extends HTMLCanvasElement{
                         polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
                         g.stroke();
                     }
-                    if(_hex.isEqual(this.game.raeuber, hex)){
+                    if(this.game.raeuber&&_hex.isEqual(this.game.raeuber, hex)){
                         g.fillStyle = "#000000";  
                         g.beginPath();
                         g.arc(x, y, this.size/4, 0, 2*Math.PI)
