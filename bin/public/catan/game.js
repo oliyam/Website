@@ -34,15 +34,7 @@ class spieler {
 
 export class spielfeld{
 
-    karte = [
-        {size: 4, offset: 3},
-        {size: 5, offset: 2},
-        {size: 6, offset: 1},
-        {size: 7, offset: 0},
-        {size: 6, offset: 0},
-        {size: 5, offset: 0},
-        {size: 4, offset: 0}
-    ];
+    karte = [];
 
     center = null;
 
@@ -121,6 +113,18 @@ export class spielfeld{
     wege = new Map();
 
     constructor(){
+
+        var size=7;
+
+        this.karte = [{size: size, offset: 0}];
+
+        for(var i=size-1;i>Math.floor(size/2);i--){
+            this.karte.unshift({size: i, offset: size-i});
+            this.karte.push({size: i, offset: 0});
+        }
+
+        console.log(this.karte)
+
         //mitte des spielfeldes ermitteln
         if(this.karte.length%2)
             this.karte.forEach(row => {
@@ -144,7 +148,7 @@ export class spielfeld{
                     index++;
             }   
         //ring blockierter felder erstellen
-        hex.ring({q: 6,r: 0}, 3).forEach(blocked_tile => {
+        hex.ring({q: this.karte.length-1,r: 0}, this.karte[0].offset).forEach(blocked_tile => {
             this.felder[blocked_tile.q+"/"+blocked_tile.r].blocked=true;
         });
         //landschaftskarten stapel erstellen

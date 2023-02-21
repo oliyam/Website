@@ -7,6 +7,13 @@ import * as channel from "/chat/channel.js";
 channel.run("catan");
 
 var temp = {
+    last_ressourcen: {
+        holz: 0,
+        wolle: 0,
+        lehm: 0,
+        getreide: 0,
+        erz: 0
+    },
     stadt: false,
     spieler: 0,
     marked_tiles: [],
@@ -50,8 +57,14 @@ map.appendChild(view);
 function redraw(){
     var ressourcen=game.spieler[temp.spieler].ressourcen;
     var cost=calculateCost();
+    var ertrag=dRessourcen();
 
-    console.log(cost)
+    document.getElementById('d+_holz').innerText='+'+ertrag.holz;
+    document.getElementById('d+_wolle').innerText='+'+ertrag.wolle;
+    document.getElementById('d+_lehm').innerText='+'+ertrag.lehm;
+    document.getElementById('d+_getreide').innerText='+'+ertrag.getreide;
+    document.getElementById('d+_erz').innerText='+'+ertrag.erz;
+
 
     document.getElementById('holz').innerText=ressourcen.holz;
     document.getElementById('wolle').innerText=ressourcen.wolle;
@@ -70,6 +83,12 @@ function redraw(){
     document.getElementById('total_lehm').innerText=ressourcen.lehm-cost.lehm;
     document.getElementById('total_getreide').innerText=ressourcen.getreide-cost.getreide;
     document.getElementById('total_erz').innerText=ressourcen.erz-cost.erz;
+
+    document.getElementById('total_holz').style=ressourcen.holz-cost.holz>=0?"color:white":"color:red";
+    document.getElementById('total_wolle').style=ressourcen.wolle-cost.wolle>=0?"color:white":"color:red";
+    document.getElementById('total_lehm').style=ressourcen.lehm-cost.lehm>=0?"color:white":"color:red";
+    document.getElementById('total_getreide').style=ressourcen.getreide-cost.getreide>=0?"color:white":"color:red";
+    document.getElementById('total_erz').style=ressourcen.erz-cost.erz>=0?"color:white":"color:red";
 
     document.getElementById('sp_label').innerText=game.spieler[temp.spieler].siegespunkte+"/10";
     document.getElementById('sp').value=game.spieler[temp.spieler].siegespunkte;
@@ -171,6 +190,15 @@ function calculateCost(){
     });
 
     return cost;
+}
+
+function dRessourcen(){
+    var d_ressourcen={};
+
+    for(const [key, value] of Object.entries(game.spieler[temp.spieler].ressourcen))
+         d_ressourcen[key]=value-temp.last_ressourcen[key];
+
+    return d_ressourcen;
 }
 
 function buildMarkedTiles(){

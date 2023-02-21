@@ -92,7 +92,7 @@ export class _view extends HTMLCanvasElement{
         this.drawTiles();
 
         this.game.haefen.forEach(hafen => {
-            this.drawHafen(hafen);
+            //this.drawHafen(hafen);
         });
 
         this.drawOutlines();
@@ -142,14 +142,14 @@ export class _view extends HTMLCanvasElement{
 
                 let g = this.getContext("2d");
         
-                        if(!data.blocked){/*
+                        if(!data.blocked){
                             g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
                             var imag = new Image();
                             imag.src = this.bilder_landschaften[data.landschaft];
                             this.append(imag);
                             var pattern = g.createPattern(imag, 'repeat');
                             g.fillStyle = pattern;
-*/
+
                             g.lineWidth = this.size/5;
                             g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
                             g.fillStyle = "#"+this.farben_landschaften[data.landschaft];
