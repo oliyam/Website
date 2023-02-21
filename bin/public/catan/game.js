@@ -5,32 +5,35 @@ class spieler {
 
     id;
 
+    siegespunkte=0;
+
     bauen={
-        strasse,
-        siedlung,
-        stadt
+        strassen: 15,
+        siedlungen: 5,
+        staedte: 4
     };
 
     ressourcen={
-        holz,
-        lehm,
-        erz,
-        getreide,
-        wolle
+        holz: 6,
+        lehm: 4,
+        erz: 0,
+        getreide: 2,
+        wolle: 9
     };
 
-    entwicklung={
-        ritter,
-        siegespunkt,
-        fortschritt
+    entwicklungen={
+        ritter: [],
+        siegespunkte: [],
+        fortschritt: []
     };
 
-    constructor(){
-        this.bauen=[60,20,16];
+    constructor(id){
+        this.id=id;
     }
 };
 
-export class _game{
+export class spielfeld{
+
     karte = [
         {size: 4, offset: 3},
         {size: 5, offset: 2},
@@ -43,28 +46,12 @@ export class _game{
 
     center = null;
 
-    farben_spieler = [
-        "FF0000",
-        "0000FF",
-        "FFFFFF",
-        "FF8C00"
-    ];
-
     ressourcen = {
-        "holz": "wald",
-        "lehm": "huegelland",
-        "wolle": "weideland",
-        "getreide": "ackerland",
-        "erz": "gebirge"
-    };
-
-    farben_landschaften = {
-        "wald": "027800",
-        "huegelland": "9c5819",
-        "weideland": "10c21e",
-        "ackerland": "fad92f",
-        "gebirge": "666666",
-        "wueste": "ba8f23"
+        "holz":"wald",
+        "lehm":"huegelland",
+        "wolle":"weideland",
+        "getreide":"ackerland",
+        "erz":"gebirge"
     };
 
     landschaften = { 
@@ -77,14 +64,6 @@ export class _game{
     };
 
     felder = [];
-
-    entwicklungen = {
-        "ritter": 14,
-        "fortschritt": 6,
-        "siegpunkt": 5
-    }
-
-    entwicklungsstapel = [];
 
     zahlen = [5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11];
 
@@ -196,11 +175,6 @@ export class _game{
             if(this.felder[feld.q+"/"+feld.r].landschaft=="wueste")
                 index--;
         });
-
-        //entwicklungskarten stapel erstellen
-        for(let key in this.entwicklungen)
-            for(let i=0;i<this.entwicklungen[key];i++)
-                this.entwicklungsstapel.push(key);
     }
 
     has(array, tile){
@@ -279,12 +253,8 @@ export class _game{
 
     isFree(temp){
         let frei = true;
-
-        if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
-            frei = true;
-
-        if(temp.marked_tiles.length&&!this.areAllBlocked(temp.marked_tiles))
-            switch(temp.marked_tiles.length){
+            if(temp.marked_tiles.length&&!this.areAllBlocked(temp.marked_tiles))
+              switch(temp.marked_tiles.length){
                 case 2:
                     this.wege.forEach((value, key) => {
                         if(this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))
@@ -319,5 +289,90 @@ export class _game{
                     return frei;
             }
         return false;
+    }
+};
+
+export class spiel{
+
+    runde = 0;
+    wuerfel = [4,2];
+
+    spieler = [];
+
+    spielfeld = new spielfeld();
+
+    entwicklungen = {
+        "fortschritte": {
+            "monopol": 2,
+            "strassenbau": 2,
+            "erfindug": 2
+        },
+        "siegespunkt": {
+            "bibliothek": 1,
+            "marktplatz":1 ,
+            "rathaus": 1,
+            "kirche": 1,
+            "universität": 1 
+        },
+        "ritter": {
+            "generisch": 14
+        }
+    };
+
+    entwicklungsstapel = [];
+
+    laengste_handelsstrasse;
+    groesste_rittermacht;
+
+    constructor(){
+
+        for(var i=0;i<4;i++)
+            this.spieler.push(new spieler(i));
+        
+        //entwicklungskarten stapel erstellen
+        for(let key in this.entwicklungen)
+            for(let key_ in this.entwicklungen[key]){
+                var karte = {};
+                karte[key] = key_;
+                this.entwicklungsstapel=this.entwicklungsstapel.concat(new Array(this.entwicklungen[key][key_]).fill(karte));
+            }
+        //entwicklungsstapel mischen        
+        this.entwicklungsstapel=array.shuffleArray(this.entwicklungsstapel);
+    }
+
+    runde(){
+
+        //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
+
+        var aktiver_spieler = runde%4;
+
+        this.wuerfeln()
+
+
+    }
+
+    wuerfeln(){
+        this.wuerfel[0]=Math.floor(Math.random()*6+1);
+        this.wuerfel[1]=Math.floor(Math.random()*6+1);
+
+        return this.wuerfel;
+    }
+
+    lhs_ermitteln(){
+
+    }
+
+    grm_ermitteln(){
+        
+    }
+
+    sp_berechnen(){
+        for(var spieler in this.spieler){
+            spieler.siegespunkte=(5-spieler.bauen.siedlungen)+2*(4-spieler.bauen.steadte)+spieler.entwicklung.siegespunkt
+            if(this.grm==spieler.id)
+                spieler.siegespunkte+=2
+            if(this.lhs==spieler.id)
+                spieler.siegespunkte+=2
+        }
     }
 };

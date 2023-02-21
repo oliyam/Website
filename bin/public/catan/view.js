@@ -9,6 +9,9 @@ export class _view extends HTMLCanvasElement{
     y=0;
     
     mouse_x;mouse_y;click=0;
+    last_x;last_y;click_last=0;
+
+    offset_x=0;offset_y=0;
 
     game;
     positions = new Map();
@@ -22,6 +25,31 @@ export class _view extends HTMLCanvasElement{
     };
 
     objects = [];
+
+    farben_landschaften = {
+        "wald": "027800",
+        "huegelland": "9c5819",
+        "weideland": "10c21e",
+        "ackerland": "fad92f",
+        "gebirge": "666666",
+        "wueste": "ba8f23"
+    };
+
+    bilder_landschaften = {
+        "wald": "/res/wald.jpg",
+        "huegelland": "9c5819",
+        "weideland": "10c21e",
+        "ackerland": "fad92f",
+        "gebirge": "666666",
+        "wueste": "ba8f23"
+    }
+
+    farben_spieler = [
+        "FF0000",
+        "0000FF",
+        "FFFFFF",
+        "FF8C00"
+    ];
 
     constructor(game, temp, width, height, size){
         super();
@@ -43,6 +71,7 @@ export class _view extends HTMLCanvasElement{
 
     drawGame(game, temp, width, height, size){
         this.game=game;
+        this.temp=temp;
     
         super.getContext("2d").clearRect(0, 0, 600, 600);
 
@@ -69,23 +98,31 @@ export class _view extends HTMLCanvasElement{
         this.drawOutlines();
 
         this.temp.wege.forEach((value, key) => {
-            this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
+            this.drawStrasse(value, key, this.farben_spieler[value.id]);
         });
 
         this.game.wege.forEach((value, key) => {
-            this.drawStrasse(value, key, this.game.farben_spieler[value.id]);
+            this.drawStrasse(value, key, this.farben_spieler[value.id]);
         });
         
         this.temp.kreuzungen.forEach((value, key) => {
-            this.drawKreuzung(value, key);
+            this.drawKreuzung(value, key, this.farben_spieler[value.id]);
         });
 
         this.game.kreuzungen.forEach((value, key) => {
-            this.drawKreuzung(value, key);
+            this.drawKreuzung(value, key, this.farben_spieler[value.id]);
         });
 
-        this.drawMarkedTiles();
+        this.drawMarkedTiles(this.temp.spieler);
         
+        if(this.click_last&&this.click){
+            this.offset_x += this.mouse_x-this.last_x;
+            this.offset_y += this.mouse_y-this.last_y;
+        }
+
+        this.click_last=this.click;
+        this.last_x=this.mouse_x;
+        this.last_y=this.mouse_y;
     }
 
     drawTiles(){
@@ -98,18 +135,32 @@ export class _view extends HTMLCanvasElement{
                     r: data.r
                 };
 
-                var x=this.x+_hex.hexToPixel(hex, this.size).x;
-                var y=this.y+_hex.hexToPixel(hex, this.size).y;
+                var x=this.x+_hex.hexToPixel(hex, this.size).x+this.offset_x;
+                var y=this.y+_hex.hexToPixel(hex, this.size).y+this.offset_y;
 
                 this.positions[hex.q+"/"+hex.r]={x: x, y: y};
 
                 let g = this.getContext("2d");
         
-                        if(!data.blocked)
-                          g.fillStyle = "#"+this.game.farben_landschaften[data.landschaft];
-                        else
-                          g.fillStyle = "#2693FF";
+                        if(!data.blocked){/*
+                            g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
+                            var imag = new Image();
+                            imag.src = this.bilder_landschaften[data.landschaft];
+                            this.append(imag);
+                            var pattern = g.createPattern(imag, 'repeat');
+                            g.fillStyle = pattern;
+*/
+                            g.lineWidth = this.size/5;
+                            g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
+                            g.fillStyle = "#"+this.farben_landschaften[data.landschaft];
+                        }
+                        else{
+                            g.fillStyle = "rgba(0,0,0,0)";
+                            g.lineWidth = this.size/5;
+                            g.strokeStyle = "#2693ff";
+                        }
   
+
                     g.beginPath();
                     polygon(g, x, y, this.size, 6, Math.PI/2, 0)
                     if(g.isPointInPath(this.mouse_x, this.mouse_y)){
@@ -122,8 +173,13 @@ export class _view extends HTMLCanvasElement{
                         }
                     }
                     g.fill();
+
+                    g.beginPath();
+                    polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
+                    g.stroke();
+
                     if(this.temp.marked_tiles.some(e => _hex.isEqual(e, hex))){
-                        g.lineWidth = 10;
+                        g.lineWidth = this.size/5;
                         g.strokeStyle = "#FF0088";
                         g.beginPath();
                         polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
@@ -138,19 +194,19 @@ export class _view extends HTMLCanvasElement{
                     else if(data.landschaft!="wueste"&&!data.blocked){
                         g.beginPath();
                         g.fillStyle = "#F2AC44";
-                        g.arc(x, y, this.size/4, 0, 2*Math.PI)
+                        g.arc(x, y, this.size*0.8/2, 0, 2*Math.PI)
                         g.fill();
                     
                         g.beginPath();
-                        g.lineWidth = 2;
+                        g.lineWidth = this.size/25;
                         g.strokeStyle = "#000000"; 
-                        g.arc(x, y, this.size/4, 0, 2*Math.PI)
+                        g.arc(x, y, this.size*0.8/2, 0, 2*Math.PI)
                         g.stroke()
 
                         g.fillStyle = data.zahl==6||data.zahl==8?'red':'black';
-                        g.font = "bold "+this.size/3+"px Times New Roman";
+                        g.font = "bold "+this.size/2+"px Monospace";
                         var nr=data.zahl+(data.zahl==6||data.zahl==9?'.':'');
-                        g.fillText(nr, x-g.measureText(nr).width/2, y+this.size/3/4); 
+                        g.fillText(nr, x-g.measureText(nr).width/2, y+this.size*0.8/2-this.size/4); 
                     }
                 }
             }
@@ -166,12 +222,34 @@ export class _view extends HTMLCanvasElement{
                     r: data.r
                 };
 
-                var x=this.x+_hex.hexToPixel(hex, this.size).x;
-                var y=this.y+_hex.hexToPixel(hex, this.size).y;
+                var x=this.x+_hex.hexToPixel(hex, this.size).x+this.offset_x;
+                var y=this.y+_hex.hexToPixel(hex, this.size).y+this.offset_y;
+
+                let g = this.getContext("2d");
+                if(data.blocked){
+                    g.lineWidth = this.size/10;
+                    g.strokeStyle = "#FFFFFF";
+                    g.beginPath();
+                    polygon(g, x, y, this.size, 6, Math.PI/2, 0)
+                    g.stroke();
+                }
+            }
+        }
+
+        for(let key in this.game.felder){
+            if (this.game.felder.hasOwnProperty(key)){
+                var data=this.game.felder[key];
+                var hex = {
+                    q: data.q,
+                    r: data.r
+                };
+
+                var x=this.x+_hex.hexToPixel(hex, this.size).x+this.offset_x;
+                var y=this.y+_hex.hexToPixel(hex, this.size).y+this.offset_y;
 
                 let g = this.getContext("2d");
                 if(!data.blocked){
-                    g.lineWidth = 5;
+                    g.lineWidth = this.size/10;
                     g.strokeStyle = "#F2AC44";
                     g.beginPath();
                     polygon(g, x, y, this.size, 6, Math.PI/2, 0)
@@ -181,7 +259,7 @@ export class _view extends HTMLCanvasElement{
         }
     }
         
-    drawStrasse(value, key){
+    drawStrasse(value, key, color){
         let g = this.getContext("2d");
 
         var x=(this.positions[key[0].q+"/"+key[0].r].x+this.positions[key[1].q+"/"+key[1].r].x)/2;
@@ -201,12 +279,12 @@ export class _view extends HTMLCanvasElement{
         g.lineTo(x-vec_y, y+vec_x);
         g.stroke()
 
-        g.fillStyle = "#"+this.game.farben_spieler[value.id];
+        g.fillStyle = "#"+color;
         g.beginPath();
         g.arc(x+vec_y, y-vec_x, this.size/25, 0, 2*Math.PI) 
         g.arc(x-vec_y, y+vec_x, this.size/25, 0, 2*Math.PI) 
         g.fill()
-        g.strokeStyle = "#"+this.game.farben_spieler[value.id];
+        g.strokeStyle = "#"+color;
         g.lineWidth = this.size/12;
         g.beginPath();
         g.moveTo(x+vec_y, y-vec_x);
@@ -235,26 +313,32 @@ export class _view extends HTMLCanvasElement{
         g.stroke();
 
         if(hafen.ressource)
-            g.fillStyle = "#"+this.game.farben_landschaften[this.game.ressourcen[hafen.ressource]];
+            g.fillStyle = "#"+this.farben_landschaften[this.game.ressourcen[hafen.ressource]];
         else
             g.fillStyle = "#2693FF";
         g.beginPath();
-        g.arc(x0, y0, this.size/3, 0, 2*Math.PI)
+        g.arc(x0, y0, this.size*0.8/2, 0, 2*Math.PI)
         g.fill();
     
         g.beginPath();
-        g.lineWidth = 2;
-        g.strokeStyle = "#000000"; 
-        g.arc(x0, y0, this.size/3, 0, 2*Math.PI)
+        g.lineWidth = this.size/25;
+        g.strokeStyle = "#ffffff"; 
+        g.arc(x0, y0, this.size*0.8/2, 0, 2*Math.PI)
         g.stroke()
 
-        g.fillStyle = 'black';
-        g.font = "bold "+this.size/4+"px Times New Roman";
+
+        g.font = "bold "+this.size/3+"px Monospace";
         var nr=hafen.verhaeltnis[0]+":"+hafen.verhaeltnis[1];
-        g.fillText(nr, x0-g.measureText(nr).width/2, y0+this.size/3/4); 
+
+        g.lineWidth = this.size/12;
+        g.strokeStyle = "#000000"; 
+        g.strokeText(nr, x0-g.measureText(nr).width/2, y0+this.size*0.8/3-this.size/3/2); 
+        
+        g.fillStyle = "#ffffff";
+        g.fillText(nr, x0-g.measureText(nr).width/2, y0+this.size*0.8/3-this.size/3/2);
     }
 
-    drawKreuzung(value, key){
+    drawKreuzung(value, key, color){
         let g = this.getContext("2d");
 
         var pos={
@@ -268,23 +352,23 @@ export class _view extends HTMLCanvasElement{
 
         g.lineWidth = this.size/10;
         g.strokeStyle = "#F2AC44";
-        g.fillStyle = "#"+this.game.farben_spieler[value.id];
+        g.fillStyle = "#"+color;
         g.beginPath();
-        polygon(g, pos.x/3, pos.y/3, this.size*(value.stadt?1/6:1/4), 6, value.stadt*Math.PI/180*30, 0);
+        polygon(g, pos.x/3, pos.y/3, this.size*(value.stadt?1/4:1/6), 6, !value.stadt*Math.PI/180*30, 0);
         g.fill();
         g.stroke();
 
     }
 
-    drawMarkedTiles(){
+    drawMarkedTiles(player){
         
         if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.isFree(this.temp)){
             switch(this.temp.marked_tiles.length){
                 case 2:
-                    this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles);
+                    this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles, this.farben_spieler[player]);
                     break;
                 case 3:
-                    this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles);
+                    this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles, this.farben_spieler[player]);
                     break;
             }
         }

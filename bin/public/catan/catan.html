@@ -15,25 +15,124 @@
 <body id="background">
 	<div id="everything">
 		<h1>C A T A N</h1>
-		<div id=controls>
-			<button id='reset_map'>Reset Map Position</button>
+		<div id=controls style="background-color:rgba(0,0,0,0.8);">
+			<h2>Ressourcen</h2>
+			<table style="width:100%">
+				<tr>
+					<th>Holz</th>
+					<th>Wolle</th>
+					<th>Lehm</th>
+					<th>Getreide</th>
+					<th>Erz</th>
+				</tr>
+				<tr>
+					<th><img src="/catan/res/Fichtenstamm.webp" style="width:40px;height:auto;"></img></th>
+					<th><img src="/catan/res/Weisse_Wolle.webp" style="width:40px;height:auto;"></img></th>
+					<th><img src="/catan/res/Ziegelsteine.webp" style="width:40px;height:auto;"></img></th>
+					<th><img src="/catan/res/Strohballen.webp" style="width:40px;height:auto;"></img></th>
+					<th><img src="/catan/res/Eisenerz.webp" style="width:40px;height:auto;"></img></th>
+				</tr>
+				<tr>
+					<th id="holz">0</th>
+					<th id="wolle">0</th>
+					<th id="lehm">0</th>
+					<th id="getreide">0</th>
+					<th id="erz">0</th>
+				</tr>
+				<tr>
+					<th id="d+_holz" style="color:green">+0</th>
+					<th id="d+_wolle" style="color:green">+0</th>
+					<th id="d+_lehm" style="color:green">+0</th>
+					<th id="d+_getreide" style="color:green">+0</th>
+					<th id="d+_erz" style="color:green">+0</th>
+				</tr>
+				<tr>
+					<th id="d-_holz" style="color:red">-0</th>
+					<th id="d-_wolle" style="color:red">-0</th>
+					<th id="d-_lehm" style="color:red">-0</th>
+					<th id="d-_getreide" style="color:red">-0</th>
+					<th id="d-_erz" style="color:red">-0</th>
+				</tr>
+				<tr style="border-top: double;">
+					<th id="total_holz">0</th>
+					<th id="total_wolle">0</th>
+					<th id="total_lehm">0</th>
+					<th id="total_getreide">0</th>
+					<th id="total_erz">0</th>
+				</tr>
+			</table>
+
+			<h2>Karten</h2>
+			<table style="width:100%">
+				<tr>
+					<th>Ritter</th>
+					<th>Fortschritte</th>
+					<th>SP-Karten</th>
+				</tr>
+				<tr>
+					<th>0</th>
+					<th>0</th>
+					<th>0</th>
+				</tr>
+				<tr>
+					<th></th>
+					<th>
+						<select name="cars" id="cars">
+							<option value="volvo">Volvo</option>
+							<option value="saab">Saab</option>
+							<option value="opel">Opel</option>
+							<option value="audi">Audi</option>
+					  	</select>
+					</th>
+					<th>
+						<select name="cars" id="cars">
+							<option value="volvo">Volvo</option>
+							<option value="saab">Saab</option>
+							<option value="opel">Opel</option>
+							<option value="audi">Audi</option>
+						</select>
+					</th>
+				</tr>
+				<th><button id='ritter'>Ausspielen</button></th>
+				<th><button id='fortschritt'>Ausspielen</button></th>
+				<th></th>
+			</table>
+			<table style="width:100%">
+				<tr>
+					<th>
+						<h2>SP</h2>
+						<label id="sp_label" for="sp">0/10</label>
+						<progress id="sp" value="0" max="10"></progress>
+					</th>
+					<th>
+						<h2>Würfel</h2>
+						<img id="w6_0" src="/catan/res/wuerfel/wuerfelaugen-bs-1-k.png" style="width:40px;height:auto;"></img>
+						<img id="w6_1" src="/catan/res/wuerfel/wuerfelaugen-bs-6-k.png" style="width:40px;height:auto;"></img>
+					</th>
+				</tr>
+			</table>
+			<h2>Aktionen</h2>
+			<button id='reset_map'>Spielfeld zentrieren</button>
 			<button id='spieler'>0</button>
-			<button id='bauen'>bauen</button>
-			<button id='stadt'>Siedlung</button>
-			<button id='loeschen'>löschen</button>
+			<button id='bauen'>Bauen</button>
+			<button id='stadt'>Stadt</button>
+
+			<button id='entwicklung'>Entwicklungskarten ziehen: 0</button>
+
+			<button id='loeschen'>Zug zurücksetzen</button>
 			<button id='zug_beenden'>Zug beenden</button>
 		</div>
-		<div id=map></div>
+		<div id=map style="background-image:url('/res/Japanese_Wave_Pattern.svg'); background-size:50%"></div>
 		<div id=chat>
 			<div style="background-color:rgba(0,0,0,0.8);position:absolute;top:0;left:0;right:0;bottom:90%">
-				<h2 style="padding: 5px 10px 10px 10px;">best chat ever:</h1>
+				<h2 style="">best chat ever:</h1>
 			</div>
 			<div id="msg-card" style="border-radius:0px 0px 10px 10px;overflow:auto;background-color:rgba(0,0,0,0.6);position:absolute;top:10%;left:0;right:30%;bottom:10%">
 
 			</div>
 			
 			<div id="online" style="overflow:auto;border-radius:0px 0px 10px 10px;background-color:rgba(0,0,0,0.7);position:absolute;top:10%;left:70%;right:0;bottom:10%">
-				<h3 style="padding: 5px 10px;">Online:</h1>
+				<h3 style="">Online:</h1>
 			</div>
 			
 			<form id="send-container" style="position:absolute;bottom:0;right:0;left:0;top:90%">

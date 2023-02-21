@@ -91,7 +91,7 @@
 #map::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
 }
-
-.pixijs{
-    margin: auto;
-}
+<style>
+table { border-collapse: collapse; }
+tr:nth-child(3) { border: solid thin; }
+</style>

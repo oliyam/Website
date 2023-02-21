@@ -1,29 +1,34 @@
-exports.run = (io, log) => {
+//Liste mit allen Benutzernamen an den Stellen der socket-ids
+var users={};
+//Array mit allen socket-ids
+var ids=[];
+//Boolean Liste fur alle Aktiven Sockets
+var ioactive={};
+//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
+var requests={};
+
+exports.run = (io, channel, logger) => {
 	
 	const pwd=process.env.CHAT_SERVER_PWD;
-	
+	const channel_name=channel+'>';
+
+	function log(txt, color){
+		logger(channel_name+' '+txt, color);
+	};
+
 	io.engine.on("connection_error", err => {
 		log("Socket.io connection error", "red")
 	})
 
 	log("Chat server running", "cyan");
-	
-	//Liste mit allen Benutzernamen an den Stellen der socket-ids
-	var users={};
-	//Array mit allen socket-ids
-	var ids=[];
-	//Boolean Liste fur alle Aktiven Sockets
-	var ioactive={};
-	//Liste mit der Anzahl an name-requests an den Stellen der socket-ids
-	var requests={};
 
 	io.on('connection', socket => {
 		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
 			ids=ids.filter((value) => {return value!=socket.id;});
 			if(!(users[socket.id]===null||users[socket.id]===undefined)){
-				socket.broadcast.emit('user-disconnect', users[socket.id]);
-				socket.broadcast.emit('get-users', {users: users, ids: ids});
+				socket.broadcast.emit(channel_name+'user-disconnect', users[socket.id]);
+				socket.broadcast.emit(channel_name+'get-users', {users: users, ids: ids});
 				delete ioactive[socket.id];
 				delete requests[socket.id];
 				delete users[socket.id];
@@ -31,7 +36,7 @@ exports.run = (io, log) => {
 			log("disconnect: "+socket.id,"red");
 		})
 		//wird ausgeführ wenn eine nachricht ankommt
-		socket.on('send-chat-msg', msg =>{
+		socket.on(channel_name+'send-chat-msg', msg =>{
 			//log
 			if(msg[1]!==undefined)
 				log(users[socket.id]+": "+msg[0]+"; "+msg[1],"magenta");
@@ -68,15 +73,15 @@ exports.run = (io, log) => {
 						log("denied!","red");
 				}
 				else if(ioactive[socket.id])
-						socket.broadcast.emit('chat-msg', {msg: msg, name: users[socket.id]});
+						socket.broadcast.emit(channel_name+'chat-msg', {msg: msg, name: users[socket.id]});
 			}	
 			else{
-				io.to(socket.id).emit('session-dead', socket.id);
+				io.to(socket.id).emit(channel_name+'session-dead', socket.id);
 				socket.disconnect(true);
 			}
 		})	
 		//wird ausgeführt wenn ein socket einen namen anfragt
-		socket.on('name-request', name => {
+		socket.on(channel_name+'name-request', name => {
 			// Test validity of requested username
 			function isValidName(n){
 				return !(Object.values(users).indexOf(n)>-1||n==""||n===null||n===undefined||n.includes(" ")||n.charAt(n.length-1)==":"||n.length>200||n=="null"||n=="You"||n=="you"||n=="YOU"||n=="Admin"||n=="undefined"||n=="plsnull");
@@ -84,24 +89,24 @@ exports.run = (io, log) => {
 			if(requests[socket.id]===undefined)	
 				requests[socket.id]=1;
 			else if(requests[socket.id]>10){
-				io.to(socket.id).emit('session-dead', socket.id);
+				io.to(socket.id).emit(channel_name+'session-dead', socket.id);
 				socket.disconnect(true);
 			}
 			else
 				requests[socket.id]++;
 			if(users[socket.id]===undefined){
 				var valid=isValidName(name);
-				console.log("testing validity...");
-				io.to(socket.id).emit('name-valid', valid);
-				console.log("name request: "+name+"; valid: "+valid);
+				log("testing validity...");
+				io.to(socket.id).emit(channel_name+'name-valid', valid);
+				log("name request: "+name+"; valid: "+valid);
 				if(valid){
 					log("*************************************************************","green");
 					ioactive[socket.id]=true;
 					users[socket.id]=name;  
 					ids.push(socket.id);
-					io.to(socket.id).emit('get-users', {users: users, ids: ids});
-					socket.broadcast.emit('get-users', {users: users, ids: ids});
-					socket.broadcast.emit('user-connected', users[socket.id]);
+					io.to(socket.id).emit(channel_name+'get-users', {users: users, ids: ids});
+					socket.broadcast.emit(channel_name+'get-users', {users: users, ids: ids});
+					socket.broadcast.emit(channel_name+'user-connected', users[socket.id]);
 					for(var i=0;i<ids.length;i++)
 						log("socket: "+i+"; id: "+ids[i]+"; name: "+users[ids[i]]+"; active: "+ioactive[ids[i]],"green");
 					log("*************************************************************","green");

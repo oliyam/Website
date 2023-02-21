@@ -22,8 +22,8 @@ const chat_server=require('./public/chat/server');
 const catan_server=require('./public/catan/server');
 
 //start chat server
-chat_server.run(io, log);
-catan_server.run(io, log);
+chat_server.run(io, 'chat', log);
+catan_server.run(io, 'catan', log);
 
 //start http server
 var PORT= process.env.PORT || 80;
