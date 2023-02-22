@@ -24,7 +24,8 @@ var temp = {
 
 var size=50;
 
-var spielfeld_size;
+var spielfeld_size=
+    10;
 
 var game = new spiel(spielfeld_size);
 var spielfeld = game.spielfeld;
@@ -110,11 +111,13 @@ var fps_ticks=0,render=false, start=0, end=0, interval=500, mul=1;
 
 window.setInterval(function(){
     if(render){
-        document.getElementById('fps-box').innerText="FPS: "+(1000/(end - start));
+        document.getElementById('fps-box').style="color:black;";
+        document.getElementById('fps-box').innerText="Render duration: "+(end - start)+"ms (FPS: "+1000.0/(end - start)+")";
         end = performance.now();
     }
     else{
-        document.getElementById('fps-box').innerText="FPS: <"+1000/(interval*mul)+" - No Updates, render stopped!";
+        document.getElementById('fps-box').style="color:red;";
+        document.getElementById('fps-box').innerText="No Updates, render stopped! (FPS: <"+1000.0/interval*mul+")";
     }
     if(fps_ticks++%mul==0)
         render = false;

@@ -74,9 +74,9 @@ export class _view extends HTMLCanvasElement{
         this.game=game;
         this.temp=temp;
     
-        super.getContext("2d").clearRect(0, 0, 600, 600);
+        super.getContext("2d").clearRect(0, 0, this.width, this.height);
 
-        this.size=size;
+        this.size=size||this.size;
         var hex_x = _hex.getHexSize(this.size).x, hex_y = _hex.getHexSize(this.size).y;
 
         //index der längsten reihe
@@ -129,83 +129,87 @@ export class _view extends HTMLCanvasElement{
     drawTiles(){
 
         for(let key in this.game.felder){
-            if (this.game.felder.hasOwnProperty(key)){
                 var data=this.game.felder[key];
-                var hex = {
-                    q: data.q,
-                    r: data.r
-                };
 
-                var x=this.x+_hex.hexToPixel(hex, this.size).x+this.offset_x;
-                var y=this.y+_hex.hexToPixel(hex, this.size).y+this.offset_y;
+                var pos=_hex.hexToPixel({r:data.r, q:data.q}, this.size)
 
-                this.positions[hex.q+"/"+hex.r]={x: x, y: y};
+                var x=this.x+pos.x+this.offset_x;
+                var y=this.y+pos.y+this.offset_y;
 
-                let g = this.getContext("2d");
-        
-                        if(!data.blocked){
-                            g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
+                if(x>0-this.size/2&&y>0-this.size/2&&x<this.width+this.size/2&&y<this.height+this.size/2){
 
-                            g.lineWidth = this.size/5;
-                            g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
-                            g.fillStyle = "#"+this.farben_landschaften[data.landschaft];
+                    var hex = {
+                        q: data.q,
+                        r: data.r
+                    };
+
+                    this.positions[hex.q+"/"+hex.r]={x: x, y: y};
+                
+                    let g = this.getContext("2d");
+            
+                            if(!data.blocked){
+                                g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
+
+                                g.lineWidth = this.size/5;
+                                g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
+                                g.fillStyle = "#"+this.farben_landschaften[data.landschaft];
+                            }
+                            else{
+                                g.fillStyle = "rgba(0,0,0,0)";
+                                g.lineWidth = this.size/5;
+                                g.strokeStyle = "#2693ff";
+                            }
+    
+
+                        g.beginPath();
+                        polygon(g, x, y, this.size, 6, Math.PI/2, 0)
+                        if(g.isPointInPath(this.mouse_x, this.mouse_y)){
+                            g.fillStyle = "#ff00ff";
+                            if(this.click){
+                                if(!this.temp.marked_tiles.some(e => _hex.isEqual(e, hex))&&this.temp.marked_tiles.length<3)
+                                    this.temp.marked_tiles.push(hex)
+                                else
+                                    this.temp.marked_tiles=this.temp.marked_tiles.filter(e => !_hex.isEqual(e, hex))
+                            }
                         }
-                        else{
-                            g.fillStyle = "rgba(0,0,0,0)";
-                            g.lineWidth = this.size/5;
-                            g.strokeStyle = "#2693ff";
-                        }
-  
+                        g.fill();
 
-                    g.beginPath();
-                    polygon(g, x, y, this.size, 6, Math.PI/2, 0)
-                    if(g.isPointInPath(this.mouse_x, this.mouse_y)){
-                        g.fillStyle = "#ff00ff";
-                        if(this.click){
-                            if(!this.temp.marked_tiles.some(e => _hex.isEqual(e, hex))&&this.temp.marked_tiles.length<3)
-                                this.temp.marked_tiles.push(hex)
-                            else
-                                this.temp.marked_tiles=this.temp.marked_tiles.filter(e => !_hex.isEqual(e, hex))
-                        }
-                    }
-                    g.fill();
-
-                    g.beginPath();
-                    polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
-                    g.stroke();
-
-                    if(this.temp.marked_tiles.some(e => _hex.isEqual(e, hex))){
-                        g.lineWidth = this.size/5;
-                        g.strokeStyle = "#FF0088";
                         g.beginPath();
                         polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
                         g.stroke();
-                    }
-                    if(this.game.raeuber&&_hex.isEqual(this.game.raeuber, hex)){
-                        g.fillStyle = "#000000";  
-                        g.beginPath();
-                        g.arc(x, y, this.size/4, 0, 2*Math.PI)
-                        g.fill()
-                    }
-                    else if(data.landschaft!="wueste"&&!data.blocked){
-                        g.beginPath();
-                        g.fillStyle = "#F2AC44";
-                        g.arc(x, y, this.size*0.8/2, 0, 2*Math.PI)
-                        g.fill();
-                    
-                        g.beginPath();
-                        g.lineWidth = this.size/25;
-                        g.strokeStyle = "#000000"; 
-                        g.arc(x, y, this.size*0.8/2, 0, 2*Math.PI)
-                        g.stroke()
 
-                        g.fillStyle = data.zahl==6||data.zahl==8?'red':'black';
-                        g.font = "bold "+this.size/2+"px Monospace";
-                        var nr=data.zahl+(data.zahl==6||data.zahl==9?'.':'');
-                        g.fillText(nr, x-g.measureText(nr).width/2, y+this.size*0.8/2-this.size/4); 
+                        if(this.temp.marked_tiles.some(e => _hex.isEqual(e, hex))){
+                            g.lineWidth = this.size/5;
+                            g.strokeStyle = "#FF0088";
+                            g.beginPath();
+                            polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
+                            g.stroke();
+                        }
+                        if(this.game.raeuber&&_hex.isEqual(this.game.raeuber, hex)){
+                            g.fillStyle = "#000000";  
+                            g.beginPath();
+                            g.arc(x, y, this.size/4, 0, 2*Math.PI)
+                            g.fill()
+                        }
+                        else if(data.landschaft!="wueste"&&!data.blocked){
+                            g.beginPath();
+                            g.fillStyle = "#F2AC44";
+                            g.arc(x, y, this.size*0.8/2, 0, 2*Math.PI)
+                            g.fill();
+                        
+                            g.beginPath();
+                            g.lineWidth = this.size/25;
+                            g.strokeStyle = "#000000"; 
+                            g.arc(x, y, this.size*0.8/2, 0, 2*Math.PI)
+                            g.stroke()
+
+                            g.fillStyle = data.zahl==6||data.zahl==8?'red':'black';
+                            g.font = "bold "+this.size/2+"px Monospace";
+                            var nr=data.zahl+(data.zahl==6||data.zahl==9?'.':'');
+                            g.fillText(nr, x-g.measureText(nr).width/2, y+this.size*0.8/2-this.size/4); 
+                        }
                     }
                 }
-            }
         }
     
     drawOutlines(){
