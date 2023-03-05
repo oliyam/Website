@@ -1,8 +1,7 @@
-const array = new (require('../catan/array_tools.js'))();
-const hex = new (require('../catan/hex.js'))();
-const _ = require('lodash');
+import * as hex from "../catan/hex_client.js"
+import * as array from "../catan/array_tools_client.js"
 
-class spieler {
+export class spieler {
 
     id;
 
@@ -29,11 +28,11 @@ class spieler {
     };
 
     constructor(id){
-        this.id=id;
+        this.id=id||null;
     }
 };
 
-class spielfeld{
+export class spielfeld{
 
     karte = [];
 
@@ -56,7 +55,7 @@ class spielfeld{
         "wueste": 1
     };
 
-    felder = {};
+    felder = [];
 
     blocked = [69];
 
@@ -116,8 +115,6 @@ class spielfeld{
     wege = new Map();
 
     constructor(size){
-
-        this.kreuzungen.set([{ q: 3, r: 1 },{ q: 2, r: 2 },{ q: 3, r: 2 }], {id: 0, stadt: 1});
 
         size=size*2+1;
 
@@ -307,12 +304,12 @@ class spielfeld{
     }
 };
 
-exports.spiel = class{
+export class spiel{
 
     runde = 0;
     wuerfel = [4,2];
 
-    spieler = [];
+    spieler;
 
     spielfeld = {};
 
@@ -340,11 +337,9 @@ exports.spiel = class{
     groesste_rittermacht;
 
     constructor(size){
+        this.spieler = new spieler();
 
         this.spielfeld = new spielfeld(size||3);
-
-        for(var i=0;i<4;i++)
-            this.spieler.push(new spieler(i));
         
         //entwicklungskarten stapel erstellen
         for(let key in this.entwicklungen)
@@ -357,17 +352,20 @@ exports.spiel = class{
         this.entwicklungsstapel=array.shuffleArray(this.entwicklungsstapel);
     }
 
-    forPlayer(player){
+    set(json){
+        Object.assign(this, json);
+        Object.assign(this.spielfeld=new spielfeld(3), json.spielfeld)
+        Object.assign(this.spieler, json.spieler)
+        
+        console.log(json.spieler)
+        this.spielfeld.wege=new Map();
+        for(let entry of json.spielfeld.wege)
+            this.spielfeld.wege.set(entry[0], entry[1]);
 
-        var json = _.cloneDeep(this);
-
-        if(player>-1&&player<4)
-            json.spieler=this.spieler[player];
-
-        json.spielfeld.wege=[...this.spielfeld.wege];
-        json.spielfeld.kreuzungen=[...this.spielfeld.kreuzungen];
-
-        return json;
+        this.spielfeld.kreuzungen=new Map();
+        for(let entry of json.spielfeld.kreuzungen)
+            this.spielfeld.kreuzungen.set(entry[0], entry[1]);
+  
     }
 
     runde(){

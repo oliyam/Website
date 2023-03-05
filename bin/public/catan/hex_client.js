@@ -1,15 +1,13 @@
-module.exports = class hex {
-
-    vectors= [
+export var vectors= [
         [-1, 0], [-1, 1], [0, 1], 
         [1, 0], [1, -1], [0, -1]
     ]
 
-    isEqual(hex_0, hex_1){
+    export function   isEqual(hex_0, hex_1){
         return hex_0.q==hex_1.q&&hex_0.r==hex_1.r;
     }
 
-    pixelToHex(x, y, size){
+    export function pixelToHex(x, y, size){
         var q = (Math.sqrt(3)/3*x-1/3*y)/size;
         var r = (2/3*y)/size;
         return this.axialRound({
@@ -18,14 +16,14 @@ module.exports = class hex {
         });
     }
 
-    hexToPixel(hex, size){
+    export function hexToPixel(hex, size){
         return {
             x: size * (Math.sqrt(3) * hex.q  +  Math.sqrt(3)/2 * hex.r),
             y: size * (                                   3./2 * hex.r)
         };
     }
 
-    axialToCube(axial){
+    export function axialToCube(axial){
         return {
             q: axial.q,
             r: axial.r,
@@ -33,14 +31,14 @@ module.exports = class hex {
         };
     }
 
-    cubeToAxial(cube){
+    export function   cubeToAxial(cube){
         return {
             q: cube.q,
             r: cube.r
         };
     }
 
-    cubeRound(frac){
+    export function  cubeRound(frac){
         var q = Math.round(frac.q), r = Math.round(frac.r), s = Math.round(frac.s);
         var dq = Math.abs(q - frac.q), dr = Math.abs(r - frac.r), ds = Math.abs(s - frac.s);
 
@@ -58,11 +56,11 @@ module.exports = class hex {
         };
     }
 
-    axialRound(frac){
+    export function  axialRound(frac){
         return this.cubeToAxial(this.cubeRound(this.axialToCube(frac)));
     }
 
-    areNeighbours(tiles){
+    export function areNeighbours(tiles){
         if(tiles.length<2)
             return -1;
         let a = true;
@@ -75,18 +73,18 @@ module.exports = class hex {
         return a;
     }
 
-    neighbour(hex, i){
+    export function neighbour(hex, i){
         return {q: hex.q+this.vectors[i][0], r: hex.r+this.vectors[i][1]};
     }
 
-    neighbours(t0, t1){
+    export function  neighbours(t0, t1){
         for(var i=0;i<this.vectors.length;i++)
             if((t0.q+this.vectors[i][0]==t1.q&&t0.r+this.vectors[i][1]==t1.r))
                 return true;
         return false;
     }
 
-    rotate(hex, center, i){
+    export function rotate(hex, center, i){
         if(i===undefined){
             hex=this.axialToCube(hex);
             center=this.axialToCube(center);
@@ -105,7 +103,7 @@ module.exports = class hex {
         return hex;
     }
 
-    ring(start, radius){
+    export function  ring(start, radius){
         var results = [];
         for(let i=0;i<6;i++)
             for(let o=0;o<radius-(i==5);o++){
@@ -116,7 +114,7 @@ module.exports = class hex {
         return results;
     }
 
-    spiral(start, radius){
+    export function   spiral(start, radius){
         var results = [];
 
         for(let i=radius;i>0;i--){
@@ -129,14 +127,14 @@ module.exports = class hex {
 
     }
 
-    getHexSize(size){
+    export function  getHexSize(size){
         return {
             x: Math.sqrt(3) * size,
             y: 2 * size
         };
     }
 
-    getHex(x, y, size, pointy){
+    export function  getHex(x, y, size, pointy){
         var array=[];
         for(var i=0;i<6;i++){
             let c=this.getHexCorner(x, y, size, i, pointy)
@@ -146,7 +144,7 @@ module.exports = class hex {
         return array;
     }
 
-    getHexCorner(x, y, size, i, pointy){
+    export function  getHexCorner(x, y, size, i, pointy){
         var angle_deg = 60 * i - (pointy?30:0);
         var angle_rad = Math.PI / 180 * angle_deg;
         return {
@@ -155,4 +153,3 @@ module.exports = class hex {
         };
     }
 
-}

@@ -1,3 +1,3 @@
 import * as channel from "/chat/channel.js";
 
-channel.run("chat");
+channel.run(new io(), "chat");

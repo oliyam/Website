@@ -1,4 +1,5 @@
-import * as _hex from "/catan/hex.js";
+import * as _hex from "../catan/hex_client.js"
+import "../catan/game_client.js"
 
 export class _view extends HTMLCanvasElement{
 
@@ -13,7 +14,7 @@ export class _view extends HTMLCanvasElement{
 
     offset_x=0;offset_y=0;
 
-    game;
+    spielfeld;
     positions = new Map();
     
     temp = {
@@ -54,16 +55,15 @@ export class _view extends HTMLCanvasElement{
     constructor(game, temp, width, height, size){
         super();
         this.game=game;
+        //this.game.spielfeld=new spielfeld();
         this.temp=temp;
         this.width=width;
         this.height=height;
         super.width=width;
         super.height=height;
-
-        this.drawGame(game, temp, width, height, size);
+        if(game)
+            this.drawGame(game, temp, width, height, size);
     }    
-
-
     
     getTemp(){
         return this.temp;
@@ -81,37 +81,38 @@ export class _view extends HTMLCanvasElement{
 
         //index der längsten reihe
         var _index = 0, index = 0;
-        this.game.karte.forEach(reihe => {
-            if(reihe.size>this.game.karte[_index].size)
+        this.game.spielfeld.karte.forEach(reihe => {
+            if(reihe.size>this.game.spielfeld.karte[_index].size)
                 _index=index;
             index++;
         });
 
-        this.x = ((this.width-hex_x*this.game.karte[_index].size)+hex_x*(-(_index)-2*this.game.karte[_index].offset)+hex_x)/2;
-        this.y = ((this.height-hex_y*(this.game.karte.length*3/4+1/4))+hex_y)/2;
+        this.x = ((this.width-hex_x*this.game.spielfeld.karte[_index].size)+hex_x*(-(_index)-2*this.game.spielfeld.karte[_index].offset)+hex_x)/2;
+        this.y = ((this.height-hex_y*(this.game.spielfeld.karte.length*3/4+1/4))+hex_y)/2;
 
         this.drawTiles();
 
-        this.game.haefen.forEach(hafen => {
-            //this.drawHafen(hafen);
-        });
-
+        if(_index==3)
+            this.game.spielfeld.haefen.forEach(hafen => {
+                this.drawHafen(hafen);
+            });
+            
         this.drawOutlines();
 
         this.temp.wege.forEach((value, key) => {
-            this.drawStrasse(value, key, this.farben_spieler[value.id]);
+            this.drawStrasse(value, key, this.farben_spieler[value.id], "#00ff00");
         });
 
-        this.game.wege.forEach((value, key) => {
-            this.drawStrasse(value, key, this.farben_spieler[value.id]);
+        this.game.spielfeld.wege.forEach((value, key) => {
+            this.drawStrasse(value, key, this.farben_spieler[value.id], "#F2AC44");
         });
         
         this.temp.kreuzungen.forEach((value, key) => {
-            this.drawKreuzung(value, key, this.farben_spieler[value.id]);
+            this.drawKreuzung(value, key, this.farben_spieler[value.id], "#00ff00");
         });
 
-        this.game.kreuzungen.forEach((value, key) => {
-            this.drawKreuzung(value, key, this.farben_spieler[value.id]);
+        this.game.spielfeld.kreuzungen.forEach((value, key) => {
+            this.drawKreuzung(value, key, this.farben_spieler[value.id], "#F2AC44");
         });
 
         this.drawMarkedTiles(this.temp.spieler);
@@ -127,26 +128,25 @@ export class _view extends HTMLCanvasElement{
     }
 
     drawTiles(){
+        let g = this.getContext("2d");
+        for(let key in this.game.spielfeld.felder)
+            {
 
-        for(let key in this.game.felder){
-                var data=this.game.felder[key];
+                var data = this.game.spielfeld.felder[key];
 
                 var pos=_hex.hexToPixel({r:data.r, q:data.q}, this.size)
 
                 var x=this.x+pos.x+this.offset_x;
                 var y=this.y+pos.y+this.offset_y;
 
-                if(x>0-this.size/2&&y>0-this.size/2&&x<this.width+this.size/2&&y<this.height+this.size/2){
+                this.positions[data.q+"/"+data.r]={x: x, y: y};
 
+                if(x>0-this.size/2&&y>0-this.size/2&&x<this.width+this.size/2&&y<this.height+this.size/2){
+  
                     var hex = {
                         q: data.q,
                         r: data.r
-                    };
-
-                    this.positions[hex.q+"/"+hex.r]={x: x, y: y};
-                
-                    let g = this.getContext("2d");
-            
+                    };            
                             if(!data.blocked){
                                 g.strokeStyle = "#"+this.farben_landschaften[data.landschaft];
 
@@ -185,7 +185,7 @@ export class _view extends HTMLCanvasElement{
                             polygon(g, x, y, this.size-this.size/10, 6, Math.PI/2, 0)
                             g.stroke();
                         }
-                        if(this.game.raeuber&&_hex.isEqual(this.game.raeuber, hex)){
+                        if(this.game.spielfeld.raeuber&&_hex.isEqual(this.game.spielfeld.raeuber, hex)){
                             g.fillStyle = "#000000";  
                             g.beginPath();
                             g.arc(x, y, this.size/4, 0, 2*Math.PI)
@@ -212,54 +212,37 @@ export class _view extends HTMLCanvasElement{
                 }
         }
     
-    drawOutlines(){
-        
-        for(let key in this.game.felder){
-            if (this.game.felder.hasOwnProperty(key)){
-                var data=this.game.felder[key];
-                var hex = {
-                    q: data.q,
-                    r: data.r
-                };
+    drawOutlines(){ 
+        let g = this.getContext("2d");
+        for(let i=0;i<2;i++)
+        for(let key in this.game.spielfeld.felder){
 
-                var x=this.x+_hex.hexToPixel(hex, this.size).x+this.offset_x;
-                var y=this.y+_hex.hexToPixel(hex, this.size).y+this.offset_y;
+                var data = this.game.spielfeld.felder[key];
 
-                let g = this.getContext("2d");
-                if(data.blocked){
-                    g.lineWidth = this.size/10;
-                    g.strokeStyle = "#FFFFFF";
-                    g.beginPath();
-                    polygon(g, x, y, this.size, 6, Math.PI/2, 0)
-                    g.stroke();
+                var pos=this.positions[data.q+"/"+data.r]
+                var x=pos.x;
+                var y=pos.y;
+
+                if(x>0-this.size/2&&y>0-this.size/2&&x<this.width+this.size/2&&y<this.height+this.size/2){
+                    if(i && !data.blocked){
+                        g.lineWidth = this.size/10;
+                        g.strokeStyle = "#F2AC44";
+                        g.beginPath();
+                        polygon(g, x, y, this.size, 6, Math.PI/2, 0)
+                        g.stroke();
+                    }
+                    else if(!i && data.blocked){
+                        g.lineWidth = this.size/10;
+                        g.strokeStyle = "#FFFFFF";
+                        g.beginPath();
+                        polygon(g, x, y, this.size, 6, Math.PI/2, 0)
+                        g.stroke();
+                    }
                 }
             }
-        }
-
-        for(let key in this.game.felder){
-            if (this.game.felder.hasOwnProperty(key)){
-                var data=this.game.felder[key];
-                var hex = {
-                    q: data.q,
-                    r: data.r
-                };
-
-                var x=this.x+_hex.hexToPixel(hex, this.size).x+this.offset_x;
-                var y=this.y+_hex.hexToPixel(hex, this.size).y+this.offset_y;
-
-                let g = this.getContext("2d");
-                if(!data.blocked){
-                    g.lineWidth = this.size/10;
-                    g.strokeStyle = "#F2AC44";
-                    g.beginPath();
-                    polygon(g, x, y, this.size, 6, Math.PI/2, 0)
-                    g.stroke();
-                }
-            }
-        }
     }
         
-    drawStrasse(value, key, color){
+    drawStrasse(value, key, color, outline){
         let g = this.getContext("2d");
 
         var x=(this.positions[key[0].q+"/"+key[0].r].x+this.positions[key[1].q+"/"+key[1].r].x)/2;
@@ -268,7 +251,7 @@ export class _view extends HTMLCanvasElement{
         var vec_y=(this.positions[key[0].q+"/"+key[0].r].y-this.positions[key[1].q+"/"+key[1].r].y)/8;
 
         g.lineWidth = this.size/10;
-        g.strokeStyle = "#F2AC44"; 
+        g.strokeStyle = outline; 
         g.beginPath();
         g.arc(x+vec_y, y-vec_x, this.size/18, 0, 2*Math.PI) 
         g.arc(x-vec_y, y+vec_x, this.size/18, 0, 2*Math.PI) 
@@ -313,7 +296,7 @@ export class _view extends HTMLCanvasElement{
         g.stroke();
 
         if(hafen.ressource)
-            g.fillStyle = "#"+this.farben_landschaften[this.game.ressourcen[hafen.ressource]];
+            g.fillStyle = "#"+this.farben_landschaften[this.game.spielfeld.ressourcen[hafen.ressource]];
         else
             g.fillStyle = "#2693FF";
         g.beginPath();
@@ -338,7 +321,7 @@ export class _view extends HTMLCanvasElement{
         g.fillText(nr, x0-g.measureText(nr).width/2, y0+this.size*0.8/3-this.size/3/2);
     }
 
-    drawKreuzung(value, key, color){
+    drawKreuzung(value, key, color, outline){
         let g = this.getContext("2d");
 
         var pos={
@@ -351,7 +334,7 @@ export class _view extends HTMLCanvasElement{
         });
 
         g.lineWidth = this.size/10;
-        g.strokeStyle = "#F2AC44";
+        g.strokeStyle = outline;
         g.fillStyle = "#"+color;
         g.beginPath();
         polygon(g, pos.x/3, pos.y/3, this.size*(value.stadt?1/4:1/6), 6, !value.stadt*Math.PI/180*30, 0);
@@ -362,13 +345,13 @@ export class _view extends HTMLCanvasElement{
 
     drawMarkedTiles(player){
         
-        if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.isFree(this.temp)){
+        if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.spielfeld.isFree(this.temp)){
             switch(this.temp.marked_tiles.length){
                 case 2:
-                    this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles, this.farben_spieler[player]);
+                    this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles, this.farben_spieler[player], "#00ff00");
                     break;
                 case 3:
-                    this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles, this.farben_spieler[player]);
+                    this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles, this.farben_spieler[player], "#00ff00");
                     break;
             }
         }

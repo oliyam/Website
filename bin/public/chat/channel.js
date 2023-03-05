@@ -1,10 +1,9 @@
-export {run}
+export {run} 
 
-function run(channel){
+function run(socket, channel){
 
 	const channel_name=channel+'>';
 
-	const socket=io();
 	const msgContainer=document.getElementById("msg-card");
 	const msgForm=document.getElementById("send-container");
 	const msgInput=document.getElementById("msg-input");
@@ -191,3 +190,4 @@ function run(channel){
 		msgContainer.scrollTop=msgContainer.scrollHeight;
 	}
 };
+
