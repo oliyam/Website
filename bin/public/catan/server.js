@@ -1,70 +1,78 @@
 const { StrictEventEmitter } = require('socket.io/dist/typed-events');
-const server=require('../chat/server.js');
-const catan=require('../catan/game.js');
+const server = require('../chat/server.js');
+const catan = require('../catan/game.js');
 
 exports.run = (io, channel, logger) => {
 
-	function log(txt, color){
-		logger(channel_name+' '+txt, color);
-	}; 
-    
+    function log(txt, color) {
+        logger(channel_name + ' ' + txt, color);
+    };
+
     server.run(io, channel, logger);
 
-    var players=[];
+    //object with player numbers at player's socket id
+    var players = {};
 
-    var game=new catan.spiel();
+    var game = new catan.spiel();
 
-    const channel_name=channel+'>';
+    const channel_name = channel + '>';
     io.on('connection', socket => {
 
-        socket.on(channel_name+'watch-request', () => {
-            if(server.ioactive[socket.id])
-                io.to(socket.id).emit(channel_name+'game-update', game.forPlayer(-1));
+        socket.on('disconnect', () => {
+            delete players[socket.id];
         });
 
-        socket.on(channel_name+'turn', msg => {
-            for(let entry of msg.wege)
-                game.spielfeld.wege.set(entry[0], entry[1]);
+        socket.on(channel_name + 'request-players', () => {
+            var game_users = {};
+            Object.keys(server.users).forEach((id) => {
+                game_users[id] = typeof players[id] != 'undefined' ? "<a>" + server.users[id] + "</a> <a style='color:orange;'>[player-" + players[id] + ']</a>' : "<a>" + server.users[id] + "</a> <a style='color:green;'>[spectator]</a>";
+            });
 
-            for(let entry of msg.kreuzungen)
-                game.spielfeld.kreuzungen.set(entry[0], entry[1]);
-
-            socket.broadcast.emit(channel_name+'game-update', game.forPlayer(-1));
-            for(var i=0;i<players.length;i++)
-                io.to(players[i]).emit(channel_name+'game-update', game.forPlayer(i));
+            io.to(socket.id).emit(channel_name + 'get-players', { users: game_users, ids: server.ids });
+            socket.broadcast.emit(channel_name + 'get-players', { users: game_users, ids: server.ids });
         });
 
-        socket.on(channel_name+'send-chat-msg', msg =>{
+        socket.on(channel_name + 'watch-request', () => {
+            if (server.ioactive[socket.id])
+                io.to(socket.id).emit(channel_name + 'game-update', game.forPlayer(-1));
+        });
+
+        socket.on(channel_name + 'turn', msg => {
+            if(game.zug_beenden(msg, players[socket.id])==-1)
+                console.log("ILLEGAL MOVE - CHECK FOR HACKERS!")
+            game.runde_beenden();
+
+            socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
+            Object.keys(players).forEach((id) => {
+                io.to(id).emit(channel_name + 'game-update', game.forPlayer(players[id]));
+            });
+        });
+
+        socket.on(channel_name + 'send-chat-msg', msg => {
             //if socket is active
-            if(server.ioactive[socket.id])
-				if(msg[0].substring(0,"pls player".length)=="pls player"&&players.indexOf(socket.id)==-1&&players.length<4){
-                    players.push(socket.id)
-                    logger((socket.id)+" selected player-"+(players.length-1)+"!", "yellow")
-                    
-                    var current_players = [];
-                    for(var i=0;i<players.length;i++)
-                        current_players.push({player: i, user: server.users[players[i]]});
-                    
-                    socket.broadcast.emit(channel_name+'new-player', current_players);
+            if (server.ioactive[socket.id])
+                if (msg[0].substring(0, "pls player".length) == "pls player" && Object.keys(players).length < 4 && typeof players[socket.id] == 'undefined') {
+                    var player;
+                    console.log(players)
+                    for (var i = 3; i > -1; i--)
+                        if (!Object.values(players).includes(i))
+                            player = i;
+                    players[socket.id] = player;
+                    logger((socket.id) + " selected player-" + player + "!", "yellow")
 
-                    var game_users={};
-                    Object.keys(server.users).forEach((id) => {
-                        game_users[id]=players.indexOf(id)!=-1?server.users[id]+"<player: "+players.indexOf(id)+'>':server.users[id];
-                    });
+                    io.to(socket.id).emit(channel_name + 'get-users', { users: server.users, ids: server.ids });
+                    socket.broadcast.emit(channel_name + 'get-users', { users: server.users, ids: server.ids });
 
-                    io.to(socket.id).emit(channel_name+'get-users', {users: game_users, ids: server.ids});
-                    socket.broadcast.emit(channel_name+'get-users', {users: game_users, ids: server.ids})
+                    io.to(socket.id).emit(channel_name + 'chat-msg', { msg: ["You, @" + server.users[socket.id] + ", selected player-" + player,], name: "[Catan-server]" });
+                    socket.broadcast.emit(channel_name + 'chat-msg', { msg: ["User: @" + server.users[socket.id] + ", selected player-" + player,], name: "[Catan-server]" });
 
-                    io.to(socket.id).emit(channel_name+'chat-msg', {msg: ["You, @"+server.users[socket.id]+", selected player-"+(players.length-1), ], name: "[Catan-server]"});
-                    socket.broadcast.emit(channel_name+'chat-msg', {msg: ["User: @"+server.users[socket.id]+", selected player-"+(players.length-1), ], name: "[Catan-server]"});
-                    
-                    io.to(socket.id).emit(channel_name+'game-update', game.forPlayer(players.length-1));
+                    io.to(socket.id).emit(channel_name + 'game-update', game.forPlayer(player));
                 }
         });
-    }); 
+    });
 };
 
-StrictEventEmitter.prototype.override = function(event, fn) {
+StrictEventEmitter.prototype.override = function (event, fn) {
     this.removeAllListeners(event);
     this.on(event, fn);
 }

@@ -87,6 +87,22 @@
     margin: 0 0;
 }
 
+#reset_map {
+    border-top-left-radius: 5px;
+    padding: 2px 2px 2px 2px;
+    font-family: monospace;
+    font-size: 12px;
+    text-align: right;
+    color: black;
+    background-color: white;
+    z-index: 489;
+    margin: 0 0;
+
+    position:absolute;
+    bottom:0px;
+    right:0px;
+}
+
 #map {
     position: absolute;
     top: calc(50% - 275px);

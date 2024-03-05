@@ -18,6 +18,7 @@ exports.connect = (database) =>{
     });
 
     connection.connect(function(err) {
+        log(process.env.DB_USER)
         if (err)
             return log('MySQL database error: ' + err.message, "red");
       

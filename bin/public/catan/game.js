@@ -15,11 +15,11 @@ class spieler {
     };
 
     ressourcen={
-        holz: 6,
-        lehm: 4,
+        holz: 0,
+        lehm: 0,
         erz: 0,
-        getreide: 2,
-        wolle: 9
+        getreide: 0,
+        wolle: 0
     };
 
     entwicklungen={
@@ -40,11 +40,11 @@ class spielfeld{
     center = null;
 
     ressourcen = {
-        "holz":"wald",
-        "lehm":"huegelland",
-        "wolle":"weideland",
-        "getreide":"ackerland",
-        "erz":"gebirge"
+        "wald":"holz",
+        "huegelland":"lehm",
+        "weideland":"wolle",
+        "ackerland":"getreide",
+        "gebirge":"erz"
     };
 
     landschaften = { 
@@ -192,7 +192,7 @@ class spielfeld{
         });
     }
 
-    has(array, tile){
+    hashex(array, tile){
         let a = false;
         array.forEach(t => {
             if(hex.isEqual(t, tile))
@@ -213,9 +213,9 @@ class spielfeld{
                         break;
                     case 3:
                         if(
-                            this.has(keys, tiles[0])&&this.has(keys, tiles[1])||
-                            this.has(keys, tiles[1])&&this.has(keys, tiles[2])||
-                            this.has(keys, tiles[2])&&this.has(keys, tiles[0])
+                            this.hashex(keys, tiles[0])&&this.hashex(keys, tiles[1])||
+                            this.hashex(keys, tiles[1])&&this.hashex(keys, tiles[2])||
+                            this.hashex(keys, tiles[2])&&this.hashex(keys, tiles[0])
                         )
                             connected ++;
                         break;
@@ -230,9 +230,9 @@ class spielfeld{
                         break;
                     case 3:
                         if(
-                            this.has(keys, tiles[0])&&this.has(keys, tiles[1])||
-                            this.has(keys, tiles[1])&&this.has(keys, tiles[2])||
-                            this.has(keys, tiles[2])&&this.has(keys, tiles[0])
+                            this.hashex(keys, tiles[0])&&this.hashex(keys, tiles[1])||
+                            this.hashex(keys, tiles[1])&&this.hashex(keys, tiles[2])||
+                            this.hashex(keys, tiles[2])&&this.hashex(keys, tiles[0])
                         )
                             connected ++;
                         break;
@@ -272,11 +272,11 @@ class spielfeld{
               switch(temp.marked_tiles.length){
                 case 2:
                     this.wege.forEach((value, key) => {
-                        if(this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))
+                        if(this.hashex(key, temp.marked_tiles[0])&&this.hashex(key, temp.marked_tiles[1]))
                             frei = false;
                     });
                     temp.wege.forEach((value, key) => {
-                        if(this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))
+                        if(this.hashex(key, temp.marked_tiles[0])&&this.hashex(key, temp.marked_tiles[1]))
                             frei = false;
                     });
                     return frei;
@@ -284,9 +284,9 @@ class spielfeld{
                     this.kreuzungen.forEach((value, key) => {
                         if(
                             (
-                                (this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))||
-                                (this.has(key, temp.marked_tiles[1])&&this.has(key, temp.marked_tiles[2]))||
-                                (this.has(key, temp.marked_tiles[2])&&this.has(key, temp.marked_tiles[0]))
+                                (this.hashex(key, temp.marked_tiles[0])&&this.hashex(key, temp.marked_tiles[1]))||
+                                (this.hashex(key, temp.marked_tiles[1])&&this.hashex(key, temp.marked_tiles[2]))||
+                                (this.hashex(key, temp.marked_tiles[2])&&this.hashex(key, temp.marked_tiles[0]))
                             )
                         )
                             frei = false;
@@ -294,9 +294,9 @@ class spielfeld{
                     temp.kreuzungen.forEach((value, key) => {
                         if(
                             (
-                                (this.has(key, temp.marked_tiles[0])&&this.has(key, temp.marked_tiles[1]))||
-                                (this.has(key, temp.marked_tiles[1])&&this.has(key, temp.marked_tiles[2]))||
-                                (this.has(key, temp.marked_tiles[2])&&this.has(key, temp.marked_tiles[0]))
+                                (this.hashex(key, temp.marked_tiles[0])&&this.hashex(key, temp.marked_tiles[1]))||
+                                (this.hashex(key, temp.marked_tiles[1])&&this.hashex(key, temp.marked_tiles[2]))||
+                                (this.hashex(key, temp.marked_tiles[2])&&this.hashex(key, temp.marked_tiles[0]))
                             )
                         )
                             frei = false;
@@ -310,7 +310,7 @@ class spielfeld{
 exports.spiel = class{
 
     runde = 0;
-    wuerfel = [4,2];
+    wuerfel = [0,0];
 
     spieler = [];
 
@@ -370,22 +370,45 @@ exports.spiel = class{
         return json;
     }
 
-    runde(){
+    runde_beenden(){
 
         //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
 
-        var aktiver_spieler = runde%4;
+        var aktiver_spieler = this.runde%4;
 
-        this.wuerfeln()
+        var augen=this.wuerfeln();
+
+        this.spielfeld.kreuzungen.forEach((bauwerk, pos) => {
+            pos.forEach(p => {
+                let anliegendes_feld=this.spielfeld.felder[p.q+"/"+p.r];
+                if(anliegendes_feld.zahl==augen){
+                    this.spieler[bauwerk.id].ressourcen[this.spielfeld.ressourcen[anliegendes_feld.landschaft]]+=1+bauwerk.stadt;
+                }
+            });
+
+        });
 
 
+    }
+
+    zug_beenden(data){
+        for (let entry of data.wege)
+            if(!this.spielfeld.wege.has(entry[0]))
+                this.spielfeld.wege.set(entry[0], entry[1]);
+            else
+                return -1;
+        for (let entry of data.kreuzungen)
+            if(!this.spielfeld.kreuzungen.has(entry[0]))
+                this.spielfeld.kreuzungen.set(entry[0], entry[1]);
+            else
+                return -1;
     }
 
     wuerfeln(){
         this.wuerfel[0]=Math.floor(Math.random()*6+1);
         this.wuerfel[1]=Math.floor(Math.random()*6+1);
 
-        return this.wuerfel;
+        return this.wuerfel[0]+this.wuerfel[1];
     }
 
     lhs_ermitteln(){

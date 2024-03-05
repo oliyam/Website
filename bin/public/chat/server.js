@@ -34,6 +34,7 @@ exports.run = (io, channel, logger) => {
 				delete exports.ioactive[socket.id];
 				delete exports.requests[socket.id];
 				delete exports.users[socket.id];
+				delete exports.home[socket.id];
 				log("disconnect: "+socket.id,"red");
 			}
 		})

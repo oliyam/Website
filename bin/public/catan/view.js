@@ -27,6 +27,14 @@ export class _view extends HTMLCanvasElement{
 
     objects = [];
 
+    ressourcen = {
+        "holz":"wald",
+        "lehm":"huegelland",
+        "wolle":"weideland",
+        "getreide":"ackerland",
+        "erz":"gebirge"
+    };
+
     farben_landschaften = {
         "wald": "027800",
         "huegelland": "9c5819",
@@ -296,7 +304,7 @@ export class _view extends HTMLCanvasElement{
         g.stroke();
 
         if(hafen.ressource)
-            g.fillStyle = "#"+this.farben_landschaften[this.game.spielfeld.ressourcen[hafen.ressource]];
+            g.fillStyle = "#"+this.farben_landschaften[this.ressourcen[hafen.ressource]];
         else
             g.fillStyle = "#2693FF";
         g.beginPath();
@@ -348,10 +356,10 @@ export class _view extends HTMLCanvasElement{
         if(_hex.areNeighbours(this.temp.marked_tiles)&&this.game.spielfeld.isFree(this.temp)){
             switch(this.temp.marked_tiles.length){
                 case 2:
-                    this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles, this.farben_spieler[player], "#00ff00");
+                    this.drawStrasse({id: this.temp.spieler}, this.temp.marked_tiles, this.farben_spieler[player], "#FF0088");
                     break;
                 case 3:
-                    this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles, this.farben_spieler[player], "#00ff00");
+                    this.drawKreuzung({id: this.temp.spieler, stadt: this.temp.stadt}, this.temp.marked_tiles, this.farben_spieler[player], "#FF0088");
                     break;
             }
         }

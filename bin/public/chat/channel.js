@@ -55,7 +55,6 @@ function run(socket, channel){
 			appendUser(data.users[data.ids[t]],data.ids[t]);
 	})
 
-
 	async function getReddit(msg, send){
 		var subreddit=msg.substring(4,msg.length);
 		var string={};

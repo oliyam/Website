@@ -24,7 +24,6 @@ var size=50;
 var game;
 var view = new _view(game, temp, 600, 600, size);
 
-const event = new Event("uncover", {index: '-1'});
 var map=document.getElementById('map');
 map.appendChild(view);
 
@@ -33,12 +32,38 @@ const channel_name='catan'+'>';
 const socket=new io();
 c.run(socket, 'catan');
 
+//Benutzerliste mit Spielern aktualisieren
+socket.on(channel_name+'get-players',  data => {
+	for(var t=0;t<data.ids.length;t++)
+		document.getElementById(data.ids[t]).innerHTML=data.users[data.ids[t]];
+})
+
+socket.on(channel_name+'get-users',  () => {
+	socket.emit(channel_name+'request-players', {});
+})
+
 socket.emit(channel_name+'watch-request', {});
 
 socket.on(channel_name+'game-update', msg => {
     game=new spiel()
     game.set(msg);
+    temp.spieler=game.spieler.id;
     redraw();
+    temp = {
+        last_ressourcen: {
+            holz: 0,
+            wolle: 0,
+            lehm: 0,
+            getreide: 0,
+            erz: 0
+        },
+        stadt: false,
+        spieler: temp.spieler,
+        marked_tiles: [],
+        kreuzungen: new Map(),
+        wege: new Map()
+    }
+    view.temp=temp;
 });
 
 view.addEventListener("mousemove", (e) => {
@@ -151,23 +176,11 @@ function redraw(){
     });
 
     document.getElementById('zug_beenden').addEventListener('click', e => {
+        for(let res in temp.last_ressourcen){
+            temp.last_ressourcen[res]=game.spieler.ressourcen[res];
+        }
         buildMarkedTiles();
         socket.emit(channel_name+'turn', {player: temp.spieler, wege: [...temp.wege], kreuzungen: [...temp.kreuzungen]});
-        temp = {
-            last_ressourcen: {
-                holz: 0,
-                wolle: 0,
-                lehm: 0,
-                getreide: 0,
-                erz: 0
-            },
-            stadt: false,
-            spieler: temp.spieler,
-            marked_tiles: [],
-            kreuzungen: new Map(),
-            wege: new Map()
-        }
-        view.temp=temp;
     });
 
     document.getElementById('bauen').addEventListener('click', e => {
@@ -198,13 +211,13 @@ function redraw(){
         temp.stadt=!temp.stadt;
         redraw();
     });
-
+/*
     document.getElementById('spieler').addEventListener('click', e => {
         temp.spieler=(temp.spieler+1)%4;
         document.getElementById('spieler').innerText=temp.spieler;
         redraw();
     });
-
+*/
     document.getElementById('reset_map').addEventListener('click', e => {
         size=50;
         view.offset_x=0;
