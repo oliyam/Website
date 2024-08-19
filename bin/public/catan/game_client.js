@@ -14,11 +14,11 @@ export class spieler {
     };
 
     ressourcen={
-        holz: 6,
-        lehm: 4,
+        holz: 0,
+        lehm: 0,
         erz: 0,
-        getreide: 2,
-        wolle: 9
+        getreide: 0,
+        wolle: 0
     };
 
     entwicklungen={
@@ -307,7 +307,7 @@ export class spielfeld{
 export class spiel{
 
     runde = 0;
-    wuerfel = [4,2];
+    wuerfel = [0,0];
 
     spieler;
 
@@ -353,11 +353,12 @@ export class spiel{
     }
 
     set(json){
+        console.log("recieved server game:", json)
+
         Object.assign(this, json);
         Object.assign(this.spielfeld=new spielfeld(3), json.spielfeld)
         Object.assign(this.spieler, json.spieler)
         
-        console.log(json.spieler)
         this.spielfeld.wege=new Map();
         for(let entry of json.spielfeld.wege)
             this.spielfeld.wege.set(entry[0], entry[1]);
@@ -365,7 +366,9 @@ export class spiel{
         this.spielfeld.kreuzungen=new Map();
         for(let entry of json.spielfeld.kreuzungen)
             this.spielfeld.kreuzungen.set(entry[0], entry[1]);
-  
+
+        console.log("updated client game", this)
+        return this;  
     }
 
     runde(){

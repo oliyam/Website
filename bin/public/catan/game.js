@@ -363,6 +363,8 @@ exports.spiel = class{
 
         if(player>-1&&player<4)
             json.spieler=this.spieler[player];
+        else
+            json.spieler=undefined;
 
         json.spielfeld.wege=[...this.spielfeld.wege];
         json.spielfeld.kreuzungen=[...this.spielfeld.kreuzungen];
@@ -370,7 +372,7 @@ exports.spiel = class{
         return json;
     }
 
-    runde_beenden(){
+    neue_runde(){
 
         //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
 
@@ -378,10 +380,17 @@ exports.spiel = class{
 
         var augen=this.wuerfeln();
 
+        console.log("neue-runde")
+        console.log(this.spielfeld.kreuzungen)
         this.spielfeld.kreuzungen.forEach((bauwerk, pos) => {
+            
             pos.forEach(p => {
+                console.log("feld:")
+                console.log(p)
                 let anliegendes_feld=this.spielfeld.felder[p.q+"/"+p.r];
+                
                 if(anliegendes_feld.zahl==augen){
+                    console.log(augen)
                     this.spieler[bauwerk.id].ressourcen[this.spielfeld.ressourcen[anliegendes_feld.landschaft]]+=1+bauwerk.stadt;
                 }
             });
@@ -408,7 +417,7 @@ exports.spiel = class{
         this.wuerfel[0]=Math.floor(Math.random()*6+1);
         this.wuerfel[1]=Math.floor(Math.random()*6+1);
 
-        return this.wuerfel[0]+this.wuerfel[1];
+        return (this.wuerfel[0]+this.wuerfel[1]);
     }
 
     lhs_ermitteln(){

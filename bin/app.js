@@ -34,11 +34,12 @@ http.listen(PORT, function(){
 
 
 //start ngrok
+/*
 ngrok.connect({authtoken: process.env.NGROK_TOKEN, addr: PORT}).then( (url) => {
 	log("Ngrok tunnel established: ", "magenta")
 	log(url+" -> http://localhost:"+PORT, "yellow")
 });
-
+*/
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())

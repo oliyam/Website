@@ -5,23 +5,17 @@ import * as c from "/chat/channel.js";
 import {uncover} from "/preloader/preloader.js";
 
 var temp = {
-    last_ressourcen: {
-        holz: 0,
-        wolle: 0,
-        lehm: 0,
-        getreide: 0,
-        erz: 0
-    },
+
     stadt: false,
     spieler: 0,
     marked_tiles: [],
     kreuzungen: new Map(),
     wege: new Map()
-}
+};
 
 var size=50;
 
-var game;
+var game=new spiel();
 var view = new _view(game, temp, 600, 600, size);
 
 var map=document.getElementById('map');
@@ -31,6 +25,9 @@ const channel_name='catan'+'>';
 
 const socket=new io();
 c.run(socket, 'catan');
+
+var roll = new Audio('/catan/res/wuerfel/rolling dice 2.mp3');
+var pop= new Audio('/catan/res/pop.mp3');
 
 //Benutzerliste mit Spielern aktualisieren
 socket.on(channel_name+'get-players',  data => {
@@ -45,25 +42,46 @@ socket.on(channel_name+'get-users',  () => {
 socket.emit(channel_name+'watch-request', {});
 
 socket.on(channel_name+'game-update', msg => {
-    game=new spiel()
-    game.set(msg);
-    temp.spieler=game.spieler.id;
-    redraw();
-    temp = {
-        last_ressourcen: {
+    if(game&&game.spieler.ressourcen){
+        //console.log("game: ")
+        //console.log(game)
+    }
+    else
+        console.log("game undefined")
+    temp.last_ressourcen=(game.spieler.ressourcen==undefined?{
+        holz: 0,
+        wolle: 0,
+        lehm: 0,
+        getreide: 0,
+        erz: 0
+    }:game.spieler.ressourcen);
+    game=game.set(msg);
+        var d_ressourcen={
             holz: 0,
             wolle: 0,
             lehm: 0,
             getreide: 0,
             erz: 0
-        },
-        stadt: false,
-        spieler: temp.spieler,
-        marked_tiles: [],
-        kreuzungen: new Map(),
-        wege: new Map()
-    }
-    view.temp=temp;
+        };
+        //console.log("temp: ")
+        //console.log(temp)
+        if(game.spieler.ressourcen)
+            for(var key in game.spieler.ressourcen){
+            d_ressourcen[key]=(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]);
+            //console.log("d: "+(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]))
+            //console.log("= "+game.spieler.ressourcen[key]+"-"+temp["last_ressourcen"][key]+"=")
+            if(d_ressourcen[key]!=0)
+                pop.play()     
+        }
+
+        ertrag= d_ressourcen;
+ 
+    //console.log("ertrag: ")
+    //console.log(ertrag)
+    temp.spieler=game.spieler.id;
+    redraw();
+    if(game.wuerfel[0]!=0)
+        roll.play();
 });
 
 view.addEventListener("mousemove", (e) => {
@@ -73,7 +91,6 @@ view.addEventListener("mousemove", (e) => {
 });
 
 view.addEventListener("mousedown", (e) => {
-
     view.click=1;
     redraw();
 });
@@ -88,21 +105,28 @@ view.addEventListener("mouseout", (e) => {
     redraw();
 });
 
-function redraw(){
+var ertrag={
+    holz: 0,
+    wolle: 0,
+    lehm: 0,
+    getreide: 0,
+    erz: 0
+};
 
+function redraw(){
     start = performance.now();
     render = true;
 
-    if(game){   
+    if(game){ 
+        console.log(game.spieler)  
         uncover('-1');
 
-        if(typeof game.spieler !== 'undefined' && typeof game.spieler.ressourcen !== 'undefined')
+        if(game.spieler.id !== null && typeof game.spieler !== 'undefined' && typeof game.spieler.ressourcen !== 'undefined')
         {
             uncover('-2');
 
             var ressourcen=game.spieler.ressourcen;
             var cost=calculateCost();
-            var ertrag=dRessourcen();
 
             document.getElementById('total_holz').innerText=ressourcen.holz-cost.holz;
             document.getElementById('total_wolle').innerText=ressourcen.wolle-cost.wolle;
@@ -122,11 +146,12 @@ function redraw(){
             document.getElementById('getreide').innerText=ressourcen.getreide;
             document.getElementById('erz').innerText=ressourcen.erz;
             
-            document.getElementById('d+_holz').innerText='+'+ertrag.holz;
-            document.getElementById('d+_wolle').innerText='+'+ertrag.wolle;
-            document.getElementById('d+_lehm').innerText='+'+ertrag.lehm;
-            document.getElementById('d+_getreide').innerText='+'+ertrag.getreide;
-            document.getElementById('d+_erz').innerText='+'+ertrag.erz;
+
+            document.getElementById('d+_holz').innerText=(!ertrag.holz?"":"+"+ertrag.holz);
+            document.getElementById('d+_wolle').innerText=(!ertrag.wolle?"":"+"+ertrag.wolle);
+            document.getElementById('d+_lehm').innerText=(!ertrag.lehm?"":"+"+ertrag.lehm);
+            document.getElementById('d+_getreide').innerText=(!ertrag.getreide?"":"+"+ertrag.getreide);
+            document.getElementById('d+_erz').innerText=(!ertrag.erz?"":"+"+ertrag.erz);
 
             document.getElementById('d-_holz').innerText='-'+cost.holz;
             document.getElementById('d-_wolle').innerText='-'+cost.wolle;
@@ -136,8 +161,8 @@ function redraw(){
 
             document.getElementById('sp_label').innerText=game.spieler.siegespunkte+"/10";
             document.getElementById('sp').value=game.spieler.siegespunkte;
-            document.getElementById('w6_0').src="/catan/res/wuerfel/wuerfelaugen-bs-"+game.wuerfel[0]+"-k.png";
-            document.getElementById('w6_1').src="/catan/res/wuerfel/wuerfelaugen-bs-"+game.wuerfel[1]+"-k.png";
+            document.getElementById('w6_0').src="/catan/res/wuerfel/"+(0==game.wuerfel[0]?"loading.gif":"wuerfelaugen-bs-"+game.wuerfel[0]+"-k.png");
+            document.getElementById('w6_1').src="/catan/res/wuerfel/"+(0==game.wuerfel[1]?"loading.gif":"wuerfelaugen-bs-"+game.wuerfel[1]+"-k.png");
         }
 
         view.drawGame(game, temp, 600, 600, size);
@@ -176,11 +201,24 @@ function redraw(){
     });
 
     document.getElementById('zug_beenden').addEventListener('click', e => {
-        for(let res in temp.last_ressourcen){
-            temp.last_ressourcen[res]=game.spieler.ressourcen[res];
-        }
+        game.wuerfel=[0,0];
         buildMarkedTiles();
+        redraw();
         socket.emit(channel_name+'turn', {player: temp.spieler, wege: [...temp.wege], kreuzungen: [...temp.kreuzungen]});
+        temp = {
+            last_ressourcen: {
+                holz: 0,
+                wolle: 0,
+                lehm: 0,
+                getreide: 0,
+                erz: 0
+            },
+            stadt: false,
+            spieler: temp.spieler,
+            marked_tiles: [],
+            kreuzungen: new Map(),
+            wege: new Map()
+        }
     });
 
     document.getElementById('bauen').addEventListener('click', e => {
@@ -262,14 +300,6 @@ function redraw(){
         return cost;
     }
 
-    function dRessourcen(){
-        var d_ressourcen={};
-        for(var key in game.spieler.ressourcen)
-            d_ressourcen[key]=game.spieler.ressourcen[key]-temp.last_ressourcen[key];
-
-        return d_ressourcen;
-    }
-
     function buildMarkedTiles(){
         if(_hex.areNeighbours(temp.marked_tiles)&&game.spielfeld.isFree(temp)){
             switch(temp.marked_tiles.length){
@@ -282,6 +312,5 @@ function redraw(){
             }
             temp.marked_tiles = [];
             view.temp.marked_tiles = [];
-            redraw();
         }
     }

@@ -38,14 +38,21 @@ exports.run = (io, channel, logger) => {
         });
 
         socket.on(channel_name + 'turn', msg => {
-            if(game.zug_beenden(msg, players[socket.id])==-1)
-                console.log("ILLEGAL MOVE - CHECK FOR HACKERS!")
-            game.runde_beenden();
+            if (server.ioactive[socket.id]){
+                io.to(socket.id).emit(channel_name + 'end-of-turn');
+                socket.broadcast.emit(channel_name + 'end-of-turn');
+                //Ineffizientes Timeout zur Spannungserhaltung
+                setTimeout(function(){
+                    if(game.zug_beenden(msg, players[socket.id])==-1)
+                        console.log("ILLEGAL MOVE - CHECK FOR HACKERS!")
+                    game.neue_runde();
 
-            socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
-            Object.keys(players).forEach((id) => {
-                io.to(id).emit(channel_name + 'game-update', game.forPlayer(players[id]));
-            });
+                    socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
+                    Object.keys(players).forEach((id) => {
+                        io.to(id).emit(channel_name + 'game-update', game.forPlayer(players[id]));
+                    });
+                }, 2000);
+            }
         });
 
         socket.on(channel_name + 'send-chat-msg', msg => {
