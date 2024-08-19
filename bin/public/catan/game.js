@@ -380,35 +380,26 @@ exports.spiel = class{
 
         var augen=this.wuerfeln();
 
-        console.log("neue-runde")
-        console.log(this.spielfeld.kreuzungen)
-        this.spielfeld.kreuzungen.forEach((bauwerk, pos) => {
-            
-            pos.forEach(p => {
-                console.log("feld:")
-                console.log(p)
-                let anliegendes_feld=this.spielfeld.felder[p.q+"/"+p.r];
-                
-                if(anliegendes_feld.zahl==augen){
-                    console.log(augen)
-                    this.spieler[bauwerk.id].ressourcen[this.spielfeld.ressourcen[anliegendes_feld.landschaft]]+=1+bauwerk.stadt;
-                }
-            });
+        this.sp_berechnen();
 
-        });
+        this.res_verteilen(augen);
 
-
+        return augen;
     }
 
-    zug_beenden(data){
+    zug_beenden(data, id){
         for (let entry of data.wege)
-            if(!this.spielfeld.wege.has(entry[0]))
-                this.spielfeld.wege.set(entry[0], entry[1]);
+            if(!this.spielfeld.wege.has(entry[0])&&this.spieler[id].bauen.strassen>0){
+                this.spieler[id].bauen.strassen--;
+                this.spielfeld.wege.set(entry[0], id);
+            }
             else
                 return -1;
         for (let entry of data.kreuzungen)
-            if(!this.spielfeld.kreuzungen.has(entry[0]))
-                this.spielfeld.kreuzungen.set(entry[0], entry[1]);
+            if(!this.spielfeld.kreuzungen.has(entry[0])&&(entry[1].stadt?this.spieler[id].bauen.staedte>0:this.spieler[id].bauen.siedlungen>0)){
+                entry[1].stadt?this.spieler[id].bauen.staedte--:this.spieler[id].bauen.siedlungen--;
+                this.spielfeld.kreuzungen.set(entry[0], {id: id, stadt: entry[1].stadt});
+            }
             else
                 return -1;
     }
@@ -420,6 +411,17 @@ exports.spiel = class{
         return (this.wuerfel[0]+this.wuerfel[1]);
     }
 
+    res_verteilen(augen){
+        this.spielfeld.kreuzungen.forEach((bauwerk, pos) => {
+            pos.forEach(p => {
+                let anliegendes_feld=this.spielfeld.felder[p.q+"/"+p.r];
+                if(anliegendes_feld.zahl==augen)
+                    this.spieler[bauwerk.id].ressourcen[this.spielfeld.ressourcen[anliegendes_feld.landschaft]]+=1+bauwerk.stadt;
+            });
+
+        });
+    }
+
     lhs_ermitteln(){
 
     }
@@ -429,12 +431,12 @@ exports.spiel = class{
     }
 
     sp_berechnen(){
-        for(var spieler in this.spieler){
-            spieler.siegespunkte=(5-spieler.bauen.siedlungen)+2*(4-spieler.bauen.steadte)+spieler.entwicklung.siegespunkt
-            if(this.grm==spieler.id)
-                spieler.siegespunkte+=2
-            if(this.lhs==spieler.id)
-                spieler.siegespunkte+=2
+        for(var i=0; i<4; i++){
+            this.spieler[i].siegespunkte=0;
+            this.spieler[i].siegespunkte+=(this.laengste_handelsstrasse==i)+(this.groesste_rittermacht==i);
         }
+        this.spielfeld.kreuzungen.forEach(bauwerk => {
+            this.spieler[bauwerk.id].siegespunkte+=1+bauwerk.stadt+this.spieler[bauwerk.id].entwicklungen.siegespunkte.length;
+        });
     }
 };

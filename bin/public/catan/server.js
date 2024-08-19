@@ -44,8 +44,9 @@ exports.run = (io, channel, logger) => {
                 //Ineffizientes Timeout zur Spannungserhaltung
                 setTimeout(function(){
                     if(game.zug_beenden(msg, players[socket.id])==-1)
-                        console.log("ILLEGAL MOVE - CHECK FOR HACKERS!")
-                    game.neue_runde();
+                        log("ILLEGAL MOVE - CHECK FOR HACKERS!")
+                    
+                    log("*** Neue Runde! Gewürfelte Zahl: " + game.neue_runde() + " ***", "magenta");
 
                     socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
                     Object.keys(players).forEach((id) => {
@@ -60,18 +61,17 @@ exports.run = (io, channel, logger) => {
             if (server.ioactive[socket.id])
                 if (msg[0].substring(0, "pls player".length) == "pls player" && Object.keys(players).length < 4 && typeof players[socket.id] == 'undefined') {
                     var player;
-                    console.log(players)
                     for (var i = 3; i > -1; i--)
                         if (!Object.values(players).includes(i))
                             player = i;
                     players[socket.id] = player;
-                    logger((socket.id) + " selected player-" + player + "!", "yellow")
+                    log("<socket.id:" + (socket.id) + "> selected <player-" + player + ">!", "yellow")
 
                     io.to(socket.id).emit(channel_name + 'get-users', { users: server.users, ids: server.ids });
                     socket.broadcast.emit(channel_name + 'get-users', { users: server.users, ids: server.ids });
 
-                    io.to(socket.id).emit(channel_name + 'chat-msg', { msg: ["You, @" + server.users[socket.id] + ", selected player-" + player,], name: "[Catan-server]" });
-                    socket.broadcast.emit(channel_name + 'chat-msg', { msg: ["User: @" + server.users[socket.id] + ", selected player-" + player,], name: "[Catan-server]" });
+                    io.to(socket.id).emit(channel_name + 'chat-msg', { msg: ["You, @" + server.users[socket.id] + ", selected <player-" + player + ">!"], name: "[Catan-server]" });
+                    socket.broadcast.emit(channel_name + 'chat-msg', { msg: ["User: @" + server.users[socket.id] + ", selected <player-" + player + ">!"], name: "[Catan-server]" });
 
                     io.to(socket.id).emit(channel_name + 'game-update', game.forPlayer(player));
                 }
