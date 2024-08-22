@@ -36,7 +36,17 @@ exports.run = (io, channel, logger) => {
             if (server.ioactive[socket.id])
                 io.to(socket.id).emit(channel_name + 'game-update', game.forPlayer(-1));
         });
-
+/*
+        socket.on(channel_name + 'turn', msg => {
+            if (server.ioactive[socket.id]){
+                    if(game.zug_beenden(msg, players[socket.id])==-1)
+                        log("ILLEGAL MOVE - CHECK FOR HACKERS!")
+            else{
+				io.to(socket.id).emit(channel_name+'session-dead', socket.id);
+				socket.disconnect(true);
+			}
+        });
+*/
         socket.on(channel_name + 'turn', msg => {
             if (server.ioactive[socket.id]){
                 io.to(socket.id).emit(channel_name + 'end-of-turn');
@@ -46,7 +56,8 @@ exports.run = (io, channel, logger) => {
                     if(game.zug_beenden(msg, players[socket.id])==-1)
                         log("ILLEGAL MOVE - CHECK FOR HACKERS!")
                     
-                    log("*** Neue Runde! Gewürfelte Zahl: " + game.neue_runde() + " ***", "magenta");
+                    var runde=game.neue_runde();
+                    log("*** "+(runde.runde+1)+". Runde! Gewürfelte Zahl: " + runde.augen + " ***", "magenta");
 
                     socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
                     Object.keys(players).forEach((id) => {
@@ -54,10 +65,6 @@ exports.run = (io, channel, logger) => {
                     });
                 }, 2000);
             }
-            else{
-				io.to(socket.id).emit(channel_name+'session-dead', socket.id);
-				socket.disconnect(true);
-			}
         });
 
         socket.on(channel_name + 'send-chat-msg', msg => {

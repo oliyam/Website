@@ -25,6 +25,15 @@ exports.run = (io, channel, logger) => {
 	log("Chat server running", "cyan");
 
 	io.on('connection', socket => {
+
+		//wird bei jedem Socket-Ereignis ausgeführt
+		socket.onevent("*", () => {
+            if (!server.ioactive[socket.id]){
+                io.to(socket.id).emit(channel_name+'session-dead', socket.id);
+                socket.disconnect(true);
+            }
+        });
+
 		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
 			if(!(exports.users[socket.id]===null||exports.users[socket.id]===undefined)&&exports.home[socket.id]==channel_name){

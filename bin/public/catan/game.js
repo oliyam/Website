@@ -376,15 +376,19 @@ exports.spiel = class{
 
         //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
 
-        var aktiver_spieler = this.runde%4;
+        var data = {augen: {}, runde: {}}
 
-        var augen=this.wuerfeln();
+        data.augen=this.wuerfeln();
 
         this.sp_berechnen();
 
-        this.res_verteilen(augen);
+        this.res_verteilen(data.augen);
 
-        return augen;
+        data.runde=this.runde;
+
+        var aktiver_spieler = this.runde++%4;
+
+        return data;
     }
 
     zug_beenden(data, id){
