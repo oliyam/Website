@@ -9,7 +9,10 @@ function run(socket, channel){
 	const msgInput=document.getElementById("msg-input");
 	const onlineUsers=document.getElementById("online");
 
-	var name=prompt("pls name");
+	var URL_params=new URLSearchParams(window.location.search)
+
+	//Automatische Namensanfrage via URL-Query (?name=[name])
+	var name=URL_params.get('name')||prompt("pls name");
 	var validName=false;
 	var users=[];
 	var message="What's your name?";

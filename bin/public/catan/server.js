@@ -54,6 +54,10 @@ exports.run = (io, channel, logger) => {
                     });
                 }, 2000);
             }
+            else{
+				io.to(socket.id).emit(channel_name+'session-dead', socket.id);
+				socket.disconnect(true);
+			}
         });
 
         socket.on(channel_name + 'send-chat-msg', msg => {

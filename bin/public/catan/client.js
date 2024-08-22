@@ -10,7 +10,8 @@ var temp = {
     spieler: 0,
     marked_tiles: [],
     kreuzungen: new Map(),
-    wege: new Map()
+    wege: new Map(),
+    entwicklungen: 0
 };
 
 var size=50;
@@ -28,6 +29,24 @@ c.run(socket, 'catan');
 
 var roll = new Audio('/catan/res/wuerfel/rolling dice 2.mp3');
 var pop= new Audio('/catan/res/pop.mp3');
+var one_up= new Audio('/catan/res/Purple Studs SFX.mp3');
+
+function repeat_audio(audio, n){
+    let count=1;
+    audio.addEventListener('ended', function() {
+        if(count<n){
+            count++;
+            this.play();
+        }
+    }, false);
+    audio.play();
+}
+
+var URL_params=new URLSearchParams(window.location.search);
+
+//Automatische Spieleranfrage via URL-Query (?player=1)
+if(URL_params.get('player'))
+    socket.emit(channel_name+'send-chat-msg', ["pls player", "<no image>"]);
 
 //Benutzerliste mit Spielern aktualisieren
 socket.on(channel_name+'get-players',  data => {
@@ -67,21 +86,28 @@ socket.on(channel_name+'game-update', msg => {
         //console.log(temp)
         if(game.spieler.ressourcen)
             for(var key in game.spieler.ressourcen){
-            d_ressourcen[key]=(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]);
-            //console.log("d: "+(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]))
-            //console.log("= "+game.spieler.ressourcen[key]+"-"+temp["last_ressourcen"][key]+"=")
-            if(d_ressourcen[key]!=0)
-                pop.play()     
+                d_ressourcen[key]=(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]);
+                //console.log("d: "+(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]))
+                //console.log("= "+game.spieler.ressourcen[key]+"-"+temp["last_ressourcen"][key]+"=")
+                if(d_ressourcen[key]!=0)
+                    pop.play()     
         }
 
         ertrag= d_ressourcen;
  
+    
     //console.log("ertrag: ")
     //console.log(ertrag)
     temp.spieler=game.spieler.id;
     redraw();
     if(game.wuerfel[0]!=0)
         roll.play();
+   
+    for(let i=0; i<game.spieler.siegespunkte;i++)
+        setTimeout(() => {
+            let one_up= new Audio('/catan/res/Purple Studs SFX.mp3');
+            one_up.play();
+        }, 500);
 });
 
 view.addEventListener("mousemove", (e) => {
@@ -113,13 +139,8 @@ var ertrag={
     erz: 0
 };
 
-function redraw(){
-    start = performance.now();
-    render = true;
-
+function redraw_controls(){
     if(game){ 
-        console.log(game.spieler)  
-        uncover('-1');
 
         if(game.spieler.id !== null && typeof game.spieler !== 'undefined' && typeof game.spieler.ressourcen !== 'undefined')
         {
@@ -127,6 +148,32 @@ function redraw(){
 
             var ressourcen=game.spieler.ressourcen;
             var cost=calculateCost();
+
+            document.getElementById('entwicklung').innerText="Entwicklungskarten ziehen: "+temp.entwicklungen;
+
+            var entw=game.spieler.entwicklungen;
+
+            document.getElementById('anz_ritter').innerText=entw.ritter.length;
+            document.getElementById('anz_fortschritt').innerText=entw.fortschritt.length;
+            document.getElementById('anz_sp').innerText=entw.siegespunkt.length;
+
+            var ls_fortschritt=document.getElementById("ls_fortschritt");
+            var ls_sp=document.getElementById("ls_sp");
+
+            ls_fortschritt.textContent='';
+            ls_sp.textContent='';
+
+            entw.fortschritt.forEach( e => {
+                let opt = document.createElement('option');
+                opt.innerText = e.toUpperCase() ;
+                ls_fortschritt.appendChild(opt);
+            });
+
+            entw.siegespunkt.forEach( e => {
+                let opt = document.createElement('option');
+                opt.innerText = e.toUpperCase() ;
+                ls_sp.appendChild(opt);
+            });
 
             document.getElementById('total_holz').innerText=ressourcen.holz-cost.holz;
             document.getElementById('total_wolle').innerText=ressourcen.wolle-cost.wolle;
@@ -163,7 +210,18 @@ function redraw(){
             document.getElementById('sp').value=game.spieler.siegespunkte;
             document.getElementById('w6_0').src="/catan/res/wuerfel/"+(0==game.wuerfel[0]?"loading.gif":"wuerfelaugen-bs-"+game.wuerfel[0]+"-k.png");
             document.getElementById('w6_1').src="/catan/res/wuerfel/"+(0==game.wuerfel[1]?"loading.gif":"wuerfelaugen-bs-"+game.wuerfel[1]+"-k.png");
-        }
+        };
+    }
+}
+
+function redraw(){
+    start = performance.now();
+    render = true;
+
+    if(game){ 
+        uncover('-1');
+
+        redraw_controls();
 
         view.drawGame(game, temp, 600, 600, size);
     }
@@ -203,8 +261,7 @@ function redraw(){
     document.getElementById('zug_beenden').addEventListener('click', e => {
         game.wuerfel=[0,0];
         buildMarkedTiles();
-        redraw();
-        socket.emit(channel_name+'turn', {player: temp.spieler, wege: [...temp.wege], kreuzungen: [...temp.kreuzungen]});
+        socket.emit(channel_name+'turn', {player: temp.spieler, wege: [...temp.wege], kreuzungen: [...temp.kreuzungen], entwicklungen: temp.entwicklungen});
         temp = {
             last_ressourcen: {
                 holz: 0,
@@ -217,12 +274,15 @@ function redraw(){
             spieler: temp.spieler,
             marked_tiles: [],
             kreuzungen: new Map(),
-            wege: new Map()
-        }
+            wege: new Map(),
+            entwicklungen: 0
+        };
+        redraw();
     });
 
     document.getElementById('bauen').addEventListener('click', e => {
         buildMarkedTiles();
+        redraw();
     });
 
     document.getElementById('loeschen').addEventListener('click', e => {
@@ -249,6 +309,12 @@ function redraw(){
         temp.stadt=!temp.stadt;
         redraw();
     });
+
+    document.getElementById('entwicklung').addEventListener('click', e => {
+        temp.entwicklungen++;
+        redraw_controls();
+    });
+
 /*
     document.getElementById('spieler').addEventListener('click', e => {
         temp.spieler=(temp.spieler+1)%4;
@@ -296,6 +362,12 @@ function redraw(){
             }
 
         });
+
+        for(let i=0; i<temp.entwicklungen; i++){
+            cost.erz++;
+            cost.getreide++;
+            cost.wolle++;
+        }
 
         return cost;
     }

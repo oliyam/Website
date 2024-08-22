@@ -24,7 +24,7 @@ class spieler {
 
     entwicklungen={
         ritter: [],
-        siegespunkte: [],
+        siegespunkt: [],
         fortschritt: []
     };
 
@@ -266,7 +266,7 @@ class spielfeld{
         return blocked;
     }
 
-    isFree(temp){
+    disFree(temp){
         let frei = true;
             if(temp.marked_tiles.length&&!this.areAllBlocked(temp.marked_tiles))
               switch(temp.marked_tiles.length){
@@ -317,7 +317,7 @@ exports.spiel = class{
     spielfeld = {};
 
     entwicklungen = {
-        "fortschritte": {
+        "fortschritt": {
             "monopol": 2,
             "strassenbau": 2,
             "erfindug": 2
@@ -402,6 +402,18 @@ exports.spiel = class{
             }
             else
                 return -1;
+
+        console.log(data.entwicklungen);
+        console.log(this.entwicklungsstapel)
+        if(this.entwicklungsstapel.length>=data.entwicklungen)
+            for(let i=0; i<data.entwicklungen; i++){
+            let entw = this.entwicklungsstapel.pop();
+            let entw_typ = Object.keys(entw)[0]
+            this.spieler[id].entwicklungen[entw_typ].push(entw[entw_typ]);
+            }
+        else   
+            return -1;
+        console.log( this.spieler[id].entwicklungen)
     }
 
     wuerfeln(){
@@ -433,10 +445,10 @@ exports.spiel = class{
     sp_berechnen(){
         for(var i=0; i<4; i++){
             this.spieler[i].siegespunkte=0;
-            this.spieler[i].siegespunkte+=(this.laengste_handelsstrasse==i)+(this.groesste_rittermacht==i);
+            this.spieler[i].siegespunkte+=2*(this.laengste_handelsstrasse==i)+2*(this.groesste_rittermacht==i);
         }
         this.spielfeld.kreuzungen.forEach(bauwerk => {
-            this.spieler[bauwerk.id].siegespunkte+=1+bauwerk.stadt+this.spieler[bauwerk.id].entwicklungen.siegespunkte.length;
+            this.spieler[bauwerk.id].siegespunkte+=1+bauwerk.stadt+this.spieler[bauwerk.id].entwicklungen.siegespunkt.length;
         });
     }
 };

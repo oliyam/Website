@@ -71,31 +71,23 @@
 					<th>SP-Karten</th>
 				</tr>
 				<tr>
-					<th>0</th>
-					<th>0</th>
-					<th>0</th>
+					<th id="anz_ritter">0</th>
+					<th id="anz_fortschritt">0</th>
+					<th id="anz_sp">0</th>
 				</tr>
 				<tr>
 					<th></th>
 					<th>
-						<select name="cars" id="cars">
-							<option value="volvo">Volvo</option>
-							<option value="saab">Saab</option>
-							<option value="opel">Opel</option>
-							<option value="audi">Audi</option>
+						<select name="ls_fortschritt" id="ls_fortschritt">
 					  	</select>
 					</th>
 					<th>
-						<select name="cars" id="cars">
-							<option value="volvo">Volvo</option>
-							<option value="saab">Saab</option>
-							<option value="opel">Opel</option>
-							<option value="audi">Audi</option>
+						<select name="ls_sp" id="ls_sp">
 						</select>
 					</th>
 				</tr>
-				<th><button id='ritter'>Ausspielen</button></th>
-				<th><button id='fortschritt'>Ausspielen</button></th>
+				<th><button id='ritter_'>Ausspielen</button></th>
+				<th><button id='fortschritt_'>Ausspielen</button></th>
 				<th></th>
 			</table>
 			<table style="width:100%">
@@ -137,12 +129,12 @@
 			</div>
 			
 			<div id="online" style="overflow:auto;border-radius:0px 0px 10px 10px;background-color:rgba(0,0,0,0.7);position:absolute;top:10%;left:70%;right:0;bottom:10%">
-				<h3 style="">Online:</h1>
+				<a>Online:</a>
 			</div>
 			
-			<form id="send-container" style="position:absolute;bottom:0;right:0;left:0;top:90%">
-				<input type="text" id="msg-input" style="border-radius:10px;width:70%;height:100%;float:left;" value="pls player">
-				<button type="submit" id="msg-send-button" style="border-radius:10px;height:100%;width:30%">Send</button>
+			<form id="send-container" style="position:absolute;bottom:-2.5%;right:0;left:0;top:90%">
+				<input type="text" id="msg-input" style="display:table-cell;border-radius:10px;width:70%;height:100%;float:left;" value="pls player">
+				<button type="submit" id="msg-send-button" style="display:table-cell;border-radius:10px;height:100%;width:30%">Send</button>
 			</form>
 		</div>
 	</div>
