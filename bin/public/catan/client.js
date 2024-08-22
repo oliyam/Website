@@ -11,7 +11,11 @@ var temp = {
     marked_tiles: [],
     kreuzungen: new Map(),
     wege: new Map(),
-    entwicklungen: 0
+    entwicklungen: 0,
+    ritter: {
+        feld: undefined,
+        opfer: undefined
+    }
 };
 
 var size=50;
@@ -29,9 +33,10 @@ c.run(socket, 'catan');
 
 var roll = new Audio('/catan/res/wuerfel/rolling dice 2.mp3');
 var pop= new Audio('/catan/res/pop.mp3');
-var one_up= new Audio('/catan/res/Purple Studs SFX.mp3');
+var one_up= '/catan/res/Purple Studs SFX.mp3';
+var knight = '/catan/res/sword_clash.mp3';
 
-function repeat_audio(audio, n){
+function _repeat_audio(audio, n){
     let count=1;
     audio.addEventListener('ended', function() {
         if(count<n){
@@ -42,6 +47,10 @@ function repeat_audio(audio, n){
     audio.play();
 }
 
+function repeat_audio(url, n, delay){
+    for(let i=0; i<n;i++)
+        setTimeout(() => {new Audio(url).play()}, delay);
+}
 var URL_params=new URLSearchParams(window.location.search);
 
 //Automatische Spieleranfrage via URL-Query (?player=1)
@@ -103,11 +112,7 @@ socket.on(channel_name+'game-update', msg => {
     if(game.wuerfel[0]!=0)
         roll.play();
    
-    for(let i=0; i<game.spieler.siegespunkte;i++)
-        setTimeout(() => {
-            let one_up= new Audio('/catan/res/Purple Studs SFX.mp3');
-            one_up.play();
-        }, 500);
+    repeat_audio(one_up, game.spieler.siegespunkte, 500);
 });
 
 view.addEventListener("mousemove", (e) => {
@@ -149,6 +154,25 @@ function redraw_controls(){
             var ressourcen=game.spieler.ressourcen;
             var cost=calculateCost();
 
+            var ls_ausraubbare_spieler=document.getElementById('ls_ritter');
+            ls_ausraubbare_spieler.textContent='';
+
+            if(temp.marked_tiles.length==1){
+
+                console.log(temp.marked_tiles[0])
+
+               game.spielfeld.kreuzungen.forEach((value, key) => {
+                    key.forEach(pos => {
+                        if(_hex.isEqual(temp.marked_tiles[0],pos)&&value.id!=game.spieler.id){
+                            let opt = document.createElement('option');
+                            opt.value=value.id;
+                            opt.innerText = "[player-"+value.id+"]";
+                            ls_ausraubbare_spieler.appendChild(opt);
+                        }
+                    });
+               });
+            }
+
             document.getElementById('entwicklung').innerText="Entwicklungskarten ziehen: "+temp.entwicklungen;
 
             var entw=game.spieler.entwicklungen;
@@ -165,13 +189,14 @@ function redraw_controls(){
 
             entw.fortschritt.forEach( e => {
                 let opt = document.createElement('option');
-                opt.innerText = e.toUpperCase() ;
+                opt.innerText = e.toUpperCase();
                 ls_fortschritt.appendChild(opt);
             });
 
+
             entw.siegespunkt.forEach( e => {
                 let opt = document.createElement('option');
-                opt.innerText = e.toUpperCase() ;
+                opt.innerText = e.toUpperCase();
                 ls_sp.appendChild(opt);
             });
 
@@ -261,7 +286,14 @@ function redraw(){
     document.getElementById('zug_beenden').addEventListener('click', e => {
         game.wuerfel=[0,0];
         buildMarkedTiles();
-        socket.emit(channel_name+'turn', {player: temp.spieler, wege: [...temp.wege], kreuzungen: [...temp.kreuzungen], entwicklungen: temp.entwicklungen});
+        socket.emit(channel_name+'turn', 
+        {
+            player: temp.spieler,
+            wege: [...temp.wege],
+            kreuzungen: [...temp.kreuzungen],
+            entwicklungen: temp.entwicklungen,
+            ritter: temp.ritter
+        });
         temp = {
             last_ressourcen: {
                 holz: 0,
@@ -275,7 +307,11 @@ function redraw(){
             marked_tiles: [],
             kreuzungen: new Map(),
             wege: new Map(),
-            entwicklungen: 0
+            entwicklungen: 0,
+            ritter: {
+                feld: undefined,
+                opfer: undefined
+            }
         };
         redraw();
     });
@@ -286,6 +322,7 @@ function redraw(){
     });
 
     document.getElementById('loeschen').addEventListener('click', e => {
+        document.getElementById('ritter_').disabled=false;
         temp = {
             last_ressourcen: {
                 holz: 0,
@@ -298,7 +335,12 @@ function redraw(){
             spieler: temp.spieler,
             marked_tiles: [],
             kreuzungen: new Map(),
-            wege: new Map()
+            wege: new Map(),
+            entwicklungen: 0,
+            ritter: {
+                feld: undefined,
+                opfer: undefined
+            }
         }
         view.temp=temp;
         redraw();
@@ -308,6 +350,15 @@ function redraw(){
         document.getElementById('stadt').innerText=temp.stadt?'Siedlung':'Stadt';
         temp.stadt=!temp.stadt;
         redraw();
+    });
+
+    document.getElementById('ritter_').addEventListener('click', e => {
+        if(game.spieler.entwicklungen.ritter.length>0&&temp.marked_tiles.length==1){
+            document.getElementById('ritter_').disabled=true;
+            temp.ritter.feld=temp.marked_tiles[0];
+            temp.ritter.opfer=document.getElementById('ls_ritter').value;
+            redraw();
+        }
     });
 
     document.getElementById('entwicklung').addEventListener('click', e => {

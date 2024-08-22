@@ -266,7 +266,7 @@ class spielfeld{
         return blocked;
     }
 
-    disFree(temp){
+    isFree(temp){
         let frei = true;
             if(temp.marked_tiles.length&&!this.areAllBlocked(temp.marked_tiles))
               switch(temp.marked_tiles.length){
@@ -403,8 +403,6 @@ exports.spiel = class{
             else
                 return -1;
 
-        console.log(data.entwicklungen);
-        console.log(this.entwicklungsstapel)
         if(this.entwicklungsstapel.length>=data.entwicklungen)
             for(let i=0; i<data.entwicklungen; i++){
             let entw = this.entwicklungsstapel.pop();
@@ -413,7 +411,6 @@ exports.spiel = class{
             }
         else   
             return -1;
-        console.log( this.spieler[id].entwicklungen)
     }
 
     wuerfeln(){
