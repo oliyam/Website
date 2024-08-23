@@ -58,7 +58,7 @@ exports.run = (io, channel, logger) => {
 				log(exports.users[socket.id]+": "+msg[0]+"; <no image>","white");		
 			//if socket is active
 			if(exports.ioactive[socket.id]){
-				//adminmode
+				//adminmode z.B.: "admin kick [user] [pwd]"
 				if(msg[0].substring(0,"admin".length)=="admin"){
 					log("adminmode for "+exports.users[socket.id],"yellow");
 					var cmd=[];
@@ -75,15 +75,15 @@ exports.run = (io, channel, logger) => {
 							case "kick":
 								log("kicking: "+cmd[2]+"...","yellow");
 								for(var i=0;i<exports.ids.length;i++)
-									if(exports.users[ids[i]]==cmd[2]){
+									if(exports.users[exports.ids[i]]==cmd[2]){
 										log("got you!","green")
-										exports.ioactive[ids[i]]=false;
-										log("kicked: "+exports.users[ids[i]],"green");
+										exports.ioactive[exports.ids[i]]=false;
+										log("kicked: "+exports.users[exports.ids[i]],"green");
 									}	
 								break;
 						}
 					}
-					elseS
+					else
 						log("denied!","red");
 				}
 				else if(exports.ioactive[socket.id])
