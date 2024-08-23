@@ -446,10 +446,10 @@ exports.spiel = class{
     sp_berechnen(){
         for(var i=0; i<4; i++){
             this.spieler[i].siegespunkte=0;
-            this.spieler[i].siegespunkte+=2*(this.laengste_handelsstrasse==i)+2*(this.groesste_rittermacht==i);
+            this.spieler[i].siegespunkte+=2*(this.laengste_handelsstrasse==i)+2*(this.groesste_rittermacht==i)+this.spieler[i].entwicklungen.siegespunkt.length;
         }
         this.spielfeld.kreuzungen.forEach(bauwerk => {
-            this.spieler[bauwerk.id].siegespunkte+=1+bauwerk.stadt+this.spieler[bauwerk.id].entwicklungen.siegespunkt.length;
+            this.spieler[bauwerk.id].siegespunkte+=1+bauwerk.stadt;
         });
     }
 };
