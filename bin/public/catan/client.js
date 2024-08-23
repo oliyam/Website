@@ -73,6 +73,8 @@ socket.on(channel_name+'game-update', msg => {
     temp.last_ressourcen=game.spieler.ressourcen;
 
     temp.last_entwicklungen={};
+
+    temp.last_sp=game.spieler.siegespunkte;
     
     if(game.spieler.entwicklungen)
         for(var key in game.spieler.entwicklungen)
@@ -107,12 +109,14 @@ socket.on(channel_name+'game-update', msg => {
 
         karten= d_entwicklungen;
 
+        d_sp= game.spieler.siegespunkte-temp.last_sp;
+
     temp.spieler=game.spieler.id;
     redraw();
     if(game.wuerfel[0]!=0)
         roll.play();
-   
-    repeat_audio(one_up, game.spieler.siegespunkte, 500);
+
+    repeat_audio(one_up, d_sp, 500);
 });
 
 view.addEventListener("mousemove", (e) => {
@@ -150,6 +154,8 @@ var karten={
     fortschritt: 0
 };
 
+var d_sp=0;
+
 function redraw_controls(){
     if(game){ 
 
@@ -178,6 +184,8 @@ function redraw_controls(){
                     });
                });
             }
+
+            document.getElementById('d_sp').innerText=(!d_sp?"":"+"+d_sp);
 
             document.getElementById('entwicklung').innerText="Entwicklungskarten ziehen: "+temp.entwicklungen;
 
@@ -316,7 +324,8 @@ function redraw(){
                 ritter: 0,
                 siegespunkte: 0,
                 fortschritt: 0
-            },
+            },          
+            last_sp: 0,
             stadt: false,
             spieler: temp.spieler,
             marked_tiles: [],
@@ -351,6 +360,7 @@ function redraw(){
                 siegespunkte: 0,
                 fortschritt: 0
             },
+            last_sp: 0,
             stadt: false,
             spieler: temp.spieler,
             marked_tiles: [],
