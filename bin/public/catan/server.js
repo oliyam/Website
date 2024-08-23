@@ -13,6 +13,13 @@ exports.run = (io, channel, logger) => {
     //object with player numbers at player's socket id
     var players = {};
 
+    farben = [
+        "FF0000",
+        "0000FF",
+        "FFFFFF",
+        "FF8C00"
+    ];
+
     var game = new catan.spiel();
 
     const channel_name = channel + '>';
@@ -25,7 +32,7 @@ exports.run = (io, channel, logger) => {
         socket.on(channel_name + 'request-players', () => {
             var game_users = {};
             Object.keys(server.users).forEach((id) => {
-                game_users[id] = typeof players[id] != 'undefined' ? "<a>" + server.users[id] + "</a> <a style='color:orange;'>[player-" + players[id] + ']</a>' : "<a>" + server.users[id] + "</a> <a style='color:green;'>[spectator]</a>";
+                game_users[id] = typeof players[id] != 'undefined' ? "<a>" + server.users[id] + "</a> <a style='color:"+farben[players[id]]+"'>[player-" + players[id] + ']</a>' : "<a>" + server.users[id] + "</a> <a style='color:green;'>[spectator]</a>";
             });
 
             io.to(socket.id).emit(channel_name + 'get-players', { users: game_users, ids: server.ids });
@@ -57,7 +64,7 @@ exports.run = (io, channel, logger) => {
                         log("ILLEGAL MOVE - CHECK FOR HACKERS!")
                     
                     var runde=game.neue_runde();
-                    log("*** "+(runde.runde+1)+". Runde! Gewürfelte Zahl: " + runde.augen + " ***", "magenta");
+                    log("*** "+(runde.runde+1)+". Runde! Spieler-"+runde.runde%4+" am Zug. Gewürfelte Zahl: " + runde.augen + " ***", "magenta");
 
                     socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
                     Object.keys(players).forEach((id) => {

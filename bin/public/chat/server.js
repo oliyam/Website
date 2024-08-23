@@ -26,13 +26,15 @@ exports.run = (io, channel, logger) => {
 
 	io.on('connection', socket => {
 
-		//wird bei jedem Socket-Ereignis ausgeführt
-		socket.onevent("*", () => {
+		/*
+		//wird bei jedem Socket-Ereignis ausgeführt - anscheinend nicht ... ?
+		socket.onevent("*", (e) => {
             if (!server.ioactive[socket.id]){
                 io.to(socket.id).emit(channel_name+'session-dead', socket.id);
                 socket.disconnect(true);
             }
         });
+		*/
 
 		//wird ausgeführt wenn sich ein socket vom server trennt
 		socket.on('disconnect', () => {
