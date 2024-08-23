@@ -70,19 +70,14 @@ socket.on(channel_name+'get-users',  () => {
 socket.emit(channel_name+'watch-request', {});
 
 socket.on(channel_name+'game-update', msg => {
-    if(game&&game.spieler.ressourcen){
-        //console.log("game: ")
-        //console.log(game)
-    }
-    else
-        console.log("game undefined")
-    temp.last_ressourcen=(game.spieler.ressourcen==undefined?{
-        holz: 0,
-        wolle: 0,
-        lehm: 0,
-        getreide: 0,
-        erz: 0
-    }:game.spieler.ressourcen);
+    temp.last_ressourcen=game.spieler.ressourcen;
+
+    temp.last_entwicklungen={};
+    
+    if(game.spieler.entwicklungen)
+        for(var key in game.spieler.entwicklungen)
+            temp.last_entwicklungen[key]=game.spieler.entwicklungen[key].length;
+
     game=game.set(msg);
         var d_ressourcen={
             holz: 0,
@@ -91,22 +86,27 @@ socket.on(channel_name+'game-update', msg => {
             getreide: 0,
             erz: 0
         };
-        //console.log("temp: ")
-        //console.log(temp)
+
         if(game.spieler.ressourcen)
             for(var key in game.spieler.ressourcen){
                 d_ressourcen[key]=(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]);
-                //console.log("d: "+(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]))
-                //console.log("= "+game.spieler.ressourcen[key]+"-"+temp["last_ressourcen"][key]+"=")
-                if(d_ressourcen[key]!=0)
-                    pop.play()     
+                    if(d_ressourcen[key]!=0)
+                        pop.play()     
         }
-
         ertrag= d_ressourcen;
- 
-    
-    //console.log("ertrag: ")
-    //console.log(ertrag)
+
+        var d_entwicklungen={
+            ritter: 0,
+            siegespunkte: 0,
+            fortschritt: 0
+        };
+
+        if(game.spieler.entwicklungen)
+            for(var key in game.spieler.entwicklungen)
+                d_entwicklungen[key]=(game.spieler.entwicklungen[key].length-temp["last_entwicklungen"][key]);   
+
+        karten= d_entwicklungen;
+
     temp.spieler=game.spieler.id;
     redraw();
     if(game.wuerfel[0]!=0)
@@ -142,6 +142,12 @@ var ertrag={
     lehm: 0,
     getreide: 0,
     erz: 0
+};
+
+var karten={
+    ritter: 0,
+    siegespunkte: 0,
+    fortschritt: 0
 };
 
 function redraw_controls(){
@@ -180,6 +186,10 @@ function redraw_controls(){
             document.getElementById('anz_ritter').innerText=entw.ritter.length;
             document.getElementById('anz_fortschritt').innerText=entw.fortschritt.length;
             document.getElementById('anz_sp').innerText=entw.siegespunkt.length;
+
+            document.getElementById('d_anz_ritter').innerText=(!karten.ritter?"":"+"+karten.ritter);
+            document.getElementById('d_anz_fortschritt').innerText=(!karten.fortschritt?"":"+"+karten.fortschritt);
+            document.getElementById('d_anz_sp').innerText=(!karten.siegespunkt?"":"+"+karten.siegespunkt);
 
             var ls_fortschritt=document.getElementById("ls_fortschritt");
             var ls_sp=document.getElementById("ls_sp");
@@ -302,6 +312,11 @@ function redraw(){
                 getreide: 0,
                 erz: 0
             },
+            last_entwicklungen: {
+                ritter: 0,
+                siegespunkte: 0,
+                fortschritt: 0
+            },
             stadt: false,
             spieler: temp.spieler,
             marked_tiles: [],
@@ -330,6 +345,11 @@ function redraw(){
                 lehm: 0,
                 getreide: 0,
                 erz: 0
+            },
+            last_entwicklungen: {
+                ritter: 0,
+                siegespunkte: 0,
+                fortschritt: 0
             },
             stadt: false,
             spieler: temp.spieler,
