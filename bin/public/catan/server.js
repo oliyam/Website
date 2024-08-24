@@ -54,17 +54,29 @@ exports.run = (io, channel, logger) => {
 			}
         });
 */
+
+        socket.on(channel_name + 'cast', msg => {
+            if (server.ioactive[socket.id]&&game.runde%4==players[socket.id]){
+                log("*** Gewürfelte Zahl: " + game.wuerfeln() + " ***", "magenta");
+                socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
+                    Object.keys(players).forEach((id) => {
+                        io.to(id).emit(channel_name + 'game-update', game.forPlayer(players[id]));
+                    });
+            }
+        });
+
         socket.on(channel_name + 'turn', msg => {
             if (server.ioactive[socket.id]){
                 io.to(socket.id).emit(channel_name + 'end-of-turn');
                 socket.broadcast.emit(channel_name + 'end-of-turn');
+                
                 //Ineffizientes Timeout zur Spannungserhaltung
                 setTimeout(function(){
                     if(game.zug_beenden(msg, players[socket.id])==-1)
                         log("ILLEGAL MOVE - CHECK FOR HACKERS!")
                     
                     var runde=game.neue_runde();
-                    log("*** "+(runde.runde+1)+". Runde! Spieler-"+runde.runde%4+" am Zug. Gewürfelte Zahl: " + runde.augen + " ***", "magenta");
+                    log("*** "+(runde.runde+1)+". Runde! Spieler-"+runde.id+" am Zug. ***", "magenta");
 
                     socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
                     Object.keys(players).forEach((id) => {

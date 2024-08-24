@@ -376,9 +376,7 @@ exports.spiel = class{
 
         //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
 
-        var data = {augen: {}, runde: {}}
-
-        data.augen=this.wuerfeln();
+        var data = {runde: {}, id: {}}
 
         this.sp_berechnen();
 
@@ -387,6 +385,8 @@ exports.spiel = class{
         data.runde=this.runde;
 
         var aktiver_spieler = this.runde++%4;
+
+        data.id=aktiver_spieler;
 
         return data;
     }

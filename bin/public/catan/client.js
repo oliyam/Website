@@ -304,6 +304,15 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             map.style.cursor = 'crosshair';
         });
 
+        document.getElementById('wuerfeln').addEventListener('click', e => {
+            game.wuerfel=[0,0];
+            socket.emit(channel_name+'cast', 
+            {
+
+            });
+            redraw();
+        });
+
         document.getElementById('zug_beenden').addEventListener('click', e => {
             game.wuerfel=[0,0];
             buildMarkedTiles();
@@ -342,6 +351,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             };
             redraw();
         });
+        
 
         document.getElementById('bauen').addEventListener('click', e => {
             buildMarkedTiles();
