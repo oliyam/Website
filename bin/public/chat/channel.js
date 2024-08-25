@@ -24,8 +24,10 @@ function run(socket, channel){
 	socket.on(channel_name+'name-valid', valid => {
 		if(valid)
 			appendJoinMsg("You joined!");
-		else
-			socket.emit(channel_name+'name-request', prompt("name already taken or invalid"));
+		else{
+			name=prompt("name already taken or invalid");
+			socket.emit(channel_name+'name-request', name);
+		}
 	})
 
 	// Weiterleitung zu /dead bei einer toten Sitzung
