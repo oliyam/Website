@@ -110,19 +110,19 @@ function run(socket, channel){
 
 	function appendUser(user, id) {
 		const userElement=document.createElement("div");
-		userElement.style="padding: 0px 0px 0px 20px";
+		userElement.style="padding: 10px; border-top: 2px solid white";
 		userElement.setAttribute("id",id);
 		userElement.innerText=user;
 		onlineUsers.append(userElement);
 	}
 	function removeAllUsers() {
-		const userElement=document.createElement("h1");
+		const userElement=document.createElement("h2");
 		for(var r=0;r<onlineUsers.childNodes.length;r++){
 			while(onlineUsers.firstChild){
 					onlineUsers.removeChild(onlineUsers.firstChild);
 			}
 		}	
-		userElement.style="padding: 10px 10px 10px 10px;";
+		userElement.style="text-align: center;";
 		userElement.innerText="Online:";
 		onlineUsers.append(userElement);
 	}

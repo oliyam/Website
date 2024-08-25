@@ -22,26 +22,34 @@ exports.run = (io, channel, logger) => {
 
     var game = new catan.spiel();
 
+    
+
     const channel_name = channel + '>';
     io.on('connection', socket => {
 
-        socket.on('disconnect', () => {
-            delete players[socket.id];
-        });
-
-        socket.on(channel_name + 'request-players', () => {
+        function send_players(){
             var game_users = {};
             Object.keys(server.users).forEach((id) => {
-                game_users[id] = typeof players[id] != 'undefined' ? "<a>" + server.users[id] + "</a> <a style='color:"+farben[players[id]]+"'>[player-" + players[id] + ']</a>' : "<a>" + server.users[id] + "</a> <a style='color:green;'>[spectator]</a>";
+                game_users[id] = typeof players[id] != 'undefined' ? (game.runde%4==players[id]?"<b style='color: green'>&gt; </b>":"") + "<a>" + server.users[id] + "</a> <a style='color:"+farben[players[id]]+"'>[player-" + players[id] + "]</a>" : "<a>" + server.users[id] + "</a> <a style='color:green;'>[spectator]</a>";
             });
 
             io.to(socket.id).emit(channel_name + 'get-players', { users: game_users, ids: server.ids });
             socket.broadcast.emit(channel_name + 'get-players', { users: game_users, ids: server.ids });
+        }
+
+        socket.on('disconnect', () => {
+            delete players[socket.id];
+            send_players();
         });
 
+        socket.on(channel_name + 'request-players', () => {send_players()});
+
+        socket.on(channel_name + 'get-users', () => {send_players()});
+
         socket.on(channel_name + 'watch-request', () => {
+            send_players();
             if (server.ioactive[socket.id])
-                io.to(socket.id).emit(channel_name + 'game-update', game.forPlayer(-1));
+                io.to(socket.id).emit(channel_name + 'game-update', {game: game.forPlayer(-1), cast: false});
         });
 /*
         socket.on(channel_name + 'turn', msg => {
@@ -58,10 +66,9 @@ exports.run = (io, channel, logger) => {
         socket.on(channel_name + 'cast', msg => {
             if (server.ioactive[socket.id]&&game.runde%4==players[socket.id]){
                 log("*** Gewürfelte Zahl: " + game.wuerfeln() + " ***", "magenta");
-                socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
-                    Object.keys(players).forEach((id) => {
-                        io.to(id).emit(channel_name + 'game-update', game.forPlayer(players[id]));
-                    });
+                Object.keys(players).forEach((id) => {
+                    io.to(id).emit(channel_name + 'game-update', {game: game.forPlayer(players[id]), cast: true});
+                });
             }
         });
 
@@ -69,20 +76,25 @@ exports.run = (io, channel, logger) => {
             if (server.ioactive[socket.id]){
                 io.to(socket.id).emit(channel_name + 'end-of-turn');
                 socket.broadcast.emit(channel_name + 'end-of-turn');
-                
+                /*
                 //Ineffizientes Timeout zur Spannungserhaltung
                 setTimeout(function(){
+                */
                     if(game.zug_beenden(msg, players[socket.id])==-1)
                         log("ILLEGAL MOVE - CHECK FOR HACKERS!")
                     
                     var runde=game.neue_runde();
-                    log("*** "+(runde.runde+1)+". Runde! Spieler-"+runde.id+" am Zug. ***", "magenta");
+                    log("*** "+runde.runde+". Runde! Spieler-"+runde.id+" am Zug. ***", "magenta");
 
-                    socket.broadcast.emit(channel_name + 'game-update', game.forPlayer(-1));
+                    send_players();
+
+                    socket.broadcast.emit(channel_name + 'game-update', {game: game.forPlayer(-1), cast: false});
                     Object.keys(players).forEach((id) => {
-                        io.to(id).emit(channel_name + 'game-update', game.forPlayer(players[id]));
+                        io.to(id).emit(channel_name + 'game-update', {game: game.forPlayer(players[id]), cast: false});
                     });
+                /*
                 }, 2000);
+                */
             }
         });
 
@@ -97,13 +109,12 @@ exports.run = (io, channel, logger) => {
                     players[socket.id] = player;
                     log("<socket.id:" + (socket.id) + "> selected <player-" + player + ">!", "yellow")
 
-                    io.to(socket.id).emit(channel_name + 'get-users', { users: server.users, ids: server.ids });
-                    socket.broadcast.emit(channel_name + 'get-users', { users: server.users, ids: server.ids });
+ <                  send_players();
 
                     io.to(socket.id).emit(channel_name + 'chat-msg', { msg: ["You, @" + server.users[socket.id] + ", selected <player-" + player + ">!"], name: "[Catan-server]" });
                     socket.broadcast.emit(channel_name + 'chat-msg', { msg: ["User: @" + server.users[socket.id] + ", selected <player-" + player + ">!"], name: "[Catan-server]" });
 
-                    io.to(socket.id).emit(channel_name + 'game-update', game.forPlayer(player));
+                    io.to(socket.id).emit(channel_name + 'game-update', {game: game.forPlayer(player), cast: false});
                 }
         });
     });

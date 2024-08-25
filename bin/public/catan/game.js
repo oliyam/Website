@@ -378,15 +378,12 @@ exports.spiel = class{
 
         var data = {runde: {}, id: {}}
 
+        this.wuerfel = [0,0];
+
         this.sp_berechnen();
 
-        this.res_verteilen(data.augen);
-
-        data.runde=this.runde;
-
-        var aktiver_spieler = this.runde++%4;
-
-        data.id=aktiver_spieler;
+        data.runde=++this.runde;
+        data.id=this.runde%4;
 
         return data;
     }
@@ -421,14 +418,16 @@ exports.spiel = class{
         this.wuerfel[0]=Math.floor(Math.random()*6+1);
         this.wuerfel[1]=Math.floor(Math.random()*6+1);
 
+        this.res_verteilen();
+
         return (this.wuerfel[0]+this.wuerfel[1]);
     }
 
-    res_verteilen(augen){
+    res_verteilen(){
         this.spielfeld.kreuzungen.forEach((bauwerk, pos) => {
             pos.forEach(p => {
                 let anliegendes_feld=this.spielfeld.felder[p.q+"/"+p.r];
-                if(anliegendes_feld.zahl==augen)
+                if(anliegendes_feld.zahl==(this.wuerfel[0]+this.wuerfel[1]))
                     this.spieler[bauwerk.id].ressourcen[this.spielfeld.ressourcen[anliegendes_feld.landschaft]]+=1+bauwerk.stadt;
             });
 

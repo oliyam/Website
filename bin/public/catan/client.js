@@ -54,6 +54,8 @@ Erst nach der Bestätigung des Namens wird der Rest ausgeführt.*/
 var URL_params=new URLSearchParams(window.location.search);
 socket.on(channel_name+'name-valid', (valid) => {if(valid){ 
 
+    socket.emit(channel_name+'watch-request', {});
+    
     var game=new spiel();
     var view=new _view(game, temp, 600, 600, size);
     var map=document.getElementById('map').appendChild(view);
@@ -64,13 +66,9 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
     socket.on(channel_name+'get-players',  data => {
         for(var t=0;t<data.ids.length;t++)
             document.getElementById(data.ids[t]).innerHTML=data.users[data.ids[t]];
-    })
+    });
 
-    socket.on(channel_name+'get-users',  () => {
-        socket.emit(channel_name+'request-players', {});
-    })
-
-    socket.emit(channel_name+'watch-request', {});
+    socket.on(channel_name+'get-users',  {});
 
     socket.on(channel_name+'game-update', msg => {
         temp.last_ressourcen=game.spieler.ressourcen;
@@ -83,7 +81,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             for(var key in game.spieler.entwicklungen)
                 temp.last_entwicklungen[key]=game.spieler.entwicklungen[key].length;
 
-        game=game.set(msg);
+        game=game.set(msg.game);
             var d_ressourcen={
                 holz: 0,
                 wolle: 0,
@@ -115,11 +113,15 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             d_sp= game.spieler.siegespunkte-temp.last_sp;
 
         temp.spieler=game.spieler.id;
-        redraw();
-        if(game.wuerfel[0]!=0)
+
+        disable_buttons(!(game.runde%4==game.spieler.id));
+
+        if(msg.cast)
             roll.play();
 
-        repeat_audio(one_up, d_sp, 500);
+        redraw();
+
+        //repeat_audio(one_up, d_sp, 500);
     });
 
     view.addEventListener("mousemove", (e) => {
@@ -172,21 +174,17 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                 var ls_ausraubbare_spieler=document.getElementById('ls_ritter');
                 ls_ausraubbare_spieler.textContent='';
 
-                if(temp.marked_tiles.length==1){
-
-                    console.log(temp.marked_tiles[0])
-
-                game.spielfeld.kreuzungen.forEach((value, key) => {
-                        key.forEach(pos => {
-                            if(_hex.isEqual(temp.marked_tiles[0],pos)&&value.id!=game.spieler.id){
-                                let opt = document.createElement('option');
-                                opt.value=value.id;
-                                opt.innerText = "[player-"+value.id+"]";
-                                ls_ausraubbare_spieler.appendChild(opt);
-                            }
-                        });
-                });
-                }
+                if(temp.marked_tiles.length==1)
+                    game.spielfeld.kreuzungen.forEach((value, key) => {
+                            key.forEach(pos => {
+                                if(_hex.isEqual(temp.marked_tiles[0],pos)&&value.id!=game.spieler.id){
+                                    let opt = document.createElement('option');
+                                    opt.value=value.id;
+                                    opt.innerText = "[player-"+value.id+"]";
+                                    ls_ausraubbare_spieler.appendChild(opt);
+                                }
+                            });
+                    });
 
                 document.getElementById('d_sp').innerText=(!d_sp?"":"+"+d_sp);
 
@@ -306,50 +304,57 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         document.getElementById('wuerfeln').addEventListener('click', e => {
             game.wuerfel=[0,0];
-            socket.emit(channel_name+'cast', 
-            {
-
-            });
-            redraw();
+            socket.emit(channel_name+'cast',{});
+            redraw_controls();
         });
 
-        document.getElementById('zug_beenden').addEventListener('click', e => {
-            game.wuerfel=[0,0];
-            buildMarkedTiles();
-            socket.emit(channel_name+'turn', 
-            {
-                player: temp.spieler,
-                wege: [...temp.wege],
-                kreuzungen: [...temp.kreuzungen],
-                entwicklungen: temp.entwicklungen,
-                ritter: temp.ritter
+        function disable_buttons(active){
+            Array.from(document.getElementsByTagName('button')).forEach(button => {
+                button.disabled=active;
             });
-            temp = {
-                last_ressourcen: {
-                    holz: 0,
-                    wolle: 0,
-                    lehm: 0,
-                    getreide: 0,
-                    erz: 0
-                },
-                last_entwicklungen: {
-                    ritter: 0,
-                    siegespunkte: 0,
-                    fortschritt: 0
-                },          
-                last_sp: 0,
-                stadt: false,
-                spieler: temp.spieler,
-                marked_tiles: [],
-                kreuzungen: new Map(),
-                wege: new Map(),
-                entwicklungen: 0,
-                ritter: {
-                    feld: undefined,
-                    opfer: undefined
-                }
-            };
-            redraw();
+        }
+
+        document.getElementById('zug_beenden').addEventListener('click', e => {
+            if(game.wuerfel[0]+game.wuerfel[1]){
+                disable_buttons(true);
+                game.wuerfel=[0,0];
+                buildMarkedTiles();
+                redraw();
+                socket.emit(channel_name+'turn', 
+                {
+                    player: temp.spieler,
+                    wege: [...temp.wege],
+                    kreuzungen: [...temp.kreuzungen],
+                    entwicklungen: temp.entwicklungen,
+                    ritter: temp.ritter
+                });
+                temp = {
+                    last_ressourcen: {
+                        holz: 0,
+                        wolle: 0,
+                        lehm: 0,
+                        getreide: 0,
+                        erz: 0
+                    },
+                    last_entwicklungen: {
+                        ritter: 0,
+                        siegespunkte: 0,
+                        fortschritt: 0
+                    },          
+                    last_sp: 0,
+                    stadt: false,
+                    spieler: temp.spieler,
+                    marked_tiles: [],
+                    kreuzungen: new Map(),
+                    wege: new Map(),
+                    entwicklungen: 0,
+                    ritter: {
+                        feld: undefined,
+                        opfer: undefined
+                    }
+                };
+                redraw();
+            }
         });
         
 

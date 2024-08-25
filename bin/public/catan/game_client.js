@@ -353,7 +353,7 @@ export class spiel{
     }
 
     set(json){
-        console.log("recieved server game:", json)
+        //console.log("recieved server game:", json)
 
         Object.assign(this, json);
         Object.assign(this.spielfeld=new spielfeld(3), json.spielfeld)
@@ -367,7 +367,7 @@ export class spiel{
         for(let entry of json.spielfeld.kreuzungen)
             this.spielfeld.kreuzungen.set(entry[0], entry[1]);
 
-        console.log("updated client game", this)
+        //console.log("updated client game", this)
         return this;  
     }
 
