@@ -309,7 +309,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         });
 
         function disable_buttons(active){
-            Array.from(document.getElementsByTagName('button')).forEach(button => {
+            Array.from(document.getElementById("controls").getElementsByTagName('button')).forEach(button => {
                 button.disabled=active;
             });
         }
