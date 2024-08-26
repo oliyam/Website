@@ -27,6 +27,8 @@ export class spieler {
         fortschritt: []
     };
 
+    entwicklung_ausgespielt=false;
+
     constructor(id){
         this.id=id||null;
     }

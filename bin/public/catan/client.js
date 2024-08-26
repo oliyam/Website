@@ -115,6 +115,11 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         temp.spieler=game.spieler.id;
 
         disable_buttons(!(game.runde%4==game.spieler.id));
+        console.log(game.spieler.entwicklung_ausgespielt)
+        if(game.spieler.entwicklung_ausgespielt){
+            document.getElementById('ritter_').disabled=true;
+            document.getElementById('fortschritt_').disabled=true;
+        }
 
         if(msg.cast)
             roll.play();
@@ -196,8 +201,14 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                 document.getElementById('anz_fortschritt').innerText=entw.fortschritt.length;
                 document.getElementById('anz_sp').innerText=entw.siegespunkt.length;
 
-                document.getElementById('d_anz_ritter').innerText=(!karten.ritter?"":"+"+karten.ritter);
-                document.getElementById('d_anz_fortschritt').innerText=(!karten.fortschritt?"":"+"+karten.fortschritt);
+
+                document.getElementById('d_anz_ritter').style.color=Math.sign(karten.ritter)==-1?"red":"green";
+                document.getElementById('d_anz_ritter').innerText=(karten.ritter?(Math.sign(karten.ritter)==-1?"":"+")+karten.ritter:"");
+
+                document.getElementById('d_anz_fortschritt').style.color=Math.sign(karten.fortschritt)==-1?"red":"green";
+                document.getElementById('d_anz_fortschritt').innerText=(karten.fortschritt?(Math.sign(karten.fortschritt)==-1?"":"+")+karten.fortschritt:"");
+
+
                 document.getElementById('d_anz_sp').innerText=(!karten.siegespunkt?"":"+"+karten.siegespunkt);
 
                 var ls_fortschritt=document.getElementById("ls_fortschritt");
@@ -238,11 +249,21 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                 document.getElementById('erz').innerText=ressourcen.erz;
                 
 
-                document.getElementById('d+_holz').innerText=(!ertrag.holz?"":"+"+ertrag.holz);
-                document.getElementById('d+_wolle').innerText=(!ertrag.wolle?"":"+"+ertrag.wolle);
-                document.getElementById('d+_lehm').innerText=(!ertrag.lehm?"":"+"+ertrag.lehm);
-                document.getElementById('d+_getreide').innerText=(!ertrag.getreide?"":"+"+ertrag.getreide);
-                document.getElementById('d+_erz').innerText=(!ertrag.erz?"":"+"+ertrag.erz);
+                document.getElementById('d+_holz').style.color=Math.sign(ertrag.holz)==-1?"red":"green";
+                document.getElementById('d+_holz').innerText=(ertrag.holz?(Math.sign(ertrag.holz)==-1?"":"+")+ertrag.holz:"");
+
+                document.getElementById('d+_wolle').style.color=Math.sign(ertrag.wolle)==-1?"red":"green";
+                document.getElementById('d+_wolle').innerText=(ertrag.wolle?(Math.sign(ertrag.wolle)==-1?"":"+")+ertrag.wolle:"");
+
+                document.getElementById('d+_lehm').style.color=Math.sign(ertrag.lehm)==-1?"red":"green";
+                document.getElementById('d+_lehm').innerText=(ertrag.lehm?(Math.sign(ertrag.lehm)==-1?"":"+")+ertrag.lehm:"");
+
+                document.getElementById('d+_getreide').style.color=Math.sign(ertrag.getreide)==-1?"red":"green";
+                document.getElementById('d+_getreide').innerText=(ertrag.getreide?(Math.sign(ertrag.getreide)==-1?"":"+")+ertrag.getreide:"");
+
+                document.getElementById('d+_erz').style.color=Math.sign(ertrag.erz)==-1?"red":"green";
+                document.getElementById('d+_erz').innerText=(ertrag.erz?(Math.sign(ertrag.erz)==-1?"":"+")+ertrag.erz:"");
+  
 
                 document.getElementById('d-_holz').innerText='-'+cost.holz;
                 document.getElementById('d-_wolle').innerText='-'+cost.wolle;
@@ -401,11 +422,10 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         });
 
         document.getElementById('ritter_').addEventListener('click', e => {
-            if(game.spieler.entwicklungen.ritter.length>0&&temp.marked_tiles.length==1){
-                document.getElementById('ritter_').disabled=true;
+            if(game.spieler.entwicklungen.ritter.length>0&&temp.marked_tiles.length==1&&!_hex.isEqual(temp.marked_tiles[0], game.spielfeld.raeuber)&&!game.spielfeld.felder[temp.marked_tiles[0].q+"/"+temp.marked_tiles[0].r].blocked){
                 temp.ritter.feld=temp.marked_tiles[0];
                 temp.ritter.opfer=document.getElementById('ls_ritter').value;
-                redraw();
+                socket.emit(channel_name + 'ritter_ausspielen', temp);
             }
         });
 

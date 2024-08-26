@@ -22,8 +22,6 @@ exports.run = (io, channel, logger) => {
 
     var game = new catan.spiel();
 
-    
-
     const channel_name = channel + '>';
     io.on('connection', socket => {
 
@@ -61,14 +59,25 @@ exports.run = (io, channel, logger) => {
 				socket.disconnect(true);
 			}
         });
+
 */
+
+        function send_game_update(cast){
+            socket.broadcast.emit(channel_name + 'game-update', {game: game.forPlayer(-1), cast: cast});
+            Object.keys(players).forEach((id) => {
+                io.to(id).emit(channel_name + 'game-update', {game: game.forPlayer(players[id]), cast: cast});
+            });
+        }
+
+        socket.on(channel_name + 'ritter_ausspielen', msg => {
+            game.ritter_ausspielen(players[socket.id], msg.ritter.opfer, msg.ritter.feld);
+            send_game_update(false);
+        });        
 
         socket.on(channel_name + 'cast', msg => {
             if (server.ioactive[socket.id]&&game.runde%4==players[socket.id]){
                 log("*** Gewürfelte Zahl: " + game.wuerfeln() + " ***", "magenta");
-                Object.keys(players).forEach((id) => {
-                    io.to(id).emit(channel_name + 'game-update', {game: game.forPlayer(players[id]), cast: true});
-                });
+                send_game_update(true);
             }
         });
 
@@ -88,10 +97,7 @@ exports.run = (io, channel, logger) => {
 
                     send_players();
 
-                    socket.broadcast.emit(channel_name + 'game-update', {game: game.forPlayer(-1), cast: false});
-                    Object.keys(players).forEach((id) => {
-                        io.to(id).emit(channel_name + 'game-update', {game: game.forPlayer(players[id]), cast: false});
-                    });
+                    send_game_update(false);
                 /*
                 }, 2000);
                 */

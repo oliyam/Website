@@ -15,18 +15,20 @@ class spieler {
     };
 
     ressourcen={
-        holz: 0,
-        lehm: 0,
-        erz: 0,
+        holz: 2,
+        lehm: 3,
+        erz: 69,
         getreide: 0,
         wolle: 0
     };
 
     entwicklungen={
-        ritter: [],
+        ritter: ['generisch','generisch'],
         siegespunkt: [],
         fortschritt: []
     };
+
+    entwicklung_ausgespielt=false;
 
     constructor(id){
         this.id=id;
@@ -376,6 +378,10 @@ exports.spiel = class{
 
         //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
 
+        this.spieler.forEach(p => {
+            p.entwicklung_ausgespielt=false;
+        });
+
         var data = {runde: {}, id: {}}
 
         this.wuerfel = [0,0];
@@ -450,5 +456,49 @@ exports.spiel = class{
         this.spielfeld.kreuzungen.forEach(bauwerk => {
             this.spieler[bauwerk.id].siegespunkte+=1+bauwerk.stadt;
         });
+    }
+
+    ritter_ausspielen(spieler_ritter_id, spieler_opfer_id, raeuber_feld){
+        if(!this.spieler[spieler_ritter_id].entwicklung_ausgespielt&&this.spieler[spieler_ritter_id].entwicklungen.ritter.length>0&&!this.spielfeld.felder[raeuber_feld.q+"/"+raeuber_feld.r].blocked&&!hex.isEqual(raeuber_feld, this.spielfeld.raeuber)){
+            let bereits_ausgeraubt=false;
+            this.spieler[spieler_ritter_id].entwicklung_ausgespielt=true;
+            
+            this.spielfeld.raeuber=raeuber_feld;
+            this.spieler[spieler_ritter_id].entwicklungen.ritter.length--;
+
+            this.spielfeld.kreuzungen.forEach((value, key) => {
+                key.forEach(pos => {
+                    if(hex.isEqual(raeuber_feld,pos)&&value.id!=spieler_ritter_id&&!bereits_ausgeraubt){
+                        this.karte_ziehen(spieler_ritter_id, spieler_opfer_id);
+                        bereits_ausgeraubt=true;
+                    }
+                });
+        });
+        }
+    }
+
+    karte_ziehen(rx_id, tx_id){
+        let karte=this.zufaellige_karte(tx_id);
+        this.spieler[tx_id].ressourcen[karte]--;
+        this.spieler[rx_id].ressourcen[karte]++;
+    }
+
+    zufaellige_karte(spieler_id){
+        let karte=-1, total=0, head=0;
+        let pool=Object.entries(this.spieler[spieler_id].ressourcen);
+
+        pool.forEach(([res, anz]) => {
+            total+=anz;
+        });
+
+        let random=Math.floor(Math.random()*total);
+ 
+        pool.forEach(([res, anz]) => {
+            head+=anz;
+            if(random<head&&karte==-1)
+                karte=res;
+        });
+
+        return karte;
     }
 };
