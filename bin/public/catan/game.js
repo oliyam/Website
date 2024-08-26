@@ -459,13 +459,17 @@ exports.spiel = class{
     }
 
     ritter_ausspielen(spieler_ritter_id, spieler_opfer_id, raeuber_feld){
-        if(!this.spieler[spieler_ritter_id].entwicklung_ausgespielt&&this.spieler[spieler_ritter_id].entwicklungen.ritter.length>0&&!this.spielfeld.felder[raeuber_feld.q+"/"+raeuber_feld.r].blocked&&!hex.isEqual(raeuber_feld, this.spielfeld.raeuber)){
-            let bereits_ausgeraubt=false;
+        if(
+               !this.spieler[spieler_ritter_id].entwicklung_ausgespielt
+            && this.spieler[spieler_ritter_id].entwicklungen.ritter.length>0
+            && !this.spielfeld.felder[raeuber_feld.q+"/"+raeuber_feld.r].blocked
+            && !hex.isEqual(raeuber_feld, this.spielfeld.raeuber)
+        ){
             this.spieler[spieler_ritter_id].entwicklung_ausgespielt=true;
-            
-            this.spielfeld.raeuber=raeuber_feld;
             this.spieler[spieler_ritter_id].entwicklungen.ritter.length--;
+            this.spielfeld.raeuber=raeuber_feld;
 
+            let bereits_ausgeraubt=false;
             this.spielfeld.kreuzungen.forEach((value, key) => {
                 key.forEach(pos => {
                     if(hex.isEqual(raeuber_feld,pos)&&value.id!=spieler_ritter_id&&!bereits_ausgeraubt){
@@ -479,6 +483,10 @@ exports.spiel = class{
 
     karte_ziehen(rx_id, tx_id){
         let karte=this.zufaellige_karte(tx_id);
+        
+        if(karte==-1)
+            return;
+
         this.spieler[tx_id].ressourcen[karte]--;
         this.spieler[rx_id].ressourcen[karte]++;
     }
