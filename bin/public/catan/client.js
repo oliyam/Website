@@ -25,6 +25,7 @@ c.run(socket, 'catan');
 
 var roll = new Audio('/catan/res/wuerfel/rolling dice 2.mp3');
 var pop= new Audio('/catan/res/pop.mp3');
+var mc_death= new Audio('/catan/res/mc_oof.mp3');
 var one_up= '/catan/res/Purple Studs SFX.mp3';
 var knight = new Audio('/catan/res/sword_clash.mp3');
 
@@ -93,8 +94,8 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             if(game.spieler.ressourcen)
                 for(var key in game.spieler.ressourcen){
                     d_ressourcen[key]=(game.spieler.ressourcen[key]-temp["last_ressourcen"][key]);
-                        if(d_ressourcen[key]!=0)
-                            pop.play()     
+                        if(d_ressourcen[key])
+                           Math.sign(d_ressourcen[key]==-1)?mc_death.play():pop.play()     
             }
             ertrag= d_ressourcen;
 
@@ -126,7 +127,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         redraw();
 
-        //repeat_audio(one_up, d_sp, 500);
+        repeat_audio(one_up, d_sp, 500);
     });
 
     view.addEventListener("mousemove", (e) => {
