@@ -477,13 +477,13 @@ exports.spiel = class{
                         bereits_ausgeraubt=true;
                     }
                 });
-        });
+            });
         }
     }
 
     karte_ziehen(rx_id, tx_id){
         let karte=this.zufaellige_karte(tx_id);
-        
+
         if(karte==-1)
             return;
 
