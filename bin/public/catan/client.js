@@ -26,7 +26,7 @@ c.run(socket, 'catan');
 var roll = new Audio('/catan/res/wuerfel/rolling dice 2.mp3');
 var pop= new Audio('/catan/res/pop.mp3');
 var one_up= '/catan/res/Purple Studs SFX.mp3';
-var knight = '/catan/res/sword_clash.mp3';
+var knight = new Audio('/catan/res/sword_clash.mp3');
 
 function _repeat_audio(audio, n){
     let count=1;
@@ -426,6 +426,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                 temp.ritter.feld=temp.marked_tiles[0];
                 temp.ritter.opfer=document.getElementById('ls_ritter').value;
                 socket.emit(channel_name + 'ritter_ausspielen', temp);
+                knight.play();
             }
         });
 
