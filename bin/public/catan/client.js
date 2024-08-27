@@ -23,10 +23,12 @@ const channel_name='catan'+'>';
 const socket=new io();
 c.run(socket, 'catan');
 
+
+var anno = new Audio('/catan/res/Anno Dawn of Discovery Create a New World WII Soundtrack Settlers.mp3');
 var roll = new Audio('/catan/res/wuerfel/rolling dice 2.mp3');
-var pop= new Audio('/catan/res/pop.mp3');
-var mc_death= new Audio('/catan/res/mc_oof.mp3');
-var one_up= '/catan/res/Purple Studs SFX.mp3';
+var pop = new Audio('/catan/res/pop.mp3');
+var mc_death = new Audio('/catan/res/mc_oof.mp3');
+var one_up = '/catan/res/Purple Studs SFX.mp3';
 var knight = new Audio('/catan/res/sword_clash.mp3');
 
 function _repeat_audio(audio, n){
@@ -56,6 +58,9 @@ var URL_params=new URLSearchParams(window.location.search);
 socket.on(channel_name+'name-valid', (valid) => {if(valid){ 
 
     socket.emit(channel_name+'watch-request', {});
+
+    anno.loop=true;
+    //anno.play();
     
     var game=new spiel();
     var view=new _view(game, temp, 600, 600, size);

@@ -89,6 +89,26 @@ exports.run = (io, channel, logger) => {
                 //Ineffizientes Timeout zur Spannungserhaltung
                 setTimeout(function(){
                 */
+               if(Object.keys(players).length>1&&0)
+                    game.handeln(
+                        0,
+                        1,
+                        {
+                            holz: 2,
+                            lehm: 3,
+                            erz: 69,
+                            getreide: 0,
+                            wolle: 0
+                        },
+                        {
+                            holz: 0,
+                            lehm: 3,
+                            erz: 0,
+                            getreide: 0,
+                            wolle: 0
+                        }
+                    );
+
                     if(game.zug_beenden(msg, players[socket.id])==-1)
                         log("ILLEGAL MOVE - CHECK FOR HACKERS!")
                     

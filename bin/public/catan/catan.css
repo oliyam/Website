@@ -125,6 +125,7 @@
 table { border-collapse: collapse; }
 #trA:nth-child(4) { border: solid thin; }
 #trA:nth-child(6) { border-top: double; }
+#trA:nth-child(7) { border-top: solid;  }
 
 #trB:nth-child(4) { border: solid thin; }
 

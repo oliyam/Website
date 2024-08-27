@@ -481,6 +481,26 @@ exports.spiel = class{
         }
     }
 
+    handeln(p_0, p_1, offer_0, offer_1){
+        if(this.genug_res(p_0, offer_0)&&this.genug_res(p_1, offer_1))
+            Object.entries(offer_0).forEach(([res, anz]) => {
+                this.spieler[p_0].ressourcen[res]+=offer_1[res];
+                this.spieler[p_1].ressourcen[res]-=offer_1[res];
+
+                this.spieler[p_1].ressourcen[res]+=anz;
+                this.spieler[p_0].ressourcen[res]-=anz;
+            });
+    }
+
+    genug_res(id, preis){
+        let valid=true;
+        Object.entries(preis).forEach(([res, anz]) => {
+            if(this.spieler[id].ressourcen[res]<anz)
+                valid=false;
+        });
+        return valid;
+    }
+
     karte_ziehen(rx_id, tx_id){
         let karte=this.zufaellige_karte(tx_id);
 
