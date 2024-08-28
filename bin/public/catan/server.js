@@ -13,6 +13,8 @@ exports.run = (io, channel, logger) => {
     //object with player numbers at player's socket id
     var players = {};
 
+    var trade_req = [];
+
     farben = [
         "FF0000",
         "0000FF",
@@ -81,6 +83,20 @@ exports.run = (io, channel, logger) => {
             }
         });
 
+        socket.on(channel_name + 'trade_req_out', ([res, id]) => {
+            if(game.check_res(players[socket.id], id, res)){
+                trade_req[players[socket.id]]=[res, id];
+                socket.broadcast.emit(channel_name + 'trade_req_in', [res, players[socket.id]]);         
+            }
+            send_game_update(false);
+        });
+
+        socket.on(channel_name + 'trade_ack', (initiator_id) => {
+            if(trade_req[initiator_id]&&game.handeln(initiator_id, trade_req[initiator_id][1] , trade_req[initiator_id][0])!=-1)
+                delete trade_req[initiator_id];
+            send_game_update(false);
+        });
+
         socket.on(channel_name + 'turn', msg => {
             if (server.ioactive[socket.id]){
                 io.to(socket.id).emit(channel_name + 'end-of-turn');
@@ -89,26 +105,7 @@ exports.run = (io, channel, logger) => {
                 //Ineffizientes Timeout zur Spannungserhaltung
                 setTimeout(function(){
                 */
-               if(Object.keys(players).length>1&&0)
-                    game.handeln(
-                        0,
-                        1,
-                        {
-                            holz: 2,
-                            lehm: 3,
-                            erz: 69,
-                            getreide: 0,
-                            wolle: 0
-                        },
-                        {
-                            holz: 0,
-                            lehm: 3,
-                            erz: 0,
-                            getreide: 0,
-                            wolle: 0
-                        }
-                    );
-
+               
                     if(game.zug_beenden(msg, players[socket.id])==-1)
                         log("ILLEGAL MOVE - CHECK FOR HACKERS!")
                     

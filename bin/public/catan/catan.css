@@ -130,3 +130,7 @@ table { border-collapse: collapse; }
 #trB:nth-child(4) { border: solid thin; }
 
 #trC:nth-child(3) { border: solid thin; }
+
+#trD:nth-child(2) { border: solid thin; }
+
+#trE:nth-child(1) { border-top: solid thin; }

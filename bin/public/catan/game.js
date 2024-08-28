@@ -481,21 +481,26 @@ exports.spiel = class{
         }
     }
 
-    handeln(p_0, p_1, offer_0, offer_1){
-        if(this.genug_res(p_0, offer_0)&&this.genug_res(p_1, offer_1))
-            Object.entries(offer_0).forEach(([res, anz]) => {
-                this.spieler[p_0].ressourcen[res]+=offer_1[res];
-                this.spieler[p_1].ressourcen[res]-=offer_1[res];
-
-                this.spieler[p_1].ressourcen[res]+=anz;
-                this.spieler[p_0].ressourcen[res]-=anz;
-            });
+    check_res(rx_id, tx_id, offer){
+        if(this.genug_res(rx_id, offer, 1)&&this.genug_res(tx_id, offer, -1))
+            return true;
+        return false;
     }
 
-    genug_res(id, preis){
+    handeln(rx_id, tx_id, offer){
+        if(this.check_res(rx_id, tx_id, offer))
+            Object.entries(offer).forEach(([res, anz]) => {
+                this.spieler[rx_id].ressourcen[res]+=anz;
+                this.spieler[tx_id].ressourcen[res]-=anz;
+            });
+        else
+            return -1;
+    }
+
+    genug_res(id, delta, mul){
         let valid=true;
-        Object.entries(preis).forEach(([res, anz]) => {
-            if(this.spieler[id].ressourcen[res]<anz)
+        Object.entries(delta).forEach(([res, anz]) => {
+            if((this.spieler[id].ressourcen[res]+anz*mul)<0)
                 valid=false;
         });
         return valid;

@@ -4,6 +4,13 @@ import {_view} from "/catan/view.js";
 import * as c from "/chat/channel.js";
 import {uncover} from "/preloader/preloader.js";
 
+var farben = [
+    "FF0000",
+    "0000FF",
+    "FFFFFF",
+    "FF8C00"
+];
+
 var temp = {
 
     stadt: false,
@@ -71,7 +78,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
     //Benutzerliste mit Spielern aktualisieren
     socket.on(channel_name+'get-players',  data => {
         for(var t=0;t<data.ids.length;t++)
-            document.getElementById(data.ids[t]).innerHTML=data.users[data.ids[t]];
+           document.getElementById(data.ids[t]).innerHTML=data.users[data.ids[t]];
     });
 
     socket.on(channel_name+'get-users',  {});
@@ -164,6 +171,23 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         erz: 0
     };
 
+    var partner=-1;
+    var handel={
+        holz: 0,
+        wolle: 0,
+        lehm: 0,
+        getreide: 0,
+        erz: 0
+    };
+
+    var cost={
+        holz: 0,
+        wolle: 0,
+        lehm: 0,
+        getreide: 0,
+        erz: 0
+    };
+
     var karten={
         ritter: 0,
         siegespunkte: 0,
@@ -180,7 +204,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                 uncover('-2');
 
                 var ressourcen=game.spieler.ressourcen;
-                var cost=calculateCost();
+                cost=calculateCost();
 
                 var ls_ausraubbare_spieler=document.getElementById('ls_ritter');
                 ls_ausraubbare_spieler.textContent='';
@@ -236,46 +260,23 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                     ls_sp.appendChild(opt);
                 });
 
-                document.getElementById('total_holz').innerText=ressourcen.holz-cost.holz;
-                document.getElementById('total_wolle').innerText=ressourcen.wolle-cost.wolle;
-                document.getElementById('total_lehm').innerText=ressourcen.lehm-cost.lehm;
-                document.getElementById('total_getreide').innerText=ressourcen.getreide-cost.getreide;
-                document.getElementById('total_erz').innerText=ressourcen.erz-cost.erz;
 
-                document.getElementById('total_holz').style=ressourcen.holz-cost.holz>=0?"color:white":"color:red";
-                document.getElementById('total_wolle').style=ressourcen.wolle-cost.wolle>=0?"color:white":"color:red";
-                document.getElementById('total_lehm').style=ressourcen.lehm-cost.lehm>=0?"color:white":"color:red";
-                document.getElementById('total_getreide').style=ressourcen.getreide-cost.getreide>=0?"color:white":"color:red";
-                document.getElementById('total_erz').style=ressourcen.erz-cost.erz>=0?"color:white":"color:red";
+                Object.entries(ressourcen).forEach(([res, anz]) => {
 
-                document.getElementById('holz').innerText=ressourcen.holz;
-                document.getElementById('wolle').innerText=ressourcen.wolle;
-                document.getElementById('lehm').innerText=ressourcen.lehm;
-                document.getElementById('getreide').innerText=ressourcen.getreide;
-                document.getElementById('erz').innerText=ressourcen.erz;
+                    document.getElementById('total_'+res).style=anz-cost[res]>=0?"color:white":"color:red";
+                    document.getElementById('total_'+res).innerText=anz-cost[res];
                 
+                    document.getElementById(res).innerText=anz;
+                
+                    document.getElementById('d+_'+res).style.color=Math.sign(ertrag[res])==-1?"red":"green";
+                    document.getElementById('d+_'+res).innerText=(ertrag[res]?(Math.sign(ertrag[res])==-1?"":"+")+ertrag[res]:"");
 
-                document.getElementById('d+_holz').style.color=Math.sign(ertrag.holz)==-1?"red":"green";
-                document.getElementById('d+_holz').innerText=(ertrag.holz?(Math.sign(ertrag.holz)==-1?"":"+")+ertrag.holz:"");
+                    document.getElementById('d-_'+res).innerText='-'+cost[res];
 
-                document.getElementById('d+_wolle').style.color=Math.sign(ertrag.wolle)==-1?"red":"green";
-                document.getElementById('d+_wolle').innerText=(ertrag.wolle?(Math.sign(ertrag.wolle)==-1?"":"+")+ertrag.wolle:"");
+                    document.getElementById('trade_'+res).innerText=handel[res];
+                });
 
-                document.getElementById('d+_lehm').style.color=Math.sign(ertrag.lehm)==-1?"red":"green";
-                document.getElementById('d+_lehm').innerText=(ertrag.lehm?(Math.sign(ertrag.lehm)==-1?"":"+")+ertrag.lehm:"");
-
-                document.getElementById('d+_getreide').style.color=Math.sign(ertrag.getreide)==-1?"red":"green";
-                document.getElementById('d+_getreide').innerText=(ertrag.getreide?(Math.sign(ertrag.getreide)==-1?"":"+")+ertrag.getreide:"");
-
-                document.getElementById('d+_erz').style.color=Math.sign(ertrag.erz)==-1?"red":"green";
-                document.getElementById('d+_erz').innerText=(ertrag.erz?(Math.sign(ertrag.erz)==-1?"":"+")+ertrag.erz:"");
-  
-
-                document.getElementById('d-_holz').innerText='-'+cost.holz;
-                document.getElementById('d-_wolle').innerText='-'+cost.wolle;
-                document.getElementById('d-_lehm').innerText='-'+cost.lehm;
-                document.getElementById('d-_getreide').innerText='-'+cost.getreide;
-                document.getElementById('d-_erz').innerText='-'+cost.erz;
+                document.getElementById('trade_ack').innerText=partner==-1?'':'Handel: [player-'+partner+']';
 
                 document.getElementById('sp_label').innerText=game.spieler.siegespunkte+"/10";
                 document.getElementById('sp').value=game.spieler.siegespunkte;
@@ -337,7 +338,8 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         function disable_buttons(active){
             Array.from(document.getElementById("controls").getElementsByTagName('button')).forEach(button => {
-                button.disabled=active;
+                if(button.id!='trade_ack')
+                    button.disabled=active;
             });
         }
 
@@ -384,6 +386,32 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             }
         });
         
+        document.getElementById('trade_req').addEventListener('click', e => {
+            socket.emit(channel_name + 'trade_req_out', [handel, document.getElementById('trade_partner').value]);
+        });
+
+        document.getElementById('trade_ack').addEventListener('click', e => {
+            socket.emit(channel_name + 'trade_ack', partner);
+            document.getElementById('trade_ack').disabled=true;
+        });
+
+        socket.on(channel_name + 'trade_req_in',  ([res, id]) => {
+            document.getElementById('trade_ack').disabled=false;
+            handel=res;
+            partner=id;
+        });
+
+
+        Object.entries(handel).forEach(([res, anz]) => {
+            document.getElementById('trade_'+res+'_+').addEventListener('click', e => {
+               handel[res]++;
+               redraw_controls();
+            });
+            document.getElementById('trade_'+res+'_-').addEventListener('click', e => {
+               handel[res]--;
+               redraw_controls();
+            });
+        });
 
         document.getElementById('bauen').addEventListener('click', e => {
             buildMarkedTiles();
@@ -391,7 +419,6 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         });
 
         document.getElementById('loeschen').addEventListener('click', e => {
-            document.getElementById('ritter_').disabled=false;
             temp = {
                 last_ressourcen: {
                     holz: 0,

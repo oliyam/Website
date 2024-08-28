@@ -61,28 +61,43 @@
 					<th id="total_getreide">0</th>
 					<th id="total_erz">0</th>
 				</tr>
-				<tabl style="width:100%">
-					<th style="text-align: center">Handel</th>
-					<tr id="trA">
+				<table style="width:100%">
+					<h2>Handel</h2>
+					<tr id="trD">
 						<th><button id="trade_holz_+">+</button></th>
 						<th><button id="trade_wolle_+">+</button></th>
 						<th><button id="trade_lehm_+">+</button></th>
 						<th><button id="trade_getreide_+">+</button></th>
 						<th><button id="trade_erz_+">+</button></th>
 					</tr>
-					<tr id="trA">
+					<tr id="trD">
 						<th id="trade_holz">0</th>
 						<th id="trade_wolle">0</th>
 						<th id="trade_lehm">0</th>
 						<th id="trade_getreide">0</th>
 						<th id="trade_erz">0</th>
 					</tr>
-					<tr id="trA">
+					<tr id="trD">
 						<th><button id="trade_holz_-">-</button></th>
 						<th><button id="trade_wolle_-">-</button></th>
 						<th><button id="trade_lehm_-">-</tbutton></th>
 						<th><button id="trade_getreide_-">-</button></th>
 						<th><button id="trade_erz_-">-</button></th>
+					</tr>
+				</table>
+				<table style="width:100%">
+					<tr id="trE">
+						<th>
+							<select name="partner" id="trade_partner">
+								<option value="-1">Seehandel</option>
+								<option value="0">[player-0]</option>
+								<option value="1">[player-1]</option>
+								<option value="2">[player-2]</option>
+								<option value="3">[player-3]</option>
+							</select>
+						</th>
+						<th><button id="trade_req">Angebot</button></th>
+						<th><button id="trade_ack">Handeln</button></th>
 					</tr>
 				</table>
 			</table>
