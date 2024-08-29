@@ -499,8 +499,8 @@ exports.spiel = class{
                         if(anz>0&&!done){
                             this.spieler.forEach(player => {
                                 if(player.id!=id){
-                                    this.spieler[id].ressourcen[monopol_res]+=player.ressourcen[monopol_res];
-                                    player.ressourcen[monopol_res]=0;
+                                    this.spieler[id].ressourcen[res]+=player.ressourcen[res];
+                                    player.ressourcen[res]=0;
                                 }
                             });
                             done=true;
@@ -531,7 +531,7 @@ exports.spiel = class{
     }
 
     check_res(rx_id, tx_id, offer){
-        if(this.genug_res(rx_id, offer, 1)&&this.genug_res(tx_id, offer, -1))
+        if(tx_id!=-1&&this.genug_res(rx_id, offer, 1)&&this.genug_res(tx_id, offer, -1))
             return true;
         return false;
     }

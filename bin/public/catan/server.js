@@ -90,11 +90,15 @@ exports.run = (io, channel, logger) => {
             if(game.check_res(players[socket.id], id, res)){
                 trade_req[players[socket.id]]=[res, id];
                 Object.entries(players).forEach(([rx_socket_id, player_id]) => {
-                    if(player_id==id)     
+                    if(player_id==id){
                         io.to(rx_socket_id).emit(channel_name + 'trade_req_in', [res, players[socket.id]]);   
+
+                        io.to(socket.id).emit(channel_name + 'chat-msg', { msg: ["You, @" + server.users[socket.id] + ", sent a trade request to @" + server.users[rx_socket_id] + ">! REQ: " + JSON.stringify(res)], name: "[Catan-server]" });
+                        socket.broadcast.emit(channel_name + 'chat-msg', { msg: ["User: @" + server.users[socket.id] + ", sent a trade request to @" + server.users[rx_socket_id] + ">! REQ: " + JSON.stringify(res)], name: "[Catan-server]" });
+                        send_game_update(false);
+                        }
                 });      
             }
-            send_game_update(false);
         });
 
         socket.on(channel_name + 'trade_ack', (initiator_id) => {
