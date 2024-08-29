@@ -494,19 +494,20 @@ exports.spiel = class{
         if(this.spieler[id].entwicklungen.fortschritt.includes(typ)&&!this.spieler[id].entwicklung_ausgespielt){
             switch(typ){
                 case 'monopol':
-                    let monopol_res;
+                    let done=false;
                     Object.entries(ressourcen).forEach(([res, anz]) => {
-                        if(anz>0)
-                            monopol_res=res;
-                    });
-                    if(!monopol_res)
-                        return -1;
-                    this.spieler.forEach(player => {
-                        if(player.id!=id){
-                            this.spieler[id].ressourcen[monopol_res]+=player.ressourcen[monopol_res];
-                            player.ressourcen[monopol_res]=0;
+                        if(anz>0&&!done){
+                            this.spieler.forEach(player => {
+                                if(player.id!=id){
+                                    this.spieler[id].ressourcen[monopol_res]+=player.ressourcen[monopol_res];
+                                    player.ressourcen[monopol_res]=0;
+                                }
+                            });
+                            done=true;
                         }
                     });
+                    if(!done)
+                        return -1;
                     break;
                 case 'erfindung':
                     let erfindung_res=[];
