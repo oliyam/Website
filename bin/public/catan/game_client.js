@@ -310,6 +310,7 @@ export class spiel{
 
     runde = 0;
     wuerfel = [0,0];
+    bereits_gewuerfelt=false;
 
     spieler;
 

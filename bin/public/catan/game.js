@@ -25,7 +25,7 @@ class spieler {
     entwicklungen={
         ritter: ['generisch','generisch'],
         siegespunkt: [],
-        fortschritt: []
+        fortschritt: ['erfindung','erfindung','monopol']
     };
 
     entwicklung_ausgespielt=false;
@@ -313,6 +313,7 @@ exports.spiel = class{
 
     runde = 0;
     wuerfel = [0,0];
+    bereits_gewuerfelt=false;
 
     spieler = [];
 
@@ -385,6 +386,7 @@ exports.spiel = class{
         var data = {runde: {}, id: {}}
 
         this.wuerfel = [0,0];
+        this.bereits_gewuerfelt=false;
 
         this.sp_berechnen();
 
@@ -398,7 +400,7 @@ exports.spiel = class{
         for (let entry of data.wege)
             if(!this.spielfeld.wege.has(entry[0])&&this.spieler[id].bauen.strassen>0){
                 this.spieler[id].bauen.strassen--;
-                this.spielfeld.wege.set(entry[0], id);
+                this.spielfeld.wege.set(entry[0], {id: id});
             }
             else
                 return -1;
@@ -421,8 +423,13 @@ exports.spiel = class{
     }
 
     wuerfeln(){
+        if(this.bereits_gewuerfelt)
+            return -1;
+
         this.wuerfel[0]=Math.floor(Math.random()*6+1);
         this.wuerfel[1]=Math.floor(Math.random()*6+1);
+
+        this.bereits_gewuerfelt=true;
 
         this.res_verteilen();
 
@@ -478,6 +485,47 @@ exports.spiel = class{
                     }
                 });
             });
+        }
+        else
+            return -1;
+    }
+
+    fortschritt_ausspielen(id, typ, ressourcen){
+        if(this.spieler[id].entwicklungen.fortschritt.includes(typ)&&!this.spieler[id].entwicklung_ausgespielt){
+            switch(typ){
+                case 'monopol':
+                    let monopol_res;
+                    Object.entries(ressourcen).forEach(([res, anz]) => {
+                        if(anz>0)
+                            monopol_res=res;
+                    });
+                    if(!monopol_res)
+                        return -1;
+                    this.spieler.forEach(player => {
+                        if(player.id!=id){
+                            this.spieler[id].ressourcen[monopol_res]+=player.ressourcen[monopol_res];
+                            player.ressourcen[monopol_res]=0;
+                        }
+                    });
+                    break;
+                case 'erfindung':
+                    let erfindung_res=[];
+                    Object.entries(ressourcen).forEach(([res, anz]) => {
+                        if(anz>0)
+                            erfindung_res.push(res);
+                    });
+                    if(!erfindung_res||erfindung_res.length<2)
+                        return -1;
+                    for(let i=0; i<2; i++)
+                        this.spieler[id].ressourcen[erfindung_res[i]]++;
+                    break;
+                case 'strassenbau':
+                    break;
+                default:
+                    return -1;
+            }
+            this.spieler[id].entwicklungen.fortschritt.splice(this.spieler[id].entwicklungen.fortschritt.indexOf(typ), 1);
+            this.spieler[id].entwicklung_ausgespielt=true;
         }
     }
 

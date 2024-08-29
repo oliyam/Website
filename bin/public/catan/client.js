@@ -128,8 +128,13 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         temp.spieler=game.spieler.id;
 
         disable_buttons(!(game.runde%4==game.spieler.id));
-        console.log(game.spieler.entwicklung_ausgespielt)
-        if(game.spieler.entwicklung_ausgespielt){
+        if(game.runde%4==game.spieler.id){
+            document.getElementById('wuerfeln').disabled=game.bereits_gewuerfelt;
+            document.getElementById('ritter_').disabled=game.spieler.entwicklung_ausgespielt;
+            document.getElementById('fortschritt_').disabled=game.spieler.entwicklung_ausgespielt;
+        }
+        else{
+            document.getElementById('wuerfeln').disabled=true;
             document.getElementById('ritter_').disabled=true;
             document.getElementById('fortschritt_').disabled=true;
         }
@@ -249,6 +254,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
                 entw.fortschritt.forEach( e => {
                     let opt = document.createElement('option');
+                    opt.value = e;
                     opt.innerText = e.charAt(0).toUpperCase() + e.slice(1);
                     ls_fortschritt.appendChild(opt);
                 });
@@ -273,10 +279,11 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
                     document.getElementById('d-_'+res).innerText='-'+cost[res];
 
+                    document.getElementById('trade_'+res).style.color=Math.sign(handel[res])==-1?"#ff5c33":"white";
                     document.getElementById('trade_'+res).innerText=handel[res];
                 });
 
-                document.getElementById('trade_ack').innerText=partner==-1?'':'Handel: [player-'+partner+']';
+                document.getElementById('trade_ack').innerText=partner==-1?'Handel':'Handel: [player-'+partner+']';
 
                 document.getElementById('sp_label').innerText=game.spieler.siegespunkte+"/10";
                 document.getElementById('sp').value=game.spieler.siegespunkte;
@@ -331,6 +338,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         });
 
         document.getElementById('wuerfeln').addEventListener('click', e => {
+            document.getElementById('wuerfeln').disabled=true;
             game.wuerfel=[0,0];
             socket.emit(channel_name+'cast',{});
             redraw_controls();
@@ -338,7 +346,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         function disable_buttons(active){
             Array.from(document.getElementById("controls").getElementsByTagName('button')).forEach(button => {
-                if(button.id!='trade_ack')
+                if(button.id!='trade_ack'&&button.id!='wuerfeln'&&!button.id.endsWith('_'))      
                     button.disabled=active;
             });
         }
@@ -391,13 +399,21 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         });
 
         document.getElementById('trade_ack').addEventListener('click', e => {
-            socket.emit(channel_name + 'trade_ack', partner);
             document.getElementById('trade_ack').disabled=true;
+            socket.emit(channel_name + 'trade_ack', partner);
+            partner=-1;
+            handel={
+                holz: 0,
+                wolle: 0,
+                lehm: 0,
+                getreide: 0,
+                erz: 0
+            };
         });
 
         socket.on(channel_name + 'trade_req_in',  ([res, id]) => {
             document.getElementById('trade_ack').disabled=false;
-            handel=res;
+            Object.entries(res).forEach(([ressource, anz]) => {handel[ressource]=-anz});
             partner=id;
         });
 
@@ -460,6 +476,20 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                 temp.ritter.opfer=document.getElementById('ls_ritter').value;
                 socket.emit(channel_name + 'ritter_ausspielen', temp);
                 knight.play();
+            }
+        });
+
+        document.getElementById('fortschritt_').addEventListener('click', e => {
+            if(game.spieler.entwicklungen.fortschritt.length>0){
+                socket.emit(channel_name + 'fortschritt_ausspielen', {type: document.getElementById('ls_fortschritt').value, res: handel});
+                partner=-1;
+                handel={
+                    holz: 0,
+                    wolle: 0,
+                    lehm: 0,
+                    getreide: 0,
+                    erz: 0
+                };
             }
         });
 

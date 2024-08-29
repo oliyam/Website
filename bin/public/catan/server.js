@@ -72,21 +72,27 @@ exports.run = (io, channel, logger) => {
         }
 
         socket.on(channel_name + 'ritter_ausspielen', msg => {
-            game.ritter_ausspielen(players[socket.id], msg.ritter.opfer, msg.ritter.feld);
-            send_game_update(false);
+            if(game.ritter_ausspielen(players[socket.id], msg.ritter.opfer, msg.ritter.feld)!=-1);
+                send_game_update(false);
         });        
 
+        socket.on(channel_name + 'fortschritt_ausspielen', msg => {
+            if(game.fortschritt_ausspielen(players[socket.id], msg.type, msg.res)!=-1);
+                send_game_update(false);
+        }); 
+
         socket.on(channel_name + 'cast', msg => {
-            if (server.ioactive[socket.id]&&game.runde%4==players[socket.id]){
-                log("*** Gewürfelte Zahl: " + game.wuerfeln() + " ***", "magenta");
+            if(game.runde%4==players[socket.id]&&game.wuerfeln()!=-1)
                 send_game_update(true);
-            }
         });
 
         socket.on(channel_name + 'trade_req_out', ([res, id]) => {
             if(game.check_res(players[socket.id], id, res)){
                 trade_req[players[socket.id]]=[res, id];
-                socket.broadcast.emit(channel_name + 'trade_req_in', [res, players[socket.id]]);         
+                Object.entries(players).forEach(([rx_socket_id, player_id]) => {
+                    if(player_id==id)     
+                        io.to(rx_socket_id).emit(channel_name + 'trade_req_in', [res, players[socket.id]]);   
+                });      
             }
             send_game_update(false);
         });
