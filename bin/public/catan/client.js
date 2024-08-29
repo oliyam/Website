@@ -67,7 +67,8 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
     socket.emit(channel_name+'watch-request', {});
 
     anno.loop=true;
-    //anno.play();
+    if(URL_params.get('music'))
+        anno.play();
     
     var game=new spiel();
     var view=new _view(game, temp, 600, 600, size);
