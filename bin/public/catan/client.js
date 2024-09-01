@@ -391,7 +391,6 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                         opfer: undefined
                     }
                 };
-                redraw();
             }
         });
         
@@ -433,6 +432,39 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
         document.getElementById('bauen').addEventListener('click', e => {
             buildMarkedTiles();
             redraw();
+            socket.emit(channel_name + 'bauen', 
+            {
+                player: temp.spieler,
+                wege: [...temp.wege],
+                kreuzungen: [...temp.kreuzungen],
+                entwicklungen: temp.entwicklungen,
+                ritter: temp.ritter
+            });
+            temp = {
+                last_ressourcen: {
+                    holz: 0,
+                    wolle: 0,
+                    lehm: 0,
+                    getreide: 0,
+                    erz: 0
+                },
+                last_entwicklungen: {
+                    ritter: 0,
+                    siegespunkte: 0,
+                    fortschritt: 0
+                },          
+                last_sp: 0,
+                stadt: false,
+                spieler: temp.spieler,
+                marked_tiles: [],
+                kreuzungen: new Map(),
+                wege: new Map(),
+                entwicklungen: 0,
+                ritter: {
+                    feld: undefined,
+                    opfer: undefined
+                }
+            };
         });
 
         document.getElementById('loeschen').addEventListener('click', e => {

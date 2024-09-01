@@ -396,7 +396,7 @@ exports.spiel = class{
         return data;
     }
 
-    zug_beenden(data, id){
+    zug_bauen(data, id){
         for (let entry of data.wege)
             if(!this.spielfeld.wege.has(entry[0])&&this.spieler[id].bauen.strassen>0){
                 this.spieler[id].bauen.strassen--;
@@ -411,7 +411,10 @@ exports.spiel = class{
             }
             else
                 return -1;
+    }
 
+    zug_beenden(data, id){
+        this.zug_bauen(data, id);
         if(this.entwicklungsstapel.length>=data.entwicklungen)
             for(let i=0; i<data.entwicklungen; i++){
             let entw = this.entwicklungsstapel.pop();
