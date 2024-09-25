@@ -1,4 +1,4 @@
-const { StrictEventEmitter } = require('socket.io/dist/typed-events');
+//const { StrictEventEmitter } = require('socket.io/dist/typed-events');
 const server = require('../chat/server.js');
 const catan = require('../catan/game.js');
 
@@ -157,8 +157,8 @@ exports.run = (io, channel, logger) => {
         });
     });
 };
-
+/*
 StrictEventEmitter.prototype.override = function (event, fn) {
     this.removeAllListeners(event);
     this.on(event, fn);
-}
+}*/
