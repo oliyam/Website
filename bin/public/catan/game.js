@@ -417,9 +417,9 @@ exports.spiel = class{
         this.zug_bauen(data, id);
         if(this.entwicklungsstapel.length>=data.entwicklungen)
             for(let i=0; i<data.entwicklungen; i++){
-            let entw = this.entwicklungsstapel.pop();
-            let entw_typ = Object.keys(entw)[0]
-            this.spieler[id].entwicklungen[entw_typ].push(entw[entw_typ]);
+                let entw = this.entwicklungsstapel.pop();
+                let entw_typ = Object.keys(entw)[0]
+                this.spieler[id].entwicklungen[entw_typ].push(entw[entw_typ]);
             }
         else   
             return -1;
