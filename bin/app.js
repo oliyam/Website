@@ -26,7 +26,7 @@ chat_server.run(io, 'chat', log);
 catan_server.run(io, 'catan', log);
 
 //start http server
-const PORT= process.env.PORT || 80;
+const PORT= process.env.PORT || 3000;
 http.listen(PORT, function(){
 	log("HTTP server listening on port: ","cyan");
 	log(PORT,"yellow");

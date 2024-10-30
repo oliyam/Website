@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs"); //bcrypt -> bcryptjs [termux-problemchen:https://stackoverflow.com/questions/29320201/error-installing-bcrypt-with-npm]
 const jwt = require("jsonwebtoken");
 const uuid = require("uuid");
 
