@@ -24,6 +24,7 @@ class spieler {
 
     entwicklungen={
         ritter: ['generisch','generisch'],
+        ausgespielte_ritter: 0,
         siegespunkt: [],
         fortschritt: ['erfindung','erfindung','monopol']
     };
@@ -340,7 +341,7 @@ exports.spiel = class{
     entwicklungsstapel = [];
 
     laengste_handelsstrasse;
-    groesste_rittermacht;
+    groesste_rittermacht=0;
 
     constructor(size){
 
@@ -388,6 +389,7 @@ exports.spiel = class{
         this.wuerfel = [0,0];
         this.bereits_gewuerfelt=false;
 
+        this.grm_ermitteln();
         this.sp_berechnen();
 
         data.runde=++this.runde;
@@ -455,7 +457,10 @@ exports.spiel = class{
     }
 
     grm_ermitteln(){
-        
+        for(var i=0; i<4; i++){
+            if(this.spieler[i].entwicklungen.ausgespielte_ritter>this.spieler[this.groesste_rittermacht].entwicklungen.ausgespielte_ritter)
+                this.groesste_rittermacht=i;
+        }
     }
 
     sp_berechnen(){
@@ -477,6 +482,7 @@ exports.spiel = class{
         ){
             this.spieler[spieler_ritter_id].entwicklung_ausgespielt=true;
             this.spieler[spieler_ritter_id].entwicklungen.ritter.length--;
+            this.spieler[spieler_ritter_id].entwicklungen.ausgespielte_ritter++;
             this.spielfeld.raeuber=raeuber_feld;
 
             let bereits_ausgeraubt=false;

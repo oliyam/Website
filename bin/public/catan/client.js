@@ -233,7 +233,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
                 var entw=game.spieler.entwicklungen;
 
-                document.getElementById('anz_ritter').innerText=entw.ritter.length;
+                document.getElementById('anz_ritter').innerText=entw.ausgespielte_ritter+"/"+entw.ritter.length;
                 document.getElementById('anz_fortschritt').innerText=entw.fortschritt.length;
                 document.getElementById('anz_sp').innerText=entw.siegespunkt.length;
 

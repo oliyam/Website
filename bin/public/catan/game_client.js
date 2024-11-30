@@ -23,6 +23,7 @@ export class spieler {
 
     entwicklungen={
         ritter: [],
+        ausgespielte_ritter: 0,
         siegespunkte: [],
         fortschritt: []
     };
