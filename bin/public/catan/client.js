@@ -431,7 +431,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         document.getElementById('bauen').addEventListener('click', e => {
             buildMarkedTiles();
-            redraw();
+            redraw();/*
             socket.emit(channel_name + 'bauen', 
             {
                 player: temp.spieler,
@@ -464,7 +464,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                     feld: undefined,
                     opfer: undefined
                 }
-            };
+            };*/
         });
 
         document.getElementById('loeschen').addEventListener('click', e => {

@@ -82,8 +82,10 @@ exports.run = (io, channel, logger) => {
         }); 
 
         socket.on(channel_name + 'cast', msg => {
-            if(game.runde%4==players[socket.id]&&game.wuerfeln()!=-1)
+            if(game.runde%4==players[socket.id]&&game.wuerfeln()!=-1){
+                send_players();
                 send_game_update(true);
+            }
         });
 
         socket.on(channel_name + 'trade_req_out', ([res, id]) => {
@@ -126,7 +128,7 @@ exports.run = (io, channel, logger) => {
                     
                     var runde=game.neue_runde();
                     log("*** "+runde.runde+". Runde! Spieler-"+runde.id+" am Zug. ***", "magenta");
-
+                    
                     send_players();
 
                     send_game_update(false);

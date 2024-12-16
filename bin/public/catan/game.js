@@ -416,15 +416,24 @@ exports.spiel = class{
     }
 
     zug_beenden(data, id){
-        this.zug_bauen(data, id);
-        if(this.entwicklungsstapel.length>=data.entwicklungen)
-            for(let i=0; i<data.entwicklungen; i++){
-                let entw = this.entwicklungsstapel.pop();
-                let entw_typ = Object.keys(entw)[0]
-                this.spieler[id].entwicklungen[entw_typ].push(entw[entw_typ]);
-            }
-        else   
-            return -1;
+            this.zug_bauen(data, id);
+            if(this.entwicklungsstapel.length>=data.entwicklungen)
+                for(let i=0; i<data.entwicklungen; i++){
+                    let entw = this.entwicklungsstapel.pop();
+                    let entw_typ = Object.keys(entw)[0]
+                    this.spieler[id].entwicklungen[entw_typ].push(entw[entw_typ]);
+                }
+            else   
+                return -1;
+    }
+
+    ergebnisse = [];
+    best_roll(){
+        var best=0;
+        for(var i=1; i<4; i++)
+            if(this.ergebnisse[best]<this.ergebnisse[i])
+                best=i;
+        return best;
     }
 
     wuerfeln(){
@@ -433,12 +442,22 @@ exports.spiel = class{
 
         this.wuerfel[0]=Math.floor(Math.random()*6+1);
         this.wuerfel[1]=Math.floor(Math.random()*6+1);
+        let wert=this.wuerfel[0]+this.wuerfel[1]
 
-        this.bereits_gewuerfelt=true;
+        if(this.runde<4){
+            this.ergebnisse.push(wert);
+            console.log(this.ergebnisse)
+            if(this.runde==3)
+                this.runde+=this.best_roll()+1;
+            else
+                this.runde++;
+        }
+        else{      
+            this.bereits_gewuerfelt=true;
+            this.res_verteilen();
+        }
 
-        this.res_verteilen();
-
-        return (this.wuerfel[0]+this.wuerfel[1]);
+        return wert;
     }
 
     res_verteilen(){
