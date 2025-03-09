@@ -376,8 +376,7 @@ exports.spiel = class{
         return json;
     }
 
-    neue_runde(){
-
+    neue_runde(phase){
         //if(this.spielerStrassen(temp.spieler)>=2&&this.spielerKreuzungen(temp.spieler)>=2)
 
         this.spieler.forEach(p => {
@@ -416,6 +415,7 @@ exports.spiel = class{
     }
 
     zug_beenden(data, id){
+         if(this.runde>11) { 
             this.zug_bauen(data, id);
             if(this.entwicklungsstapel.length>=data.entwicklungen)
                 for(let i=0; i<data.entwicklungen; i++){
@@ -425,6 +425,16 @@ exports.spiel = class{
                 }
             else   
                 return -1;
+        }
+        else if (this.runde>=4) {
+            if(data.wege.length==1&&data.kreuzungen.length==1){
+                this.zug_bauen(data, id)
+            }
+            else
+                return -1;
+        }
+        else
+            return -1;
     }
 
     ergebnisse = [];
@@ -447,8 +457,10 @@ exports.spiel = class{
         if(this.runde<4){
             this.ergebnisse.push(wert);
             console.log(this.ergebnisse)
-            if(this.runde==3)
+            if(this.runde==3){
                 this.runde+=this.best_roll()+1;
+                this.bereits_gewuerfelt=false;
+            }
             else
                 this.runde++;
         }

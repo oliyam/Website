@@ -128,18 +128,31 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         temp.spieler=game.spieler.id;
 
-        disable_buttons(!(game.runde%4==game.spieler.id));
+        //Prüfen ob Spieler am Zug ist
         if(game.runde%4==game.spieler.id){
-            document.getElementById('wuerfeln').disabled=game.bereits_gewuerfelt;
-            document.getElementById('ritter_').disabled=game.spieler.entwicklung_ausgespielt;
-            document.getElementById('fortschritt_').disabled=game.spieler.entwicklung_ausgespielt;
+            disable_buttons(false);
+            //Gründungsphase - Reihenfolgenbestimmung
+            if(game.runde<4){
+                if(game.bereits_gewuerfelt){
+                    document.getElementById('wuerfeln_').disabled=true;
+                    disable_buttons(true);
+                }
+                else
+                document.getElementById('wuerfeln_').disabled=false;
+            }
+            //Gründungsphase - Bau erster Siedlungen
+            else if(game.runde>=4&&game.runde<=11){
+            }
+            //Spielphase
+            else{
+                document.getElementById('wuerfeln_').disabled=game.bereits_gewuerfelt;
+                document.getElementById('ritter_').disabled=game.spieler.entwicklung_ausgespielt;
+                document.getElementById('fortschritt_').disabled=game.spieler.entwicklung_ausgespielt;
+            }
         }
-        else{
-            document.getElementById('wuerfeln').disabled=true;
-            document.getElementById('ritter_').disabled=true;
-            document.getElementById('fortschritt_').disabled=true;
-        }
-
+        //Deaktivieren aller Schaltflächen
+        else
+            disable_buttons(true);
         if(msg.cast)
             roll.play();
 
@@ -338,8 +351,8 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
             map.style.cursor = 'crosshair';
         });
 
-        document.getElementById('wuerfeln').addEventListener('click', e => {
-            document.getElementById('wuerfeln').disabled=true;
+        document.getElementById('wuerfeln_').addEventListener('click', e => {
+            document.getElementById('wuerfeln_').disabled=true;
             game.wuerfel=[0,0];
             socket.emit(channel_name+'cast',{});
             redraw_controls();
@@ -347,13 +360,13 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
 
         function disable_buttons(active){
             Array.from(document.getElementById("controls").getElementsByTagName('button')).forEach(button => {
-                if(button.id!='trade_ack'&&button.id!='wuerfeln'&&!button.id.endsWith('_'))      
+                if(button.id=='trade_ack'||button.id.endsWith('_'))      
                     button.disabled=active;
             });
         }
 
         document.getElementById('zug_beenden').addEventListener('click', e => {
-            if(game.wuerfel[0]+game.wuerfel[1]){
+            if(game.bereits_gewuerfelt){
                 disable_buttons(true);
                 game.wuerfel=[0,0];
                 buildMarkedTiles();

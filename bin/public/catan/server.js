@@ -108,12 +108,16 @@ exports.run = (io, channel, logger) => {
                 delete trade_req[initiator_id];
             send_game_update(false);
         });
-        
+        /*
         socket.on(channel_name + 'bauen', msg => {
-            game.zug_bauen(msg, players[socket.id]);
-            send_game_update(false);
+            if(game.runde>=4&&game.runde<=11){
+                game.zug_bauen(msg, players[socket.id]);
+                send_game_update(false);
+            }
+            else
+                log("ILLEGAL MOVE - CHECK FOR HACKERS!")
         });
-
+        */
         socket.on(channel_name + 'turn', msg => {
             if (server.ioactive[socket.id]){
                 io.to(socket.id).emit(channel_name + 'end-of-turn');
