@@ -484,7 +484,7 @@ exports.spiel = class{
     }
 
     lhs_ermitteln(){
-
+        
     }
 
     grm_ermitteln(){
