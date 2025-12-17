@@ -74,7 +74,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
     var view=new _view(game, temp, 600, 600, size);
     var map=document.getElementById('map').appendChild(view);
     if(URL_params.get('player'))
-        socket.emit(channel_name+'send-chat-msg', ["pls player", "<no image>"]);
+        socket.emit(channel_name+'send-chat-msg', "pls player");
 
     //Benutzerliste mit Spielern aktualisieren
     socket.on(channel_name+'get-players',  data => {
