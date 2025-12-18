@@ -119,7 +119,7 @@ class spielfeld{
     wege = new Map([
       [[
         {q:3,r:1},
-        {q:1,r:2}
+        {q:3,r:2}
       ],
       {id: 0}],
       [[
@@ -129,8 +129,8 @@ class spielfeld{
       {id: 0}
       ],
       [[
-        {q:1,r:1},
-        {q:1,r:2}
+        {q:3,r:1},
+        {q:2,r:2}
       ],
       {id: 0}
       ]
