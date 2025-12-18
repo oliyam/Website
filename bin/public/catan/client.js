@@ -611,6 +611,7 @@ socket.on(channel_name+'name-valid', (valid) => {if(valid){
                         temp.kreuzungen.set(temp.marked_tiles, {id: temp.spieler, stadt: temp.stadt});
                         break;
                 }
+                console.log(temp.marked_tiles)
                 temp.marked_tiles = [];
                 view.temp.marked_tiles = [];
             }
