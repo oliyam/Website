@@ -121,6 +121,12 @@ class spielfeld{
     constructor(size){
 
         this.kreuzungen.set([{ q: 3, r: 1 },{ q: 2, r: 2 },{ q: 3, r: 2 }], {id: 0, stadt: 1});
+        this.wege.set([
+            {q:3,r:1},
+            {q:2,r:2}
+        ],
+            {id: 0}
+        );
 
         size=size*2+1;
 
