@@ -81,7 +81,7 @@ module.exports = class hex {
 
     neighbours(t0, t1){
         for(var i=0;i<this.vectors.length;i++)
-            if((t0.q+this.vectors[i][0]==t1.q&&t0.r+this.vectors[i][1]==t1.r))
+            if(neighbour(t0,i)==t1)
                 return true;
         return false;
     }
