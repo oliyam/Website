@@ -67,8 +67,8 @@ function longest_paths(st, cl, ck) {
 
 function is_nb(s0, s1) {
   for(var i=0;i<4;i++){
-    m2 = i%2==0 ? 1 : 0;
-    m3 = i%3==0 ? 1 : 0;
+    let m2 = i%2==0 ? 1 : 0;
+    let m3 = i%3==0 ? 1 : 0;
     if (s0[m2].q==s1[m3].q 
         && 
         s0[m2].r==s1[m3].r)
