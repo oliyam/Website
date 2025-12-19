@@ -66,9 +66,9 @@ function longest_paths(st, cl, ck) {
 
 function is_nb(s0, s1) {
   for(var i=0;i<4;i++)
-    if (s0[!i%2].q==s1[!i%3].q 
+    if (s0[!(i%2)].q==s1[!(i%3)].q 
         && 
-        s0[!i%2].r==s1[!i%3].r)
+        s0[!(i%2)].r==s1[!(i%3)].r)
       return hex.areNeighbours(s0.concat(s1[(i+1)%2]))
   return false;
 }
