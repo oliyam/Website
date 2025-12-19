@@ -72,7 +72,7 @@ function is_nb(s0, s1) {
     if (s0[m2].q==s1[m3].q 
         && 
         s0[m2].r==s1[m3].r)
-      return hex.areNeighbours(s0.concat(s1[(m2+1)%2]))
+      return hex.areNeighbours(s0.concat(s1[(m3+1)%2]))
   }
   return false;
 }
