@@ -47,7 +47,7 @@ const strassen = new Map([
 
 function get_lhs(){
   strassen.forEach(s => {
-      longest_path(s,0,[])
+      longest_paths(s,0,[])
   })
 }
 
