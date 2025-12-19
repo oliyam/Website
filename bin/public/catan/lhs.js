@@ -45,9 +45,10 @@ const strassen = new Map([
       ]
     ]);
 
-function get_lhs(){
-  strassen.forEach(s => {
-      longest_paths(s,0,[])
+function get_lhs(player_id){
+  strassen.keys().forEach(s => {
+      if (strassen[s].id==player_id)
+        longest_paths(s,0,[])
   })
 }
 
@@ -73,5 +74,5 @@ function is_nb(s0, s1) {
   return false;
 }
 
-get_lhs();
+get_lhs(0);
 console.log(lhs)
