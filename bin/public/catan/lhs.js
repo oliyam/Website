@@ -44,9 +44,12 @@ function longest_path(st, cl, ck) {
   let current_longest = cl
   let checked = ck
   checked.push(st)
-  for(a in hex.areNeighbours(st)){
-    if (checked.indexOf(a)>=0)
+  for(n in hex.areNeighbours(st)){
+    if (checked.indexOf(n)==-1)
       longest_path(a, ++current_longest, checked)
   }
-  lhs.push(c)
+  lhs.push(current_longest)
 }
+
+get_lhs();
+console.log(lhs)
