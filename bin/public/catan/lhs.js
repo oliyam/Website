@@ -79,7 +79,7 @@ function longest_paths(pid, st, cl, ck) {
     let checked = ck
     checked.push(st)
     strassen.keys().forEach(pot_nb => {
-      if (strassen.get(st).id==pid && !checked.includes(pot_nb) && is_nb(pot_nb, st))
+      if (strassen.get(pot_nb).id==pid && !checked.includes(pot_nb) && is_nb(pot_nb, st))
         longest_paths(pid, pot_nb, ++current_length, checked)
     });
     if(lhs[pid]<current_length)
