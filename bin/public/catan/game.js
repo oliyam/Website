@@ -123,6 +123,14 @@ class spielfeld{
       ],
       {
           id: 0,
+          first: false
+      }],
+      [[
+        {q:2,r:2},
+        {q:2,r:3}
+      ],
+      {
+          id: 0,
           first: true
       }],
       [[
@@ -149,7 +157,7 @@ class spielfeld{
       ],
       {
           id: 1,
-          first: false
+          first: true
       }
       ],
       [[

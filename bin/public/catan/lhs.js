@@ -20,6 +20,14 @@ const strassen = new Map([
       ],
       {
           id: 0,
+          first: false
+      }],
+      [[
+        {q:2,r:2},
+        {q:2,r:3}
+      ],
+      {
+          id: 0,
           first: true
       }],
       [[
