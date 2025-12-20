@@ -18,40 +18,57 @@ const strassen = new Map([
         {q:3,r:1},
         {q:3,r:2}
       ],
-      {id: 0}],
+      {
+          id: 0,
+          first: true
+      }],
       [[
         {q:3,r:2},
         {q:2,r:2}
       ],
-      {id: 0}
+      {
+          id: 0,
+          first: false
+      }
       ],
       [[
         {q:3,r:1},
         {q:2,r:2}
       ],
-      {id: 0}
+      {
+          id: 0,
+          first: false
+      }
       ],
       [[
         {q:2,r:2},
         {q:2,r:1}
       ],
-      {id: 0}
+      {
+          id: 1,
+          first: false
+      }
       ],
       [[
         {q:2,r:2},
         {q:1,r:2}
       ],
-      {id: 0}
+      {
+          id: 0,
+          first: false
+      }
       ]
     ]);
 
 function get_lhs(player_id){
   strassen.keys().forEach(s => {
+    if(s.first){
       if (strassen.get(s).id==player_id)
         longest_paths(s,0,[])
       lhs.push(ls)
       ls = []
-  })
+    }
+  });
 }
 
 var ls = []

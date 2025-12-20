@@ -121,30 +121,45 @@ class spielfeld{
         {q:3,r:1},
         {q:3,r:2}
       ],
-      {id: 0}],
+      {
+          id: 0,
+          first: true
+      }],
       [[
         {q:3,r:2},
         {q:2,r:2}
       ],
-      {id: 0}
+      {
+          id: 0,
+          first: false
+      }
       ],
       [[
         {q:3,r:1},
         {q:2,r:2}
       ],
-      {id: 0}
+      {
+          id: 0,
+          first: false
+      }
       ],
       [[
         {q:2,r:2},
         {q:2,r:1}
       ],
-      {id: 0}
+      {
+          id: 1,
+          first: false
+      }
       ],
       [[
         {q:2,r:2},
         {q:1,r:2}
       ],
-      {id: 0}
+      {
+          id: 0,
+          first: false
+      }
       ]
     ]);
 
