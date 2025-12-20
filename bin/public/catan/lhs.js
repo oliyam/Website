@@ -63,7 +63,7 @@ const strassen = new Map([
 function get_lhs(){
   strassen.keys().forEach(s => {
     if(strassen.get(s).first)
-      longest_paths(strassen.get(s).id, s, 0, [])
+      longest_paths(strassen.get(s).id, s, 1, [])
   });
 }
 
@@ -75,7 +75,7 @@ var lhs = {
 }
 
 function longest_paths(pid, st, cl, ck) {
-    let current_length = ++cl
+    let current_length = cl
     let checked = ck
     strassen.keys().forEach(pot_nb => {
       if (
@@ -95,7 +95,7 @@ function longest_paths(pid, st, cl, ck) {
         })(checked, pot_nb)
       ){
         checked.push(st)
-        longest_paths(pid, pot_nb, current_length, checked)
+        longest_paths(pid, pot_nb, ++current_length, checked)
       }
     });
     if(lhs[pid]<current_length)
