@@ -85,14 +85,14 @@ function longest_paths(pid, st, cl, ck) {
         &&
         is_nb(pot_nb, st)
         &&
-        !(() => {
+        !((ckd, pnb) => {
           let db = false;
-          checked.forEach(c => {
-            if(is_nb(c, pot_nb))
+          ckd.forEach(c => {
+            if(is_nb(c, pnb))
               db = true;
           })
           return db;
-        })
+        })(checked, pot_nb)
       )
         longest_paths(pid, pot_nb, current_length, checked=ckecked.push(st))
     });
