@@ -85,7 +85,7 @@ function longest_paths(pid, st, cl, ck) {
         &&
         is_nb(pot_nb, st)
         &&
-        !((pot_nb, checked) => {
+        !(() => {
           let db = false;
           checked.forEach(c => {
             if(is_nb(c, pot_nb))
