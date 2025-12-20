@@ -75,7 +75,7 @@ var lhs = {
 }
 
 function longest_paths(st, cl, ck) {
-    let pid = strassen.get(s).id
+    let pid = strassen.get(st).id
     let current_length = ++cl
     let checked = ck
     if(lhs[pid]<current_length)
