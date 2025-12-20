@@ -75,6 +75,7 @@ var lhs = {
 }
 
 function longest_paths(st, cl, ck) {
+    let id = strassen.get(st).id
     let current_length = cl
     let checked = ck
     checked.push(st)
