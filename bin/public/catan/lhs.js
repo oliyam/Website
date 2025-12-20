@@ -94,7 +94,7 @@ function longest_paths(pid, st, cl, ck) {
           return db;
         })(checked, pot_nb)
       )
-        longest_paths(pid, pot_nb, current_length, checked=ckecked.push(st))
+        longest_paths(pid, pot_nb, current_length, checked=checked.push(st))
     });
     if(lhs[pid]<current_length)
       lhs[pid]=current_length
