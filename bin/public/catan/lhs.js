@@ -46,7 +46,7 @@ const strassen = new Map([
       ],
       {
           id: 1,
-          first: false
+          first: true
       }
       ],
       [[
