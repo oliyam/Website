@@ -82,6 +82,8 @@ function longest_paths(st, cl, ck) {
       lhs[pid]=current_length
     strassen.keys().forEach(pot_nb => {
       if (
+        pot_nb != st
+        && 
         strassen.get(pot_nb).id==pid
         && 
         !checked.includes(pot_nb)
