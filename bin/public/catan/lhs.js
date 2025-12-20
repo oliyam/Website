@@ -1,129 +1,65 @@
-const hex = new (require('../catan/hex.js'))();
-
-const d = [
-  [{q: 1, r: -1},
-   {q: 0, r: 0}],
-   
-  [{q: -1, r: 1},
-   {q: 0, r: 0}],
-   
-  [{q: 0, r: 0},
-   {q: 1, r: -1}],
-   
-  [{q: 0, r: 0},
-   {q: -1, r: 1}],
-]
-const strassen = new Map([
-      [[
-        {q:3,r:1},
-        {q:3,r:2}
-      ],
-      {
-          id: 0,
-          first: false
-      }],
-      [[
-        {q:2,r:2},
-        {q:2,r:3}
-      ],
-      {
-          id: 0,
-          first: true
-      }],
-      [[
-        {q:3,r:2},
-        {q:2,r:2}
-      ],
-      {
-          id: 0,
-          first: false
-      }
-      ],
-      [[
-        {q:3,r:1},
-        {q:2,r:2}
-      ],
-      {
-          id: 0,
-          first: false
-      }
-      ],
-      [[
-        {q:2,r:2},
-        {q:2,r:1}
-      ],
-      {
-          id: 1,
-          first: true
-      }
-      ],
-      [[
-        {q:2,r:2},
-        {q:1,r:2}
-      ],
-      {
-          id: 0,
-          first: false
-      }
-      ]
-    ]);
-
-function get_lhs(sts){
-  sts.keys().forEach(s => {
-    if(sts.get(s).first)
-      longest_paths(sts, s, 0, [])
-  });
-}
-
-var lhs = {
-  0: 0,
-  1: 0,
-  2: 0,
-  3: 0
-}
-
-function longest_paths(sts, st, cl, ck) {
-    let pid = sts.get(st).id
-    let current_length = ++cl
-    let checked = ck
-    if(lhs[pid]<current_length)
-      lhs[pid]=current_length
-      sts.keys().forEach(pot_nb => {
-      if (
-        pot_nb != st
-        && 
-        sts.get(pot_nb).id==pid
-        && 
-        !checked.includes(pot_nb)
-        &&
-        is_nb(pot_nb, st)
-        &&
-        !((ckd, pnb) => {
-          let db = false;
-          ckd.forEach(c => {
-            if(is_nb(c, pnb))
-              db = true;
-          })
-          return db;
-        })(checked, pot_nb)
-      ){
-        checked.push(st)
-        longest_paths(sts, pot_nb, current_length, checked)
-      }
+module.exports = class lhs {
+  
+  hex = new (require('../catan/hex.js'))();
+  
+  lhs = {};
+  
+  get_per_player(sts){
+    this.lhs = {
+      0: 0,
+      1: 0,
+      2: 0,
+      3: 0
+    };
+    sts.keys().forEach(s => {
+      if(sts.get(s).first)
+        this.longest_paths(sts, s, 0, [])
     });
-}
-
-function is_nb(s0, s1) {
-  for(var i=0;i<4;i++){
-    let m2 = i%2==0 ? 1 : 0;
-    let m3 = i%3==0 ? 1 : 0;
-    if (s0[m2].q==s1[m3].q 
-        && 
-        s0[m2].r==s1[m3].r)
-      return hex.areNeighbours(s0.concat(s1[(m3+1)%2]))
+    
+    return this.lhs;
   }
-  return false;
+  
+  longest_paths(sts, st, cl, ck) {
+      let pid = sts.get(st).id
+      let current_length = ++cl
+      let checked = ck
+      if(this.lhs[pid]<current_length)
+        this.lhs[pid]=current_length
+        sts.keys().forEach(pot_nb => {
+        if (
+          pot_nb != st
+          && 
+          sts.get(pot_nb).id==pid
+          && 
+          !checked.includes(pot_nb)
+          &&
+          is_nb(pot_nb, st)
+          &&
+          !((ckd, pnb) => {
+            let db = false;
+            ckd.forEach(c => {
+              if(is_nb(c, pnb))
+                db = true;
+            })
+            return db;
+          })(checked, pot_nb)
+        ){
+          checked.push(st)
+          this.longest_paths(sts, pot_nb, current_length, checked)
+        }
+      });
+  }
+  
+  is_nb(s0, s1) {
+    for(var i=0;i<4;i++){
+      let m2 = i%2==0 ? 1 : 0;
+      let m3 = i%3==0 ? 1 : 0;
+      if (s0[m2].q==s1[m3].q 
+          && 
+          s0[m2].r==s1[m3].r)
+        return this.hex.areNeighbours(s0.concat(s1[(m3+1)%2]))
+    }
+    return false;
+  }
+  
 }
-
-get_lhs();
-console.log(lhs)

@@ -1,5 +1,6 @@
 const array = new (require('../catan/array_tools.js'))();
 const hex = new (require('../catan/hex.js'))();
+const lhs = new (require('..catan/lhs.js'))();
 const _ = require('lodash');
 
 class spieler {
@@ -468,6 +469,8 @@ exports.spiel = class{
     }
 
     zug_beenden(data, id){
+        this.lhs_ermitteln()
+        console.log(this.laengste_handelsstrasse)
          if(this.runde>11) { 
             this.zug_bauen(data, id);
             if(this.entwicklungsstapel.length>=data.entwicklungen)
@@ -537,7 +540,7 @@ exports.spiel = class{
     }
 
     lhs_ermitteln(){
-        
+        this.laengste_handelsstrasse=lhs.get_per_player(this.spielfeld.wege);
     }
 
     grm_ermitteln(){
