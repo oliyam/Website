@@ -77,10 +77,24 @@ var lhs = {
 function longest_paths(pid, st, cl, ck) {
     let current_length = cl
     let checked = ck
-    checked.push(st)
     strassen.keys().forEach(pot_nb => {
-      if (strassen.get(pot_nb).id==pid && !checked.includes(pot_nb) && is_nb(pot_nb, st))
-        longest_paths(pid, pot_nb, ++current_length, checked)
+      if (
+        strassen.get(pot_nb).id==pid
+        && 
+        !checked.includes(pot_nb)
+        &&
+        is_nb(pot_nb, st)
+        &&
+        !((c, pot_nb, checked) => {
+          let db = false;
+          checked.forEach(c => {
+            if(is_nb(c, pot_nb))
+              db = true;
+          })
+          return db;
+        })
+      )
+        longest_paths(pid, pot_nb, ++current_length, checked=ckecked.push(st))
     });
     if(lhs[pid]<current_length)
       lhs[pid]=current_length
