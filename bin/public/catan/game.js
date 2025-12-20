@@ -1,6 +1,6 @@
 const array = new (require('../catan/array_tools.js'))();
 const hex = new (require('../catan/hex.js'))();
-const lhs = new (require('..catan/lhs.js'))();
+const lhs = new (require('../catan/lhs.js'))();
 const _ = require('lodash');
 
 class spieler {
