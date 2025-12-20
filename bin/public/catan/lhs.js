@@ -63,8 +63,7 @@ const strassen = new Map([
 function get_lhs(player_id){
   strassen.keys().forEach(s => {
     if(strassen.get(s).first){
-      if (strassen.get(s).id==player_id)
-        longest_paths(s,0,[])
+      longest_paths(player_id,s,0,[])
       lhs.push(ls)
       ls = []
     }
@@ -74,15 +73,17 @@ function get_lhs(player_id){
 var ls = []
 var lhs = []
 
-function longest_paths(st, cl, ck) {
-  let current_length = cl
-  let checked = ck
-  checked.push(st)
-  strassen.keys().forEach(pot_nb => {
-    if (!checked.includes(pot_nb) && is_nb(pot_nb, st))
-      longest_paths(pot_nb, ++current_length, checked)
-  });
-  ls.push(current_length)
+function longest_paths(id, st, cl, ck) {
+  if(id == strassen.get(st).id){
+    let current_length = cl
+    let checked = ck
+    checked.push(st)
+    strassen.keys().forEach(pot_nb => {
+      if (!checked.includes(pot_nb) && is_nb(pot_nb, st))
+        longest_paths(id, pot_nb, ++current_length, checked)
+    });
+    ls.push(current_length)
+  }
 }
 
 function is_nb(s0, s1) {
