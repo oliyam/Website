@@ -98,7 +98,7 @@ function longest_paths(st, cl, ck) {
         })(checked, pot_nb)
       ){
         checked.push(st)
-        longest_paths(pid, pot_nb, current_length, checked)
+        longest_paths(pot_nb, current_length, checked)
       }
     });
 }
