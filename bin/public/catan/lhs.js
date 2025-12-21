@@ -33,12 +33,12 @@ module.exports = class lhs {
           && 
           !checked.includes(pot_nb)
           &&
-          is_nb(pot_nb, st)
+          this.is_nb(pot_nb, st)
           &&
           !((ckd, pnb) => {
             let db = false;
             ckd.forEach(c => {
-              if(is_nb(c, pnb))
+              if(this.is_nb(c, pnb))
                 db = true;
             })
             return db;
