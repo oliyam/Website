@@ -247,6 +247,8 @@ class spielfeld{
                     index--;
             }
         });
+        
+        console.log(lhs.get_per_player(this.wege))
     }
 
     hashex(array, tile){
